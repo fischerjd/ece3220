@@ -2,7 +2,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build from Makefile",
+			"label": "[ECE3220] Build from Makefile",
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [],
