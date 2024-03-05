@@ -1,5 +1,5 @@
-# ~/git/courses/ece3220/share/Makefile
-# Copyright 2019-2021 James D. Fischer.  All rights reserved.
+# Makefile
+# Copyright 2019-2021 James D. Fischer
 #
 # SYNOPSYS
 #   make {all|release|debug}
@@ -171,7 +171,7 @@ CPPFLAGS.d += -MT $@ -MMD -MF $(DEPDIR)$*.Td
 # C/C++ preprocessor flags
 # NB: DO NOT add CPPFLAGS.d to this variable.
 # See also 'variables.mk' in this Makefile (e.g., for CPPFLAGS.custom)
-CPPFLAGS += $(CPPFLAGS.custom)
+CPPFLAGS += $(CPPFLAGS.custom) -DPROGRAM_NAME=$(PROGRAM_NAME)
 
 
 # C compiler command line options (a.k.a., command line "flags")
@@ -321,7 +321,7 @@ release : build_program
 .PHONY: debug
 debug : BUILD_MODE := debug
 debug : DEBUG := 1
-debug : DEBUG_TRACE_LEVEL ?= 1
+debug : DEBUG_TRACE_LEVEL ?= 5
 debug : CPPFLAGS += -DDEBUG=1 -DDEBUG_BUILD=1
 debug : CPPFLAGS += -DDEBUG_TRACE_LEVEL=$(DEBUG_TRACE_LEVEL)
 debug : CPPFLAGS += $(CPPFLAGS.debug_build)
@@ -449,7 +449,7 @@ $(DEPDIR) : ; @mkdir -p $@ >/dev/null
 # required for the dependency file X:
 #
 #  Y: X
-#       recipe that creates Y and, as a side effect, X
+#       recipe that creates Y and, as a side effect, also creates X
 #
 #  # Empty recipe rule for dependency X
 #  X:
@@ -500,6 +500,7 @@ strip : ; $(STRIP) --strip-unneeded $(PROGRAM_NAME)
 .PHONY: clean
 clean::
 	-rm -f $(OBJS) $(DEPS) $(PROGRAM_NAME)
+	-rm -f $(notdir $(OBJS:%.o=%))
 
 .PHONY: distclean
 distclean:: clean

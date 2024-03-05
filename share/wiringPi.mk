@@ -1,4 +1,4 @@
-# ~/git/courses/ece3220/share/wiringPi.mk
+# wiringPi.mk
 # Copyright 2019-2021 James D. Fischer.  All rights reserved.
 #
 # This makefile assumes variable RPIFS expands to a path string that
