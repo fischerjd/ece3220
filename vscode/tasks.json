@@ -54,10 +54,60 @@
 			"detail": "compiler: /usr/bin/g++"
 		},
 		{
-			"label": "[ECE3220] Build Project",
+			"label": "[ECE3220] Make Project",
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"options": {
+				"cwd": "${fileDirname}",
+				"env": {
+					"DEBUG": "1"
+				}
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "[ECE3220] Make clean",
+			"type": "shell",
+			"command": "/usr/bin/make",
+			"args": [ "clean" ],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"options": {
+				"cwd": "${fileDirname}",
+				"env": {
+					"DEBUG": "1"
+				}
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "[ECE3220] Make distclean",
+			"type": "shell",
+			"command": "/usr/bin/make",
+			"args": [ "distclean" ],
 			"group": {
 				"kind": "build",
 				"isDefault": true
