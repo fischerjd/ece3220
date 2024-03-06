@@ -2,33 +2,8 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "[ECE3220] Build from Makefile",
-			"type": "shell",
-			"command": "/usr/bin/make",
-			"args": [],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"options": {
-				"cwd": "${fileDirname}",
-				"env": {
-					"DEBUG": "1"
-				}
-			},
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"showReuseMessage": true,
-				"clear": true
-			},
-			"problemMatcher": []
-		},
-		{
 			"type": "cppbuild",
-			"label": "[ECE3220] Build active C file (gcc)",
+			"label": "[ECE3220] Build C File (gcc)",
 			"command": "/usr/bin/gcc",
 			"args": [
 				"-fdiagnostics-color=always",
@@ -54,7 +29,7 @@
 		},
 		{
 			"type": "cppbuild",
-			"label": "[ECE3220] Build active C++ file (g++)",
+			"label": "[ECE3220] Build C++ Build (g++)",
 			"command": "/usr/bin/g++",
 			"args": [
 				"-fdiagnostics-color=always",
@@ -77,6 +52,31 @@
 				"isDefault": false
 			},
 			"detail": "compiler: /usr/bin/g++"
+		},
+		{
+			"label": "[ECE3220] Build Project",
+			"type": "shell",
+			"command": "/usr/bin/make",
+			"args": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"options": {
+				"cwd": "${fileDirname}",
+				"env": {
+					"DEBUG": "1"
+				}
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"problemMatcher": []
 		}
 	]
 }
