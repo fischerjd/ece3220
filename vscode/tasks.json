@@ -29,7 +29,7 @@
 		},
 		{
 			"type": "cppbuild",
-			"label": "[ECE3220] Build C++ Build (g++)",
+			"label": "[ECE3220] Build C++ File (g++)",
 			"command": "/usr/bin/g++",
 			"args": [
 				"-fdiagnostics-color=always",

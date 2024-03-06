@@ -15,7 +15,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "preLaunchTask": "[ECE3220] C File Build (gcc)",
+            "preLaunchTask": "[ECE3220] Build C File (gcc)",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -40,7 +40,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "preLaunchTask": "[ECE3220] C++ File Build (g++)",
+            "preLaunchTask": "[ECE3220] Build C++ File (g++)",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
