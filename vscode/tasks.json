@@ -104,6 +104,31 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "[ECE3220] Make dist",
+			"type": "shell",
+			"command": "/usr/bin/make",
+			"args": [ "dist" ],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"options": {
+				"cwd": "${fileDirname}",
+				"env": {
+					"DEBUG": "1"
+				}
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"problemMatcher": []
+		},
+		{
 			"label": "[ECE3220] Make distclean",
 			"type": "shell",
 			"command": "/usr/bin/make",
