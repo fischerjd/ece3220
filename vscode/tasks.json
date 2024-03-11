@@ -21,10 +21,7 @@
 			"problemMatcher": [
 				"$gcc"
 			],
-			"group": {
-				"kind": "build",
-				"isDefault": false
-			},
+			"group": "build",
 			"detail": "compiler: /usr/bin/gcc"
 		},
 		{
@@ -49,7 +46,7 @@
 			],
 			"group": {
 				"kind": "build",
-				"isDefault": false
+				"isDefault": true
 			},
 			"detail": "compiler: /usr/bin/g++"
 		},
@@ -58,10 +55,7 @@
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
 				"env": {
@@ -83,10 +77,7 @@
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [ "clean" ],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
 				"env": {
@@ -133,10 +124,7 @@
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [ "distclean" ],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
 				"env": {
