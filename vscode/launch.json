@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "[ECE3220] Debug C File (gdb)",
+            "name": "[ECE3220] C File (gdb)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
@@ -30,7 +30,7 @@
             ]
         },
         {
-            "name": "[ECE3220] Debug C++ File (gdb)",
+            "name": "[ECE3220] C++ File (gdb)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
@@ -55,7 +55,7 @@
             ]
         },
         {
-            "name": "[ECE3220] Debug Project",
+            "name": "[ECE3220] Makefile Project (gdb)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/demo",
