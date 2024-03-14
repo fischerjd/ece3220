@@ -1,5 +1,5 @@
 # Makefile
-# Copyright 2019-2021 James D. Fischer
+# Copyright 2019-2024 James D. Fischer
 #
 # SYNOPSYS
 #   make {all|release|debug}

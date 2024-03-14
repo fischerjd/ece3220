@@ -1,24 +1,49 @@
 # wiringPi.mk
-# Copyright 2019-2021 James D. Fischer.  All rights reserved.
+# Copyright 2019-2024 James D. Fischer.  All rights reserved.
 #
-# This makefile assumes Makefile variable RPIFS expands to a canonical path
-# string that identifies a folder on your Linux desktop onto which the
-# Raspberry Pi's file system is already mounted.  The default value for
-# RPIFS is '${HOME}/rpifs/'.
+# When building with a cross toolchain, the toolchain requires access to
+# the wiringPi header files and library files which are installed on the
+# RPI's filesystem. The easiest way to manage this is to mount the root
+# directory '/' of the RPI's filesystem onto any convenient folder within
+# the local computer's filesystem--e.g., ${HOME}/rpifs/--prior to invoking
+# `make'. Define a makefile variable `RPIFS' whose value is the path to the
+# folder on the local filesystem where you've mounted the RPS's filesystem
+# (the "mount point").
 #
-# HINT: Use the command `mount.rpifs' to mount the Raspberry Pi's file
-# system onto folder ${HOME}/rpifs/.
+# Depending on how the wiringPi software was installed, the wiringPi header
+# files and library files are (typically) located in one of two locations:
 #
-# The wiringPi library's header files and library files are installed on
-# the Raspberry Pi's file system; they are not available on the desktop
-# computer:
-#	wiringPi header files  > $(RPIFS)/usr/include
-#	wiringPi header files  > $(RPIFS)/usr/include/arm-linux-gnuabiehf
-#	wiringPi library files > $(RPIFS)/usr/lib
+# 	/usr/include
+# 	/usr/lib
 #
-# When cross compiling, this makefile must add these paths to the
-# preprocessor's header file search path, and to the linker's library file
-# search path.
+# 	OR
+#
+# 	/usr/local/include
+# 	/usr/local/lib
+#
+# If the wiringPi header files and libraries are found in folders
+# /usr/local/include and /usr/local/lib, respectively, this makefile uses
+# those headers/libraries (PREFIX:=/usr/local); otherwise, this makefile
+# uses the header files and libraries found in folders /usr/include and
+# /usr/lib (PREFIX:=/usr).
+#
+# Within this Makefile, prepend the makefile variable expansion $(RPIFS) to
+# any path string that defines the path to a folder within the RPI's
+# filesystem that contains the wiringPi header files or library files:
+#
+#	wiringPi header files  > $(RPIFS)$(PREFIX)/include/
+#	wiringPi library files > $(RPIFS)$(PREFIX)/lib/
+#
+# where PREFIX is either '/usr/local' or '/usr', as described above. Note
+# that when building with the RPI's native toolchain, the variable RPIFS
+# must be undefined so that it expands to the empty string:
+#
+# BUILDING WITH A CROSS C/C++           BUILDING WITH THE NATIVE C/C++
+# TOOLCHAIN ON A DESKTOP COMPUTER       TOOLCHAIN ON THE RASPBERRY PI
+# $(RPIFS)=="${HOME}/ripfs"             $(RPIFS)==""
+# ===============================       ===================
+# ${HOME}/rpifs$(PREFIX)/include        $(PREFIX)/include
+# ${HOME}/rpifs$(PREFIX)/lib            $(PREFIX)/lib
 #
 
 ifndef WIRINGPI.MK
@@ -30,31 +55,37 @@ ifneq ($(WIRINGPI__BUILD_CPU_ARCH),armv7l)
 	# cross compiling on a desktop computer, AND the root folder '/' of the
 	# Raspberry Pi's filesystem is mounted onto this folder: $HOME/rpifs/
 	RPIFS ?= $(HOME)/rpifs
-
-	# The path(s) to the wiringPi library's header files on the Raspberry
-	# Pi's file system.  See also the compiler option `-pthread'.
-	CPPFLAGS += \
-		-I$(RPIFS)/usr/include/arm-linux-gnueabihf \
-		-I$(RPIFS)/usr/include \
-
-	# The path(s) to the wiringPi library's library files on the Raspberry
-	# Pi's file system.
-	LDFLAGS += -L$(RPIFS)/usr/lib
 endif
 
+# Search for `wiringPi.h'. (NB: Assume library file `libwiringPi.so' is
+# installed in the same directory tree as `wiringPi.h'.)
+ifneq (,$(wildcard $(RPIFS)/usr/include/wiringPi.h))
+CPPFLAGS += $(RPIFS)/usr/include
+LDLIBS += $(RPIFS)/usr/lib
+else ifneq (,$(wildcard $(RPIFS)/usr/local/include/wiringPi.h))
+CPPFLAGS += -I$(RPIFS)/usr/local/include
+LDLIBS += -L$(RPIFS)/usr/local/lib
+else
+$(error Failed to find header file `wiringPi.h')
+endif
+endif
+
+# Preprocessor options.  Specify the path to the folder where the wiringPi
+# library's header files are stored.
+CPPFLAGS += -I$(WIRINGPI__INCLUDEDIR)
+
 # GCC linker/loader (ld) options
-# Your program must be linked with the wiringPi shared object library.  This
-# is done via GCC's command line option `-l LIBNAME' (or, `-lLIBNAME')
-# where LIBNAME identifies the shared object library file you want to link
-# your program with:
-#		/usr/lib/libLIBNAME.so
-#		            ^^^^^^^
-# The wiringPi library file is:  /usr/lib/libwiringPi.so
-#                                            ^^^^^^^^
+# -L Specify the path to the folder that contains the library file
+#  `libwiringPi.so.*'.
+# -pthread Link the program with Linux's pthread library.
+# -l Specify the name of the library we want to link our program to.  The
+#  wiringPi library's file name is `libwiringPi.so'; therefore, the
+#  library's name is `wiringPi' (strip off the `lib' prefix and the `.so.*'
+#  suffix).
+LDFLAGS += -L$(WIRINGPI__LIBDIR)
 LDLIBS += -lwiringPi
 
-# The wiringPi library requires Linux pthreads support. Ensure makefile
-# 'pthread.mk' is present in the same directory as this makefile.
+# The wiringPi library requires Linux pthreads support
 ifneq (,$(wildcard pthread.mk))
 include pthread.mk
 endif
