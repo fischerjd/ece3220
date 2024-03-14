@@ -237,19 +237,44 @@ include variables.mk
 endif
 
 
-# [Optional]  If you are building software for the Raspberry Pi, and that
-# software usese the wiringPi library, store a copy of makefile
-# `wiringPi.mk' in the current working directory. That makefile provides
-# preprocessor (cpp), compiler (gcc/g++), and linker (ld) options to build
-# and link your program with the wiringPi library.
+## Raspberry Pi Libraries
+# [Optional]
+#
+# You may optionally link your program against one of these libraries:
+#  	* pigpio
+#  	* wiringPi
+# 
+# :: pigpio ::
+# If you are building software for the Raspberry Pi, and that software uses
+# the pigpio library, store a copy of makefile `pigpio.mk' in the current
+# working directory. That makefile provides preprocessor (cpp), compiler
+# (gcc/g++), and linker (ld) options to build and link your program with
+# the pigpio library.
+ifneq ($(wildcard pigpio.mk),)
+include pigpio.mk
+# If cross compiling, ensure the Raspberry Pi's file system is mounted onto
+# the folder specified by variable RPIFS. The pigpio header files and
+# libraries are installed on the Raspberry Pi, not on the desktop computer.
+# (NB: The shell script `mount.rpifs' is provided with Jim Fischer's
+# `rpiutils' software package.)
+ifeq ($(wildcard) $(WIRINGPI__INCLUDEDIR)/pigpio.h,)
+$(shell mount.rpifs -q || true)
+endif
+#
+# :: wiringPi ::
+# If you are building software for the Raspberry Pi, and that software uses
+# the wiringPi library, store a copy of makefile `wiringPi.mk' in the
+# current working directory. That makefile provides preprocessor (cpp),
+# compiler (gcc/g++), and linker (ld) options to build and link your
+# program with the wiringPi library.
 ifneq ($(wildcard wiringPi.mk),)
 include wiringPi.mk
 # If cross compiling, ensure the Raspberry Pi's file system is mounted onto
 # the folder specified by variable RPIFS. The wiringPi header files and
 # libraries are installed on the Raspberry Pi, not on the desktop computer.
-# (NB: The script `mount.rpifs' is provided with Jim Fischer's `rpiutils'
-# software package.)
-ifeq ($(wildcard) $(WIRINGPI__INCLUDEDIR)/wiringPi.h,)
+# (NB: The shell script `mount.rpifs' is provided with Jim Fischer's
+# `rpiutils' software package.)
+else ifeq ($(wildcard) $(WIRINGPI__INCLUDEDIR)/wiringPi.h,)
 $(shell mount.rpifs -q || true)
 endif
 endif
