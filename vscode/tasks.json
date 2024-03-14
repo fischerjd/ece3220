@@ -51,7 +51,7 @@
 			"detail": "compiler: /usr/bin/g++"
 		},
 		{
-			"label": "[ECE3220] Make Project",
+			"label": "[ECE3220] Makefile Project",
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [],
@@ -73,7 +73,7 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "[ECE3220] Make clean",
+			"label": "[ECE3220] make clean",
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [ "clean" ],
@@ -95,7 +95,7 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "[ECE3220] Make dist",
+			"label": "[ECE3220] make dist",
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [ "dist" ],
@@ -120,7 +120,7 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "[ECE3220] Make distclean",
+			"label": "[ECE3220] make distclean",
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [ "distclean" ],
