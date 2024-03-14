@@ -44,10 +44,7 @@
 			"problemMatcher": [
 				"$gcc"
 			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"group": "build",
 			"detail": "compiler: /usr/bin/g++"
 		},
 		{
@@ -55,7 +52,10 @@
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [],
-			"group": "build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
 			"options": {
 				"cwd": "${fileDirname}",
 				"env": {
@@ -76,7 +76,9 @@
 			"label": "[ECE3220] make clean",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ "clean" ],
+			"args": [
+				"clean"
+			],
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
@@ -98,11 +100,10 @@
 			"label": "[ECE3220] make dist",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ "dist" ],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"args": [
+				"dist"
+			],
+			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
 				"env": {
@@ -123,7 +124,9 @@
 			"label": "[ECE3220] make distclean",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ "distclean" ],
+			"args": [
+				"distclean"
+			],
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",

@@ -65,7 +65,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "preLaunchTask": "[ECE3220] Make Project",
+            "preLaunchTask": "[ECE3220] Makefile Project",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
