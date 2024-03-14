@@ -86,7 +86,6 @@
             "request": "launch",
             "program": "${fileDirname}/demo",
             "args": [],
-            "sudo": true,
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
