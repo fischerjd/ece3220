@@ -39,16 +39,23 @@ ifneq ($(PIGPIO__BUILD_CPU_ARCH),armv7l)
 	LDFLAGS += -L$(RPIFS)/usr/lib
 endif
 
-# GCC linker/loader (ld) options
-# Your program must be linked with the pigpio shared object library.  This
-# is done via GCC's command line option `-l LIBNAME' (or, `-lLIBNAME')
-# where LIBNAME identifies the shared object library file you want to link
-# your program with:
-#		/usr/lib/libLIBNAME.so
-#		            ^^^^^^^
-# The pigpio library file is:  /usr/lib/libpigpio.so
-#                                          ^^^^^^
-LDLIBS += -lpigpio
+## GCC linker/loader (ld) options
+# Your program must be linked with these shared object libraries:
+#   * /usr/lib/libpigpio.so
+#   * /usr/lib/librt.so
+# (See: https://abyz.me.uk/rpi/pigpio/cif.html)
+#
+# This is accomplished via GCC's command line option `-l LIBNAME' (or,
+# `-lLIBNAME') where LIBNAME identifies the shared object library file you
+# want to link your program with:
+#  * /usr/lib/libLIBNAME.so
+#                 ^^^^^^^
+#  * /usr/lib/libpigpio.so
+#                ^^^^^^ ----> -lpigpio
+#  * /usr/lib/librt.so
+#                ^^---------> -lrt
+#
+LDLIBS += -lpigpio -lrt
 
 # The pigpio library requires Linux pthreads support. Ensure makefile
 # 'pthread.mk' is present in the same directory as this makefile.
