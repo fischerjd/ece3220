@@ -1,0 +1,9 @@
+REFERENCES
+
+Debouncing Techniques for Switch Contact Bounce
+
+[1]   J. G. Ganssle, A Guide to Debouncing, June 2008 (Rev. 3) [Online].
+      Available: https://pubweb.eng.utah.edu/~cs5780/debouncing.pdf
+[2]   J. Christoffersen, "Switch Bounce and How to Deal With It", All About
+      Circuits: Technical Articles, Sep. 3, 2015 [Online]. Available:
+      https://www.allaboutcircuits.com/technical-articles/switch-bounce-how-to-deal-with-it/
