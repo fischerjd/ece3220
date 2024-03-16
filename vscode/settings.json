@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "iostream": "cpp"
-    }
+        "iostream": "cpp",
+        "functional": "cpp"
+    },
+    "rewrap.autoWrap.enabled": false,
+    "rewrap.wrappingColumn": 75,
+    "vim.disableExtension": true,
+    "vim.textwidth": 75
 }

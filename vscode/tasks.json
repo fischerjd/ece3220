@@ -58,9 +58,7 @@
 			},
 			"options": {
 				"cwd": "${fileDirname}",
-				"env": {
-					"DEBUG": "1"
-				}
+				"env": {}
 			},
 			"presentation": {
 				"echo": true,
@@ -82,9 +80,7 @@
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
-				"env": {
-					"DEBUG": "1"
-				}
+				"env": {}
 			},
 			"presentation": {
 				"echo": true,
@@ -106,9 +102,7 @@
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
-				"env": {
-					"DEBUG": "1"
-				}
+				"env": {}
 			},
 			"presentation": {
 				"echo": true,
@@ -130,9 +124,7 @@
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
-				"env": {
-					"DEBUG": "1"
-				}
+				"env": {}
 			},
 			"presentation": {
 				"echo": true,
