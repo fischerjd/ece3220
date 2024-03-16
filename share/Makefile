@@ -2,13 +2,20 @@
 # Copyright 2019-2024 James D. Fischer
 #
 # SYNOPSYS
-#   make {all|release|debug}
+#   make {all|debug}
+#	make release
 #   make {clean|distclean|maintainer-clean}
 #   make strip
 #   make vars
 #
 # DESCRIPTION
-#   The default build is `all' (a.k.a., `release').
+#   This Makeifle creates an executable program named `demo'. See also the
+#   variable `PROGRAM_NAME' at various places in this Makefile.
+#
+#   The default build target is `all'--which performs `make debug' by
+#   default--which produces an executable program that contains
+#   instrumentation code that facilitates debugging when using the GNU
+#   debugger (gdb).
 #
 
 # The default C/C++ compilers.
@@ -23,15 +30,14 @@ STRIP := strip
 
 
 # [Optional]  To build this project with a toolchain other than the default
-# toolchain that Make uses--i.e., the build computer's native GCC
-# toolchain, create within the current working directory a makefile named
-# `toolchain.mk' and within it define (at a minimum) the variables AR, CC,
-# CXX, and LD.
+# toolchain that Make uses, create within the current working directory a
+# makefile named `toolchain.mk' and within it define (at a minimum) the
+# variables AR, CC, CXX, and LD.
 # For example,
-#    AR  := /usr/local/mycross/bin/ar
-#    CC  := /usr/local/mycross/bin/gcc
-#    CXX := /usr/local/mycross/bin/g++
-#    LD  := /usr/local/mycross/bin/ld
+#    AR  := /opt/cross/gcc-10.2.1/arm-linux-gnueabihf/bin/ar
+#    CC  := /opt/cross/gcc-10.2.1/arm-linux-gnueabihf/bin/gcc
+#    CXX := /opt/cross/gcc-10.2.1/arm-linux-gnueabihf/bin/g++
+#    LD  := /opt/cross/gcc-10.2.1/arm-linux-gnueabihf/bin/ld
 ifneq ($(wildcard toolchain.mk),)
 include toolchain.mk
 endif
@@ -52,30 +58,30 @@ PROGRAM_NAME ?= demo
 
 
 # Determine the build mode: release or debug.  The default build mode is
-# 'release'.
+# 'debug'.
 # 
-# Here are some methods for selecting the 'debug' build mode:
+# Here are some methods for selecting the 'release' build mode:
 #
-#   # Option 1.  One time debug build.
-#   $ make debug
+#   # Option 1.  One time release build.
+#   $ make release
 #
-#   # Option 2.  One time debug build.
-#   $ DEBUG=1 make
+#   # Option 2.  One time release build.
+#   $ RELEASE=1 make
 #
-#   # Option 3.  Performs debug builds until the shell environment
-#   #            variable DEBUG is unset.
-#   $ export DEBUG=1
+#   # Option 3.  Performs release builds until the shell environment
+#   #            variable RELEASE is unset.
+#   $ export RELEASE=1
 #   $ make
 #
-# Note that if the variable DEBUG is defined and set in the environment,
-# invoking any make targets other than 'debug', 'clean', and
+# Note that if the variable RELEASE is defined and set in the environment,
+# invoking any make targets other than 'release', 'clean', and
 # 'maintainer-clean' yields undefined behavior.
 #
-ifeq ($(origin DEBUG),environment)
+ifeq ($(origin RELEASE),environment)
 # See options 2 and 3 above
-BUILD_TYPE := debug
-else
 BUILD_TYPE := release
+else
+BUILD_TYPE := debug
 endif
 
 
@@ -231,7 +237,7 @@ POSTCOMPILE = @mv -f $(DEPDIR)$*.Td $(DEPDIR)$*.d && touch $@
 # [Optional]  Variable customizations for this build should be defined in a
 # makefile named `variables.mk' located in the current working directory.
 # Any variables defined thus far in this Makefile can be overridden or
-# appended by (re)defining these variables within 'variables.mk'.
+# appended by (re)defining those variables within 'variables.mk'.
 ifneq ($(wildcard variables.mk),)
 include variables.mk
 endif
