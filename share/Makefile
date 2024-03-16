@@ -3,7 +3,7 @@
 #
 # SYNOPSYS
 #   make {all|debug}
-#	make release
+#   make release
 #   make {clean|distclean|maintainer-clean}
 #   make strip
 #   make vars
