@@ -15,7 +15,11 @@
 #   The default build target is `all'--which performs `make debug' by
 #   default--which produces an executable program that contains
 #   instrumentation code that facilitates debugging when using the GNU
-#   debugger (gdb).
+#   debugger (gdb). See also "16.6 Standard Targets for Users" in the GNU
+#   Make manual which states, "By default, the Make rules should compile
+#   and link with '-g', so that executable programs have debugging
+#   symbols." (NB: This Makefile compiles and links with '-ggdb'.)
+#   https://www.gnu.org/software/make/manual/html_node/Standard-Targets.html
 #
 
 # The default C/C++ compilers.
