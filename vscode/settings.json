@@ -1,10 +1,11 @@
 {
+    "editor.rulers": [ 75 ],
     "files.associations": {
         "iostream": "cpp",
         "functional": "cpp"
     },
+    "git.openRepositoryInParentFolders": "never",
     "rewrap.autoWrap.enabled": false,
-    "rewrap.wrappingColumn": 75,
     "vim.disableExtension": true,
     "vim.textwidth": 75
 }
