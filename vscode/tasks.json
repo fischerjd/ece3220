@@ -48,10 +48,33 @@
 			"detail": "compiler: /usr/bin/g++"
 		},
 		{
-			"label": "[ECE3220] Makefile Project",
+			"label": "[ECE3220] make debug",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [],
+			"args": [ "debug" ],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"options": {
+				"cwd": "${fileDirname}",
+				"env": {}
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "[ECE3220] make release",
+			"type": "shell",
+			"command": "/usr/bin/make",
+			"args": [ "release" ],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -74,9 +97,7 @@
 			"label": "[ECE3220] make clean",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [
-				"clean"
-			],
+			"args": [ "clean" ],
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
@@ -96,9 +117,7 @@
 			"label": "[ECE3220] make dist",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [
-				"dist"
-			],
+			"args": [ "dist" ],
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
@@ -115,12 +134,10 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "[ECE3220] make distclean",
+			"label": "[ECE3220] make maintainer-clean",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [
-				"distclean"
-			],
+			"args": [ "maintainer-clean" ],
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",

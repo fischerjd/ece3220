@@ -65,7 +65,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "preLaunchTask": "[ECE3220] Makefile Project",
+            "preLaunchTask": "[ECE3220] make debug",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -92,7 +92,7 @@
             "externalConsole": false,
             "MIMode": "gdb",
             "miDebuggerPath": "${userHome}/git/ece3220/vscode/sudo-gdb.sh",
-            "preLaunchTask": "[ECE3220] Makefile Project",
+            "preLaunchTask": "[ECE3220] make debug",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
