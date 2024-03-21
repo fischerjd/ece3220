@@ -1,6 +1,8 @@
 
 REFERENCES
-[1]  https://www.raspberrypi.org/documentation/hardware/raspberrypi/revision-codes/README.md
+[1]  "Raspberry Pi revision codes." Raspberry Pi Hardware. Accessed:
+     Mar. 21, 2024. [Online]. Available: 
+     https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#new-style-revision-codes
 
 $ cat /proc/cpuinfo
 [...]
@@ -11,17 +13,19 @@ Serial          : 00000000bdfea4b7
 Revision code 'a02082'
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-N O Q uuu W u F MMM CCCC PPPP TTTTTTTT RRRR
-0 0 0 000 0 0 1 010 0000 0010 00001000 0010
-| | | |   | | | |   |    |    |        +----> (2) Revision 2
-| | | |   | | | |   |    |    +-------------> (8) Pi 3B
-| | | |   | | | |   |    +------------------> (2) BCM2837
-| | | |   | | | |   +-----------------------> (0) Sony UK
-| | | |   | | | +---------------------------> (2) 1GB
-| | | |   | | +-----------------------------> (1) New-style revision
-| | | |   | +-------------------------------> (0) UNUSED BIT
-| | | |   +---------------------------------> (0) Warranty is intact (has not been voided by overclocking)
-| | | +-------------------------------------> (0) UNUSED BITS
-| | +---------------------------------------> (0) OTP Reading allowed
-| +-----------------------------------------> (0) OTP Programming allowed
-+-------------------------------------------> (0) Overvoltage allowed
+-> 0x00a02082
+-> 0000 0000 1010 0000 0010 0000 1000 0010
+-> 0 0 0 000 0 0 1 010 0000 0010 00001000 0010
+-> N O Q uuu W u F MMM CCCC PPPP TTTTTTTT RRRR
+   | | | |   | | | |   |    |    |        +----> (2) Revision 2
+   | | | |   | | | |   |    |    +-------------> (8) Pi 3B
+   | | | |   | | | |   |    +------------------> (2) BCM2837
+   | | | |   | | | |   +-----------------------> (0) Sony UK
+   | | | |   | | | +---------------------------> (2) 1GB
+   | | | |   | | +-----------------------------> (1) New-style revision
+   | | | |   | +-------------------------------> (0) UNUSED BIT
+   | | | |   +---------------------------------> (0) Warranty is intact (has not been voided by overclocking)
+   | | | +-------------------------------------> (0) UNUSED BITS
+   | | +---------------------------------------> (0) OTP Reading allowed
+   | +-----------------------------------------> (0) OTP Programming allowed
+   +-------------------------------------------> (0) Overvoltage allowed
