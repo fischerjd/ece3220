@@ -75,10 +75,7 @@
 			"type": "shell",
 			"command": "/usr/bin/make",
 			"args": [ "release" ],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
 				"env": {}
