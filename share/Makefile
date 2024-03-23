@@ -192,7 +192,7 @@ CPPFLAGS += $(CPPFLAGS.custom) -DPROGRAM_NAME=$(PROGRAM_NAME)
 CFLAGS.dialect ?= c17
 CFLAGS.default ?= -Wall
 CFLAGS.release_build ?= -O3
-CFLAGS.debug_build   ?= -O0 -ggdb
+CFLAGS.debug_build   ?= -Og -ggdb
 CFLAGS = -std=$(CFLAGS.dialect) $(CFLAGS.default) $(CFLAGS.custom)
 
 
@@ -206,7 +206,7 @@ CFLAGS = -std=$(CFLAGS.dialect) $(CFLAGS.default) $(CFLAGS.custom)
 CXXFLAGS.dialect ?= c++17
 CXXFLAGS.default ?= -Wall
 CXXFLAGS.release_build ?= -O3
-CXXFLAGS.debug_build   ?= -O0 -ggdb
+CXXFLAGS.debug_build   ?= -Og -ggdb
 CXXFLAGS = -std=$(CXXFLAGS.dialect) $(CXXFLAGS.default) $(CXXFLAGS.custom)
 
 
