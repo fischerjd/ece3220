@@ -51,7 +51,9 @@
 			"label": "[ECE3220] make debug",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ "debug" ],
+			"args": [
+				"debug"
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -74,7 +76,9 @@
 			"label": "[ECE3220] make release",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ "release" ],
+			"args": [
+				"release"
+			],
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
@@ -94,7 +98,9 @@
 			"label": "[ECE3220] make clean",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ "clean" ],
+			"args": [
+				"clean"
+			],
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
@@ -114,7 +120,9 @@
 			"label": "[ECE3220] make dist",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ "dist" ],
+			"args": [
+				"dist"
+			],
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
@@ -134,7 +142,9 @@
 			"label": "[ECE3220] make maintainer-clean",
 			"type": "shell",
 			"command": "/usr/bin/make",
-			"args": [ "maintainer-clean" ],
+			"args": [
+				"maintainer-clean"
+			],
 			"group": "build",
 			"options": {
 				"cwd": "${fileDirname}",
