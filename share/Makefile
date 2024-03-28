@@ -4,7 +4,7 @@
 # SYNOPSYS
 #   make {all|debug}
 #   make release
-#   make {clean|distclean|maintainer-clean}
+#   make {clean|distclean|mostly-clean|maintainer-clean}
 #   make strip
 #   make vars
 #
@@ -539,6 +539,12 @@ clean::
 
 .PHONY: distclean
 distclean:: clean
+	$(call remove_folder,$(DEPDIR))
+	$(call remove_folder,$(BUILDDIR))
+
+.PHONY: mostly-clean
+mostly-clean:
+	-rm -f $(OBJS) $(DEPS)
 	$(call remove_folder,$(DEPDIR))
 	$(call remove_folder,$(BUILDDIR))
 
