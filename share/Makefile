@@ -321,6 +321,27 @@ include fmt.mk
 endif
 
 
+# [Optional]  If support for the Address Sanitizer (asan) library is
+# desired, add a makefile named `asan.mk' in the current working directory
+# that defines the following variables:
+#   CFLAGS := -fsanitize=address
+#   CXXFLAGS := -fsanitize=address
+#   LDFLAGS := -fsanitize=address -static-libasan
+# :: NOTE ::
+# The setup shown above uses static linking to when linking the asan
+# library with your program. This is being done because it solves some
+# problems that sometimes occur when you use dynamic linking. If you use
+# dynamic linking instead of static linking, you may need to use the
+# environment variable LD_PRELOAD to manually load the asan library before
+# any other library is loaded, e.g., 
+#   LD_PRELOAD=/lib/arm-linux-gnueabihf/libasan.so.6 ./demo
+# See also: https://github.com/google/sanitizers/issues/679
+#
+ifneq ($(wildcard asan.mk),)
+include asan.mk
+endif
+
+
 ###########################################################################
 #
 #  The default target
