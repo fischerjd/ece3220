@@ -229,6 +229,7 @@ LINK.o = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
 endif
 # If the user's environment defines variable `STATIC_LINK' with a non-null
 # value, use static linking; otherwise, use dynamic linking by default.
+STATIC_LINK ?=
 ifneq ($(STATIC_LINK),)
 LINK.o += -static
 endif
@@ -317,7 +318,7 @@ endif
 #
 ###########################################################################
 .PHONY: all
-all : $(BUILD_TYPE)
+all: $(BUILD_TYPE)
 
 
 # Builds a 'release' version of the program without debugging support.
@@ -326,20 +327,21 @@ all : $(BUILD_TYPE)
 # or without level numbers, the last such option is the one that is
 # effective."
 #
-# It is recommended that you use either 'specs.mk' or 'variables.mk' as the
-# means of defining the *.release_build variables (e.g., CFLAGS.release_build).
+# It is recommended that you use either 'specs.mk' or 'variables.mk' 
+# as the means of defining the *.release_build variables (e.g.,
+# CFLAGS.release_build).
 #
 # See also "6.11 Target-specific Variable Values" in the GNU Make manual.
 #
 .PHONY: release
-release : BUILD_MODE := release
-release : DEBUG :=
-release : DEBUG_TRACE_LEVEL :=
-release : CPPFLAGS += -DRELEASE_BUILD=1
-release : CPPFLAGS += $(CPPFLAGS.release_build)
-release : CFLAGS += $(CFLAGS.release_build)
-release : CXXFLAGS += $(CXXFLAGS.release_build)
-release : build_program
+release: BUILD_MODE := release
+release: DEBUG :=
+release: DEBUG_TRACE_LEVEL :=
+release: CPPFLAGS += -DRELEASE_BUILD=1
+release: CPPFLAGS += $(CPPFLAGS.release_build)
+release: CFLAGS += $(CFLAGS.release_build)
+release: CXXFLAGS += $(CXXFLAGS.release_build)
+release: build_program
 
 
 # Builds a 'debug' version of the program with debugging support.
@@ -354,15 +356,15 @@ release : build_program
 # See also "6.11 Target-specific Variable Values" in the GNU Make manual.
 #
 .PHONY: debug
-debug : BUILD_MODE := debug
-debug : DEBUG := 1
-debug : DEBUG_TRACE_LEVEL ?= 5
-debug : CPPFLAGS += -DDEBUG=1 -DDEBUG_BUILD=1
-debug : CPPFLAGS += -DDEBUG_TRACE_LEVEL=$(DEBUG_TRACE_LEVEL)
-debug : CPPFLAGS += $(CPPFLAGS.debug_build)
-debug : CFLAGS += $(CFLAGS.debug_build)
-debug : CXXFLAGS += $(CXXFLAGS.debug_build)
-debug : build_program
+debug: BUILD_MODE := debug
+debug: DEBUG := 1
+debug: DEBUG_TRACE_LEVEL ?= 5
+debug: CPPFLAGS += -DDEBUG=1 -DDEBUG_BUILD=1
+debug: CPPFLAGS += -DDEBUG_TRACE_LEVEL=$(DEBUG_TRACE_LEVEL)
+debug: CPPFLAGS += $(CPPFLAGS.debug_build)
+debug: CFLAGS += $(CFLAGS.debug_build)
+debug: CXXFLAGS += $(CXXFLAGS.debug_build)
+debug: build_program
 
 
 # [Optional] If you need to perform miscellaneous tasks before the
@@ -375,11 +377,13 @@ debug : build_program
 #
 #       PREBUILD := prebuild
 #       .PHONY: prebuild
-#       prebuild : PREREQUISITE1 PREREQUISITE2 ... $(PROGRAM_NAME) 
+#       prebuild: PREREQUISITE1 PREREQUISITE2 ... $(PROGRAM_NAME) 
 #
 PREBUILD_MAKEFILE := ./prebuild.mk
 ifneq ($(wildcard $(PREBUILD_MAKEFILE)),)
 include $(PREBUILD_MAKEFILE)
+else
+PREBUILD ?=
 endif
 
 
@@ -393,24 +397,26 @@ endif
 #
 #       POSTBUILD := postbuild
 #       .PHONY: postbuild
-#       postbuild : $(PROGRAM_NAME) PREREQUISITE1 PREREQUISITE2 ...
+#       postbuild: $(PROGRAM_NAME) PREREQUISITE1 PREREQUISITE2 ...
 #
 POSTBUILD_MAKEFILE := ./postbuild.mk
 ifneq ($(wildcard $(POSTBUILD_MAKEFILE)),)
 include $(POSTBUILD_MAKEFILE)
+else
+POSTBUILD ?=
 endif
 
 
 # Build the program
 .PHONY: build_program
-build_program : $(PREBUILD) $(PROGRAM_NAME) $(POSTBUILD)
+build_program: $(PREBUILD) $(PROGRAM_NAME) $(POSTBUILD)
 
 
 # This rule performs the LINK task which links together all the object code
 # files (.o) and any libraries, as specified via the LDLIBS variable, into
 # an executable image whose name is specified via the PROGRAM_NAME
 # variable.
-$(PROGRAM_NAME) : $(OBJS)
+$(PROGRAM_NAME): $(OBJS)
 	$(LINK.o) $^ $(LDLIBS) -o $@
 
 
@@ -452,28 +458,28 @@ endif
 #     is up-to-date for the next invocation of make, when we need to decide
 #     whether to update [the %.o target] again.
 #
-%.o : %.c
-$(BUILDDIR)%.o : %.c $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
+%.o: %.c
+$(BUILDDIR)%.o: %.c $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
 	$(COMPILE.c) $(CPPFLAGS.d) $(OUTPUT_OPTION) $<
 	$(POSTCOMPILE)
 
-%.o : %.cc
-$(BUILDDIR)%.o : %.cc $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
+%.o: %.cc
+$(BUILDDIR)%.o: %.cc $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
 	$(COMPILE.cc) $(CPPFLAGS.d) $(OUTPUT_OPTION) $<
 	$(POSTCOMPILE)
 
-%.o : %.cpp
-$(BUILDDIR)%.o : %.cpp $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
+%.o: %.cpp
+$(BUILDDIR)%.o: %.cpp $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
 	$(COMPILE.cpp) $(CPPFLAGS.d) $(OUTPUT_OPTION) $<
 	$(POSTCOMPILE)
 
 
 # Create the build directory if it doesn't exist.
-$(BUILDDIR) : ; @mkdir -p $@ >/dev/null
+$(BUILDDIR): ; @mkdir -p $@ >/dev/null
 
 
 # Create the dependency directory if it doesn't exist.
-$(DEPDIR) : ; @mkdir -p $@ >/dev/null
+$(DEPDIR): ; @mkdir -p $@ >/dev/null
 
 
 #
@@ -526,7 +532,7 @@ endif
 # This should only be done on a release build (don't strip a debug build).
 #
 .PHONY: strip
-strip : ; $(STRIP) --strip-unneeded $(PROGRAM_NAME)
+strip: ; $(STRIP) --strip-unneeded $(PROGRAM_NAME)
 
 
 #
@@ -599,7 +605,7 @@ show-cxx-info:
 # tests--e.g.,
 #
 #       .PHONY: check
-#       check : $(PROGRAM_NAME) PREREQUISITE1 PREREQUISITE2 ...
+#       check: $(PROGRAM_NAME) PREREQUISITE1 PREREQUISITE2 ...
 #
 # To invoke this target type 'make check'.
 #
