@@ -210,6 +210,15 @@ CXXFLAGS.debug_build   ?= -O0 -ggdb
 CXXFLAGS = -std=$(CXXFLAGS.dialect) $(CXXFLAGS.default) $(CXXFLAGS.custom)
 
 
+# Linker flags and libraries
+# NOTES
+# * See also 'variables.mk' in this Makefile (e.g., for LDFLAGS.custom and
+# LDLIBS.custom)
+#
+LDFLAGS = $(LDFLAGS.custom)
+LDLIBS  = $(LDLIBS.custom)
+
+
 # If the project has one or more C++ source code files, use the C++
 # compiler to invoke the linking process; otherwise, use the C compiler to
 # invoke the linking process [2].
