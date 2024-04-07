@@ -12,12 +12,12 @@
 #   This Makeifle creates an executable program named `demo'. See also the
 #   variable `PROGRAM_NAME' at various places in this Makefile.
 #
-#   The default build target is `all'--which performs `make debug' by
-#   default--which produces an executable program that contains
-#   instrumentation code that facilitates debugging when using the GNU
-#   debugger (gdb). See also "16.6 Standard Targets for Users" in the GNU
-#   Make manual which states, "By default, the Make rules should compile
-#   and link with '-g', so that executable programs have debugging
+#   The default build goal is the target `all'.  By default, the `all'
+#   target performs `make debug' which produces an executable program that
+#   contains instrumentation code that facilitates debugging when using the
+#   GNU debugger (gdb). See also "16.6 Standard Targets for Users" in the
+#   GNU Make manual which states, "By default, the Make rules should
+#   compile and link with '-g', so that executable programs have debugging
 #   symbols." (NB: This Makefile compiles and links with '-ggdb'.)
 #   https://www.gnu.org/software/make/manual/html_node/Standard-Targets.html
 #
@@ -61,10 +61,10 @@ endif
 PROGRAM_NAME ?= demo
 
 
-# Determine the build mode: release or debug.  The default build mode is
-# 'debug'.
+# Two build modes are available: debug and release.  The default build mode
+# is 'debug'.
 # 
-# Here are some methods for selecting the 'release' build mode:
+# Here are some options for selecting the 'release' build mode:
 #
 #   # Option 1.  One time release build.
 #   $ make release
@@ -77,9 +77,9 @@ PROGRAM_NAME ?= demo
 #   $ export RELEASE=1
 #   $ make
 #
-# Note that if the variable RELEASE is defined and set in the environment,
-# invoking any make targets other than 'release', 'clean', and
-# 'maintainer-clean' yields undefined behavior.
+# Note that if the variable RELEASE is defined and set in the command shell
+# environment, invoking any make goals other than 'release' or the various
+# "clean" goals yields undefined behavior.
 #
 ifeq ($(origin RELEASE),environment)
 # See options 2 and 3 above
@@ -89,12 +89,13 @@ BUILD_TYPE := debug
 endif
 
 
-# BUILDDIR is the top-level target folder for all build products--e.g.,
-# object code files, dependency files, the executable image file, etc.
+# BUILDDIR is the destination folder for all build products--e.g., object
+# code files (%.o), dependency files (%.Td, %.d), precompiled headers
+# (%.gch), etc.
 #
 BUILDDIR := build
 
-# If BUILDDIR is defined, ensure BUILDDIR ends in '/'.
+# If BUILDDIR is defined, ensure BUILDDIR's path string ends with '/'.
 ifdef BUILDDIR
 ifeq ($(findstring */,$(BUILDDIR)),)
 BUILDDIR := $(BUILDDIR)/
@@ -102,18 +103,18 @@ endif
 endif
 
 
-# DEPDIR is the folder that contains the dependency files %.d for this
-# directory's object files %.o. Each object file in the current working
-# directory will have an associated dependency file within folder
-# DEPDIR--e.g.,
+# DEPDIR is the folder that contains the automatically-generated dependency
+# files (%.Td, %.d). Each object file (%.o) has an associated dependency
+# file within folder DEPDIR--e.g.,
 #    foo.o -> $(DEPDIR)foo.d
+# By default, DEPDIR is a subdirectory within BUILDDIR:
 # $(BUILDDIR)
 #  `-- $(DEPDIR)
 #
 DEPDIR_NAME := deps
 DEPDIR := $(BUILDDIR)$(DEPDIR_NAME)
 
-# If DEPDIR is defined, ensure DEPDIR ends in '/'.
+# If DEPDIR is defined, ensure DEPDIR's path string ends with '/'.
 ifdef DEPDIR
 ifeq ($(findstring */,$(DEPDIR)),)
 DEPDIR := $(DEPDIR)/
@@ -121,12 +122,13 @@ endif
 endif
 
 
-# Use make's `wildcard' function to find all of the C source files (.c) in
-# the current working directory. Next, use a substitution reference to
-# generate the list of C object files (.o) to be created from the list of C
-# source code files, as well as the list of dependency files (.d). Ditto
-# for C++ source code files (.cc, .cpp). (See also make's `patsubst'
-# function.)
+# Use make's `$(wildcard ...)' function to find all C source files (%.c) in
+# the current working directory.  Next, use a substitution reference to
+# generate the list of C object files (%.o) to be created from the list of
+# C source code files, as well as the list of dependency files (%.d). Ditto
+# for C++ source code files: %.cc, %.cpp, %.cxx, etc.. (See also make's
+# `patsubst' function.)
+#
 SOURCES.c := $(wildcard *.c)
 OBJS.c    := $(SOURCES.c:%.c=$(BUILDDIR)%.o)
 DEPS.c    := $(SOURCES.c:%.c=$(DEPDIR)%.d)
@@ -143,7 +145,7 @@ SOURCES.cxx := $(wildcard *.cxx)
 OBJS.cxx  := $(SOURCES.cxx:%.cxx=$(BUILDDIR)%.o)
 DEPS.cxx  := $(SOURCES.cxx:%.cxx=$(DEPDIR)%.d)
 
-# Visual Studio Code
+# Dependency file created by Microsoft Visual Studio Code
 DEPS.vscode := null.d
 
 # Aggregate lists of C/C++ source files, object files, and dependency
@@ -155,32 +157,58 @@ DEPS      := $(DEPS.c) $(DEPS.cc) $(DEPS.cpp) $(DEPS.cxx) $(DEPS.vscode)
 
 # Use make's wildcard function to retrieve the name of every header file in
 # the current working directory.
-HEADERS := $(wildcard *.h) $(wildcard *.hh) $(wildcard *.hpp) $(wildcard *.hxx) $(wildcard *.H)
+HEADERS := \
+	$(wildcard *.h) \
+	$(wildcard *.hh) \
+	$(wildcard *.hpp) \
+	$(wildcard *.hxx) \
+	$(wildcard *.H)
 
 
-# Use the preprocessor to generate files $(DEPDIR)%.d that contain
-# makefile-compatible dependency rules for each %.o file.
+# Use the C preprocessor to generate dependency files $(DEPDIR)%.d that
+# contain makefile-compatible dependency rules that list the set of build
+# prerequisites (dependencies) for each object code (%.o) file. For
+# example: consider a translation unit consisting of files x.c, a.h, and
+# b.h, that produces an object code file named x.o.  We want to command the
+# C preprocessor to automatically create a file named $(DEPDOR)x.d that
+# contains/provides a dependency rule for object code file $(BUILDDIR)x.o:
 #
-# NB: Variable CPPFLAGS.d must be a recursively expanded variable because
-# it contains references to other variables `$@' and `$*' whose values are
-# unknown at this point. These variables must be evaluated later, wherever
-# variable CPPFLAGS.d is expanded. So use `=' here and not `:='.
+#	$(BUILDDIR)x.o: x.c a.h b.h
 #
-# -MT target
-#       Specifies a custom target for the makefile rule.
-# -MMD
-#       List only user header files, not the system headers, in the
-#       makefile rule's dependency list. (See also: -MD)
-# -MF file
-#       Specifies the output file to write the makefile dependency rule
-#       into.
+# where '$(BUILDDIR)x.o' is the rule's target (the object code file we want
+# to create), and files x.c, a.h, and b.h are the rule's prerequisite
+# (a.k.a., dependency) files.
+#
+# [Note 1:  Variable CPPFLAGS.d provides the command line flags that compel
+# the C preprocessor to create the desired dependency files ($(DEPDIR)%.d).
+#
+#   -MT target
+#         Specifies a custom name for the makefile rule's target, which in
+#         this case is $(BUILDDIR)%.o.
+#   -MMD
+#         List only user header files, not system headers, in the rule's
+#         file dependency list. (See also: -MD)
+#   -MF file
+#         Stores the automatically-generated dependency rule in the
+#         specified file, which in this case is $(DEPDIR)%.d.
+#
+# See also: man 1 cpp
+# --end note]
+#
+# [Note 2:  Variable CPPFLAGS.d must be a recursively expanded variable
+# because it contains references to other variables `$@' and `$*' whose
+# values are unknown at this point in the makefile.  These variables must
+# be evaluated later in this makefile, at each point variable CPPFLAGS.d is
+# expanded.  So use `=' here (deferred evaluation) and not `:=' (immediate
+# evaluation). --end note]
 #
 CPPFLAGS.d =
 CPPFLAGS.d += -MT $@ -MMD -MF $(DEPDIR)$*.Td
 
 # C/C++ preprocessor flags
-# NB: DO NOT add CPPFLAGS.d to this variable.
-# See also 'variables.mk' in this Makefile (e.g., for CPPFLAGS.custom)
+# NOTES
+# * DO NOT add CPPFLAGS.d to this variable.
+# * See also 'variables.mk' in this Makefile (e.g., for CPPFLAGS.custom)
 CPPFLAGS += $(CPPFLAGS.custom) -DPROGRAM_NAME=$(PROGRAM_NAME)
 
 
@@ -219,7 +247,7 @@ LDFLAGS = $(LDFLAGS.custom)
 LDLIBS  = $(LDLIBS.custom)
 
 
-# If the project has one or more C++ source code files, use the C++
+# If this project has one or more C++ source code files, use the C++
 # compiler to invoke the linking process; otherwise, use the C compiler to
 # invoke the linking process [2].
 # See also:
@@ -229,13 +257,15 @@ LDLIBS  = $(LDLIBS.custom)
 #   $(LINK.o) $^ $(LOADLIBS) $(LDLIBS) -o $@
 #
 ifeq ($(strip $(SOURCES.c_plus_plus)),)
-# This is a C-only program; use the C compiler to invoke the linker.
+# This project does not have C++ source files; so, use the C compiler to
+# invoke the linker.
 LINK.o = $(CC) $(LDFLAGS) $(TARGET_ARCH)
 else
-# This is a C++ or C/C++ program; use the C++ compiler to invoke the
+# This project has C++ source files; so, use the C++ compiler to invoke the
 # linker.
 LINK.o = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
 endif
+
 # If the user's environment defines variable `STATIC_LINK' with a non-null
 # value, use static linking; otherwise, use dynamic linking by default.
 STATIC_LINK ?=
@@ -263,7 +293,8 @@ endif
 # You may optionally link your program against one of these libraries:
 #  	* pigpio
 #  	* wiringPi
-# 
+#
+# -------------------------------------------------------------------------
 # :: pigpio ::
 # If you are building software for the Raspberry Pi, and that software uses
 # the pigpio library, store a copy of makefile `pigpio.mk' in the current
@@ -280,23 +311,27 @@ include pigpio.mk
 ifeq ($(wildcard) $(WIRINGPI__INCLUDEDIR)/pigpio.h,)
 $(shell mount.rpifs -q || true)
 endif
-#
+# -------------------------------------------------------------------------
 # :: wiringPi ::
+# [Note 1:  This library is deprecated and should not be used in new
+# projects. --end note]
+#
 # If you are building software for the Raspberry Pi, and that software uses
 # the wiringPi library, store a copy of makefile `wiringPi.mk' in the
 # current working directory. That makefile provides preprocessor (cpp),
 # compiler (gcc/g++), and linker (ld) options to build and link your
 # program with the wiringPi library.
-ifneq ($(wildcard wiringPi.mk),)
+else ifneq ($(wildcard wiringPi.mk),)
 include wiringPi.mk
 # If cross compiling, ensure the Raspberry Pi's file system is mounted onto
 # the folder specified by variable RPIFS. The wiringPi header files and
 # libraries are installed on the Raspberry Pi, not on the desktop computer.
 # (NB: The shell script `mount.rpifs' is provided with Jim Fischer's
 # `rpiutils' software package.)
-else ifeq ($(wildcard) $(WIRINGPI__INCLUDEDIR)/wiringPi.h,)
+ifeq ($(wildcard) $(WIRINGPI__INCLUDEDIR)/wiringPi.h,)
 $(shell mount.rpifs -q || true)
 endif
+# -------------------------------------------------------------------------
 endif
 
 
@@ -312,8 +347,8 @@ endif
 
 
 # [Optional]  If support for the {fmt} library is required, add a makefile
-# named `fmt.mk' in the current working directory that contains the
-# following variable assignments:
+# named `fmt.mk' in the current working directory and ensure that makefile
+# that provides the following variable definitions:
 #   LDFLAGS  += -L/usr/local/lib64
 #   LDLIBS   += -l:libfmt.a
 ifneq ($(wildcard fmt.mk),)
@@ -323,19 +358,20 @@ endif
 
 # [Optional]  If support for the Address Sanitizer (asan) library is
 # desired, add a makefile named `asan.mk' in the current working directory
-# that defines the following variables:
+# and ensure that makefile provides the following variable definitions:
 #   CFLAGS := -fsanitize=address
 #   CXXFLAGS := -fsanitize=address
 #   LDFLAGS := -fsanitize=address -static-libasan
-# :: NOTE ::
-# The setup shown above uses static linking to when linking the asan
-# library with your program. This is being done because it solves some
-# problems that sometimes occur when you use dynamic linking. If you use
-# dynamic linking instead of static linking, you may need to use the
+#
+# [Note 1:  The setup shown above uses static linking to when linking the
+# asan library with your program. This is being done because it solves some
+# problems that sometimes occur when using dynamic linking. If you want to
+# use dynamic linking instead of static linking, you may need to use the
 # environment variable LD_PRELOAD to manually load the asan library before
-# any other library is loaded, e.g., 
+# other libraries are loaded, e.g., 
 #   LD_PRELOAD=/lib/arm-linux-gnueabihf/libasan.so.6 ./demo
 # See also: https://github.com/google/sanitizers/issues/679
+# --end note]
 #
 ifneq ($(wildcard asan.mk),)
 include asan.mk
@@ -344,7 +380,7 @@ endif
 
 ###########################################################################
 #
-#  The default target
+#  This makefile's default goal is the target 'all'.
 #
 ###########################################################################
 .PHONY: all
@@ -591,11 +627,10 @@ maintainer-clean:: distclean
 
 # Prints the value of each environment variable and makefile variable
 # (useful for debugging the makefile). These commands are also useful:
-#    $ make -pn [target]      # Rules that are defined by your Makefile
+#    $ make -pn [goal]        # Make's default rules + the Makefile's rules
 #    $ make -pn -f /dev/null  # Make's default rules, ignores your Makefile
-# NB: Make's '-n' option means "dry run"; it shows the actions make would
-# perform without actually building anything.
-# Example:  $ make vars 2>&1 | less
+# See also: the descriptions of options `-p' and `-n' in the make manual.
+#
 .PHONY: vars
 vars :
 	$(foreach V, $(sort $(.VARIABLES)), $(if $(filter-out default automatic, $(origin $V)), $(info $V=$($V) ($(value $V)))))
@@ -637,7 +672,7 @@ show-cxx-info:
 #       .PHONY: check
 #       check: $(PROGRAM_NAME) PREREQUISITE1 PREREQUISITE2 ...
 #
-# To invoke this target type 'make check'.
+# To invoke this goal type 'make check'.
 #
 CHECK_MAKEFILE := ./check.mk
 ifneq ($(wildcard $(CHECK_MAKEFILE)),)
