@@ -1,0 +1,37 @@
+#!/bin/bash
+# NAME
+#   git-update - performs `git pull' on branches develop and main
+#
+# SYNOPSYS
+#   git-update [dir]
+#
+# DESCRIPTION
+#   git-update performs a `git pull' operation on branches `develop' and
+#   `main', in that order.  If a directory name `dir' is specified on the
+#   command line, the `git pull' tasks are performed within that directory.
+#   Otherwise, the `git pull' tasks are performed within the current
+#   directory.
+#
+set -eu
+
+declare -r ECHO=/usr/bin/echo
+declare -r GIT=/usr/bin/git
+
+if [[ $# -gt 0 ]]; then
+    if [[ -d $1 ]]; then
+        # [Note 1: Use Bash's builtin `cd' and not /usr/bin/cd. --end note]
+        cd "$1"
+    else
+        >&2 "${ECHO}" ":: ERROR ::  Directory '$1' does not exist."
+        exit 1
+    fi
+fi
+"${ECHO}" -n "Updating folder: "
+pwd
+
+"$GIT" checkout develop
+"$GIT" pull
+"$GIT" checkout main
+"$GIT" pull
+"$GIT" checkout develop
+
