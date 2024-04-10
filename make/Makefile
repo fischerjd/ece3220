@@ -494,6 +494,23 @@ include rules.mk
 endif
 
 
+# [Optional]  If you want to produce an output file that shows class
+# hierarchy information, including a breakdown of each class's virtual
+# function lookup table (vtable), create a makefile named `vtable.mk' that
+# contains the following:
+#
+#	CXXFLAGS += -fdump-lang-class
+#	.PHONY: clean
+#	clean:: ; -rm -f "$(BUILDDIR)"*.class
+#
+# This flag produces an output file that is stored in the $(BUILDDIR)
+# folder.
+#
+ifneq ($(wildcard vtable.mk),)
+include vtable.mk
+endif
+
+
 # Disable make's implicit rule for %.c -> %.o translation [3] and then
 # define an implicit rule (a pattern rule) that performs %.c to %.o
 # translation with file $(DEPDIR)%.d declared as a prerequisite. Ditto for
