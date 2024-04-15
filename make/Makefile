@@ -617,6 +617,12 @@ endif
 .PHONY: strip
 strip: ; $(STRIP) --strip-unneeded $(PROGRAM_NAME)
 
+#
+# Make a distribution tarball file
+#
+ifneq ($(wildcard dist.mk),)
+include dist.mk
+endif
 
 #
 # Clean-up
@@ -632,7 +638,7 @@ distclean:: clean
 	$(call remove_folder,$(BUILDDIR))
 
 .PHONY: mostly-clean
-mostly-clean:
+mostly-clean::
 	-rm -f $(OBJS) $(DEPS)
 	$(call remove_folder,$(DEPDIR))
 	$(call remove_folder,$(BUILDDIR))
