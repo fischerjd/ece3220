@@ -48,8 +48,8 @@ endif
 
 
 # [Optional]  Create a makefile named `specs.mk' that provides
-# program-specific specifications for this build--e.g., redefine
-# PROGRAM_NAME with the desired program name; provide version
+# program-specific specifications for this build--e.g., define
+# SPECS__PROGRAM_NAME with the desired program name; provide version
 # information, build directory, dependency directory name and path, 
 # and so on. 
 ifneq ($(wildcard specs.mk),)
@@ -57,8 +57,14 @@ include specs.mk
 endif
 
 
-# The default name for the program to be created.
+# Specify the file name for the program to be created.
+ifeq (,$(PROGRAM_NAME))
+ifneq (,$(SPECS__PROGRAM_NAME))
+PROGRAM_NAME := $(SPECS__PROGRAM_NAME)
+else
 PROGRAM_NAME ?= demo
+endif
+endif
 
 
 # Two build modes are available: debug and release.  The default build mode
@@ -89,17 +95,24 @@ BUILD_TYPE := debug
 endif
 
 
+# [Optional]  Create a makefile named 'override.mk' that provides
+# alternate definitions for the variables in this makefile that are defined
+# via deferred conditional assignment, e.g.,
+# 	BUILDDIR := xyz
+ifneq ($(wildcard override.mk),)
+include override.mk
+endif
+
+
 # BUILDDIR is the destination folder for all build products--e.g., object
 # code files (%.o), dependency files (%.Td, %.d), precompiled headers
 # (%.gch), etc.
 #
-BUILDDIR := build
+BUILDDIR ?= build
 
 # If BUILDDIR is defined, ensure BUILDDIR's path string ends with '/'.
 ifdef BUILDDIR
-ifeq ($(findstring */,$(BUILDDIR)),)
-BUILDDIR := $(BUILDDIR)/
-endif
+BUILDDIR := $(BUILDDIR:/=)/
 endif
 
 
@@ -111,14 +124,12 @@ endif
 # $(BUILDDIR)
 #  `-- $(DEPDIR)
 #
-DEPDIR_NAME := deps
+DEPDIR_NAME ?= deps
 DEPDIR := $(BUILDDIR)$(DEPDIR_NAME)
 
 # If DEPDIR is defined, ensure DEPDIR's path string ends with '/'.
 ifdef DEPDIR
-ifeq ($(findstring */,$(DEPDIR)),)
-DEPDIR := $(DEPDIR)/
-endif
+DEPDIR := $(DEPDIR:/=)/
 endif
 
 
@@ -436,10 +447,10 @@ debug: build_program
 # [Optional] If you need to perform miscellaneous tasks before the
 # PROGRAM_NAME is built (e.g., building other libraries), create in the
 # current working directory a makefile named `prebuild.mk'.  In that
-# makefile define a make variable `PREBUILD' whose value is `prebuild'.
-# Then define a .PHONY rule named `prebuild' whose last prerequisite is
-# `$(PROGRAM_NAME)' and is prefixed by other prerequisites that must be
-# satisfied before the PROGRAM_NAME is built, e.g.,
+# makefile define a simply expanded variable named `PREBUILD' whose value
+# is `prebuild'.  Then define a .PHONY rule named `prebuild' whose last
+# prerequisite is `$(PROGRAM_NAME)' and is prefixed by other prerequisites
+# that must be satisfied before the PROGRAM_NAME is built, e.g.,
 #
 #       PREBUILD := prebuild
 #       .PHONY: prebuild
@@ -627,25 +638,35 @@ endif
 #
 # Clean-up
 #
-.PHONY: clean
-clean::
-	-rm -f $(OBJS) $(DEPS) $(PROGRAM_NAME)
+
+# Clean-up tasks that are common to goals `mostly-clean' and `clean'.
+.PHONY: _basic_clean
+_basic_clean::
+	-rm -f $(DEPS)
+	-rm -f $(OBJS)
 	-rm -f $(notdir $(OBJS:%.o=%))
 
+# Delete all build products *except* the program file.
+.PHONY: mostly-clean
+mostly-clean:: _basic_clean
+	$(call remove_folder,$(DEPDIR))
+	$(call remove_folder,$(BUILDDIR))
+
+# Delete all build products that are files (do not delete directories).
+.PHONY: clean
+clean:: _basic_clean
+	-rm -f $(PROGRAM_NAME)
+
+# Delete all build products.
 .PHONY: distclean
 distclean:: clean
 	$(call remove_folder,$(DEPDIR))
 	$(call remove_folder,$(BUILDDIR))
 
-.PHONY: mostly-clean
-mostly-clean::
-	-rm -f $(OBJS) $(DEPS)
-	$(call remove_folder,$(DEPDIR))
-	$(call remove_folder,$(BUILDDIR))
-
+# Delete all build products, and delete symbol cross-reference files.
 .PHONY: maintainer-clean
 maintainer-clean:: distclean
-	-@rm -f tags
+	-@rm -f cscope.out tags TAGS
 
 
 # Prints the value of each environment variable and makefile variable
