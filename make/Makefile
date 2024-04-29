@@ -635,9 +635,24 @@ ifneq ($(wildcard dist.mk),)
 include dist.mk
 endif
 
+
+###########################################################################
 #
-# Clean-up
+#  Clean-up
 #
+###########################################################################
+
+# [Optional]  Create a makefile named `clean.mk' that provides
+# project-specific for one or more of these clean-up targets:
+#   * _basic_clean
+#   * mostly-clean
+#   * clean
+#   * distclean
+#   * maintainer-clean
+#
+ifneq ($(wildcard clean.mk),)
+include clean.mk
+endif
 
 # Clean-up tasks that are common to goals `mostly-clean' and `clean'.
 .PHONY: _basic_clean
@@ -668,6 +683,12 @@ distclean:: clean
 maintainer-clean:: distclean
 	-@rm -f cscope.out tags TAGS
 
+
+###########################################################################
+#
+#  Build Information
+#
+###########################################################################
 
 # Prints the value of each environment variable and makefile variable
 # (useful for debugging the makefile). These commands are also useful:
@@ -705,6 +726,12 @@ show-cc-info:
 show-cxx-info:
 	$(CXX) -v
 
+
+###########################################################################
+#
+#  Testing
+#
+###########################################################################
 
 # [Optional] If you want to perform "check" tasks after the PROGRAM_NAME
 # is built (e.g., unit testing), create in the current working directory a
