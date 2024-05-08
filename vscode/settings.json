@@ -65,8 +65,22 @@
     },
     "git.openRepositoryInParentFolders": "never",
     "rewrap.autoWrap.enabled": false,
+    "terminal.integrated.cwd": "${fileDirname}",
     "vim.disableExtension": true,
     "vim.textwidth": 75,
+    "[c][cpp]": {
+        "editor.wordWrap": "off"
+    },
+    "[html]": {
+        "editor.wordWrap": "on"
+    },
+    "[json]": {
+        "editor.wordWrap": "on"
+    },
+    "[markdown]": {
+        "editor.wordWrapColumn": 75,
+        "editor.wordWrap": "wordWrapColumn"
+    },
     "cSpell.words": [
         "cout",
         "endl",
