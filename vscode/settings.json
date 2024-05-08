@@ -1,6 +1,6 @@
 {
     "editor.rulers": [ 75 ],
-    "editor.wordWrap": "off",
+    "editor.wordWrap": "on",
     "files.associations": {
         "iostream": "cpp",
         "functional": "cpp",
@@ -66,5 +66,10 @@
     "git.openRepositoryInParentFolders": "never",
     "rewrap.autoWrap.enabled": false,
     "vim.disableExtension": true,
-    "vim.textwidth": 75
+    "vim.textwidth": 75,
+    "cSpell.words": [
+        "cout",
+        "endl",
+        "RAII"
+    ]
 }
