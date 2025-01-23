@@ -760,11 +760,26 @@ define remove_folder
 endef
 
 # REFERENCES
-# [1]  http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
-# [2]  https://stackoverflow.com/a/13375395
-# [3]  https://www.gnu.org/software/make/manual/make.html#Match_002dAnything-Rules
-# [4]  https://ftp.gnu.org/old-gnu/Manuals/make-3.79.1/html_chapter/make_10.html
-# [5]  https://stackoverflow.com/a/34983297/5051940
-# [6]  https://www.gnu.org/software/make/manual/html_node/Static-Usage.html#Static-Usage
-# [7]  https://www.gnu.org/software/make/manual/html_node/Empty-Recipes.html
+# [1]  P. D. Smith. "Auto-Dependency Generation." GNU Make: A Program for
+#      Directing Recompilation. Jul. 4, 2020. Accessed: Jan. 23, 2025.
+#      [Online]. Available:
+#      http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
+# [2]  M. Wiedenmann. "Default linker setting in Makefile for linking C++
+#      object files." Stack Overflow. Accessed: Jan. 23, 2025. [Online].
+#      Available: https://stackoverflow.com/a/13375395
+# [3]  "10.5.5 Match-Anything Pattern Rules." GNU make. 0.77 ed. Accessed:
+#      Jan. 23, 2025. [Online]. Available:
+#      https://www.gnu.org/software/make/manual/make.html#Match_002dAnything-Rules
+# [4]  "10 Using Implicit Rules." GNU make. 0.77 ed. Accessed: Jan. 23,
+#      2025. [Online]. Available:
+#      https://www.gnu.org/software/make/manual/make.html#Implicit-Rules
+# [5]  owler. "Make ignoring Prerequisite that doesn't exist." Stack
+#      Overflow. Mar. 16, 2016. Accessed: Jan. 23, 2025. [Online].
+#      Available: https://stackoverflow.com/a/34983297/5051940
+# [6]  "4.12.1 Syntax of Static Pattern Rules." GNU make. 0.77 ed.
+#      Accessed: Jan. 23, 2025. [Online]. Available:
+#      https://www.gnu.org/software/make/manual/html_node/Static-Usage.html#Static-Usage
+# [7]  "5.9 Using Empty Recipies." GNU make. 0.77 ed. Accessed: Jan. 23,
+#      2025. [Online]. Available:
+#      https://www.gnu.org/software/make/manual/html_node/Empty-Recipes.html
 #
