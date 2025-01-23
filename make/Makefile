@@ -626,7 +626,8 @@ endif
 # This should only be done on a release build (don't strip a debug build).
 #
 .PHONY: strip
-strip: ; $(STRIP) --strip-unneeded $(PROGRAM_NAME)
+strip: $(PROGRAM_NAME)
+	$(STRIP) --strip-unneeded $(PROGRAM_NAME)
 
 #
 # Make a distribution tarball file
