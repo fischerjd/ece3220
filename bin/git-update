@@ -17,21 +17,63 @@ set -eu
 declare -r ECHO=/usr/bin/echo
 declare -r GIT=/usr/bin/git
 
+#==========================================================================
+#  git_checkout_branch()
+#==========================================================================
+
+function git_checkout_branch()
+{
+    local branch_name=$1
+    local exit_value=0
+
+    if "${GIT}" show-ref --quiet refs/heads/${branch_name}; then
+        "${ECHO}" "Updating branch '${branch_name}'"
+        "$GIT" checkout "${branch_name}"
+    else
+        >&2 "${ECHO}" ":: NOTICE :: This Git repository does not have a local branch named '${branch_name}'."
+        >&2 "${ECHO}" "Skipping branch '${branch_name}'."
+        exit_value=1
+    fi
+    return $exit_value
+}
+
+
+#==========================================================================
+#  git_pull_branch()
+#==========================================================================
+
+function git_pull_branch()
+{
+    local branch_name=$1
+    if git_checkout_branch "${branch_name}"; then
+        "$GIT" pull
+    fi
+}
+
+
+#==========================================================================
+#  main()
+#==========================================================================
+
+# Save the name of the currently selected Git branch
+saved_git_branch_name=$("${GIT}" branch --show-current)
+
 if [[ $# -gt 0 ]]; then
     if [[ -d $1 ]]; then
-        # [Note 1: Use Bash's builtin `cd' and not /usr/bin/cd. --end note]
+        # [Note 1: Use the Bash shell's builtin command `cd' and not the
+        # program /usr/bin/cd. --end note]
         cd "$1"
     else
         >&2 "${ECHO}" ":: ERROR ::  Directory '$1' does not exist."
         exit 1
     fi
 fi
+
 "${ECHO}" -n "Updating folder: "
 pwd
 
-"$GIT" checkout develop
-"$GIT" pull
-"$GIT" checkout main
-"$GIT" pull
-"$GIT" checkout develop
+git_pull_branch "develop"
+git_pull_branch "main"
+
+git_checkout_branch "${saved_git_branch_name}"
 
