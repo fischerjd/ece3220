@@ -1,0 +1,194 @@
+#!/bin/bash
+# Copyright 2025 James D. Fischer
+#
+# <help_begin>
+# NAME
+#   make-vars - displays information about makefile variables
+#
+# SYNOPSIS
+#   make-vars [OPTIONS] [pattern [pattern [...]]]
+#   make-vars --help
+#
+# DESCRIPTION
+#   By default, make-vars invokes `make --print-data-base --dry-run', which
+#   produces a listing that provides
+#   * The rules, variable names, and variable values provided by the make
+#     program itself, and
+#   * The rules, variable names, and variable values that are defined via
+#     the local makefile.
+#
+#   The patterns are regular expression patterns.  If one or more patterns
+#   are specified, the patterns filter the output. 
+#
+# OPTIONS
+#   -f file, --file=file, --makefile=file
+#       Use `file' as the makefile.
+#
+#   -h, --help
+#       Prints this help message.
+#
+#   --Wundefined-variables
+#       Prints a listing of warnings about undefined variables, if any.
+#       No other output is produced.  This option is useful if you want to
+#       produce a listing of undefined variables and nothing else.
+#
+#   --Wno-undefined-variables
+#       By default, make-vars prints warnings about undefined variables in
+#       the makefile. This option silences those warnings.
+#
+# <help_end>
+#
+set -eu
+clear
+
+# shellcheck disable=SC1091
+
+#source /usr/local/libexec/eceugl-utils/trace
+
+## Program paths
+# [Note 1: Use Bash's builtin `cd' and not /usr/bin/cd. --end note]
+declare -r CAT=/usr/bin/cat
+declare -r ECHO=/usr/bin/echo
+declare -r GETOPT=/usr/bin/getopt
+declare -r GREP=/usr/bin/grep
+declare -r MAKE=/usr/bin/make
+declare -r PRINTF=/usr/bin/printf
+declare -r RM=/usr/bin/rm
+declare -r SED=/usr/bin/sed
+
+
+#==========================================================================
+# catch STDOUT STDERR cmd [args...]
+# Captures simultaneously into variables STDOUT and STDERR the output sent
+# to stdout and stderr, respectively, by the command `cmd'.
+#
+# I'm assuming the copyright holder for this code is the author of this
+# post on StackOverflow.com: https://stackoverflow.com/a/41069638/5051940
+#==========================================================================
+
+function catch()
+{
+set +e
+    eval "$({
+    __2="$(
+      { __1="$("${@:3}")"; } 2>&1;
+      ret=$?;
+      "${PRINTF}" '%q=%q\n' "$1" "$__1" >&2;
+      exit $ret
+      )"
+    ret=$?;
+    "${PRINTF}" '%s=%q\n' "$2" "$__2" >&2;
+    "${PRINTF}" 'return %q\n' "$ret" >&2;
+    } 2>&1 )";
+set -e
+}
+
+
+#==========================================================================
+# ParseTheCommandLine() "$@"
+#==========================================================================
+
+function ParseTheCommandLine()
+{
+    # Parameter values for `lopts' and `sopts'
+    # X   no operand
+    # X:  required operand--e.g., -X required_value, --ex=required_value
+    # X:: optional operand--e.g., -X  =OR=  -X value
+    local lopts="file: help makefile: Wundefined-variables Wno-undefined-variables"
+    local sopts="f: h"
+    local getopt_stdout
+    local getopt_stderr
+
+set +e
+    catch getopt_stdout getopt_stderr \
+        "${GETOPT}" -o "${sopts}" -l "${lopts}" -a -n$-1 -s bash -- "$@"
+    getopt_exit_code=$?
+set -e
+
+    if [[ "${getopt_exit_code}" -ne 0 ]]; then
+        >&2 "${ECHO}" "${getopt_stderr[@]}"
+        exit "${getopt_exit_code}"
+    fi
+
+    eval set -- "${getopt_stdout}"
+
+    while [[ $# -gt 0 ]]
+    do
+        case "$1" in
+            -f|--file|--makefile) cloMakefile=${2}; shift; ;;
+            -h|--help) cloHelp=true ;;
+            --Wundefined-variables) cloWarnUndefinedVariables=true ;;
+            --Wno-undefined-variables) cloNoWarnUndefinedVariables=true ;;
+            --) ;;
+            *) cloPatterns+=("$1") ;;
+        esac
+        shift
+    done
+}
+
+
+#==========================================================================
+#  main
+#==========================================================================
+
+cloHelp=false
+cloMakefile=
+cloPatterns=()
+cloNoWarnUndefinedVariables=false
+cloWarnUndefinedVariables=false
+
+ParseTheCommandLine "$@"
+
+if $cloHelp; then
+    "${SED}" -n -e '/help_begin/,/help_end/{ /help_begin/d; /help_end/q; s/#\( \)\?//; p }' "$0"
+    exit 0
+fi
+
+TMPFILE=$(/usr/bin/mktemp)
+trap '"${RM}" -f -- "${TMPFILE}"' EXIT
+
+make_flags=(
+    --warn-undefined-variables
+    --dry-run
+    --print-data-base
+    )
+if [ -n "$cloMakefile" ]; then
+    make_flags+=( --file="$cloMakefile" )
+fi
+set +e
+"${MAKE}" "${make_flags[@]}" >& "${TMPFILE}"
+set -e
+
+# Remove ANSI escape codes (e.g., color codes) in TMPFILE
+# References:
+# [1] https://unix.stackexchange.com/a/55547/121145
+# [2] https://stackoverflow.com/q/17998978/5051940
+#
+"${SED}" -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "${TMPFILE}"
+
+# If option --Wundefined-variables was used, ignore this section.
+if ! $cloWarnUndefinedVariables; then
+    if [ ${#cloPatterns[@]} -eq 0 ]; then
+        # Print everything
+        "${CAT}" "${TMPFILE}"
+    else
+        for pattern in "${cloPatterns[@]}"; do
+            "${ECHO}" -e "\n=========================================================================="
+            "${ECHO}" "PATTERN: |${pattern}|"
+            "${ECHO}" "---------------------------------------------------------------------------"
+            "${GREP}" --color "$pattern" "${TMPFILE}" || true
+        done
+    fi
+fi
+
+# If option --Wno-undefined-variables was used, ignore this section.
+if ! $cloNoWarnUndefinedVariables; then
+    "${ECHO}" -e "\n==========================================================================="
+    "${ECHO}" "UNDEFINED VARIABLES"
+    "${ECHO}" "---------------------------------------------------------------------------"
+    if ! "${GREP}" --color ' warning: undefined variable ' "${TMPFILE}"
+    then
+        "${ECHO}" "There are no undefined variables."
+    fi
+fi
+
