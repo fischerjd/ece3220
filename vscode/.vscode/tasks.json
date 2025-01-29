@@ -1,4 +1,12 @@
 {
+	// PURPOSE: Configurations for user-defined tasks (e.g., build).
+    // AFFECTS: Tasks
+    // MENU: Terminal
+	// 		 |-- Configure Tasks...
+	//       |-- Configure Default Build Task...
+	//       |-- Run Task...
+	//       `-- Run Build Task (Ctrl+Shift+B)
+	//
 	"version": "2.0.0",
 	"tasks": [
 		{
@@ -59,7 +67,7 @@
 				"isDefault": true
 			},
 			"options": {
-				"cwd": "${fileDirname}",
+				"cwd": "${workspaceFolder}",
 				"env": {}
 			},
 			"presentation": {
@@ -81,7 +89,7 @@
 			],
 			"group": "build",
 			"options": {
-				"cwd": "${fileDirname}",
+				"cwd": "${workspaceFolder}",
 				"env": {}
 			},
 			"presentation": {
@@ -103,7 +111,7 @@
 			],
 			"group": "build",
 			"options": {
-				"cwd": "${fileDirname}",
+				"cwd": "${workspaceFolder}",
 				"env": {}
 			},
 			"presentation": {
@@ -125,7 +133,7 @@
 			],
 			"group": "build",
 			"options": {
-				"cwd": "${fileDirname}",
+				"cwd": "${workspaceFolder}",
 				"env": {}
 			},
 			"presentation": {
@@ -147,7 +155,7 @@
 			],
 			"group": "build",
 			"options": {
-				"cwd": "${fileDirname}",
+				"cwd": "${workspaceFolder}",
 				"env": {}
 			},
 			"presentation": {
