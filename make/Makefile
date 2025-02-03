@@ -1,5 +1,5 @@
 # Makefile
-# Copyright 2019-2024 James D. Fischer
+# Copyright 2019-2025 James D. Fischer
 #
 # SYNOPSYS
 #   make {all|debug}
@@ -9,7 +9,7 @@
 #   make vars
 #
 # DESCRIPTION
-#   This Makeifle creates an executable program named `demo'. See also the
+#   This Makefile creates an executable program named `demo'. See also the
 #   variable `PROGRAM_NAME' at various places in this Makefile.
 #
 #   The default build goal is the target `all'.  By default, the `all'
@@ -104,9 +104,10 @@ include override.mk
 endif
 
 
-# BUILDDIR is the destination folder for all build products--e.g., object
-# code files (%.o), dependency files (%.Td, %.d), precompiled headers
-# (%.gch), etc.
+# The intermediate build products--e.g., object code files (%.o),
+# dependency files (%.Td, %.d), precompiled headers (%.gch), etc.--are
+# created within the BUILDDIR folder.  The program itself (PROGRAM_NAME) is
+# created within the current working directory.
 #
 BUILDDIR ?= build
 
@@ -197,8 +198,11 @@ HEADERS := \
 #         Specifies a custom name for the makefile rule's target, which in
 #         this case is $(BUILDDIR)%.o.
 #   -MMD
-#         List only user header files, not system headers, in the rule's
-#         file dependency list. (See also: -MD)
+#         List only this project's header files, and not system header
+#         files (e.g., standard C/C++ library header files), in the rule's
+#         file dependency list. (NB: To list this project's header files
+#         AND the system header files in this rule's dependency list, use
+#         the flag -MD instead of -MMD.)
 #   -MF file
 #         Stores the automatically-generated dependency rule in the
 #         specified file, which in this case is $(DEPDIR)%.d.
