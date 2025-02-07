@@ -16,15 +16,20 @@ the dollar sign when entering a command. --end note]
 should be your Mizzou single sign-on (SSO) pawprint; it is not the word
 `pawprint'.  --end note]
 
-[Note 4.  The file access permission on file `~/.ssh/config' must be 0600
-(i.e. `-rw-------') as shown below. --end note]
+[Note 4.  The file access permissions on file `~/.ssh/config' must be 0600
+(i.e. `-rw-------') as shown below.  If the file access permissions are not
+0600, use the `chmod' program to redefine that file's access permissions as
+shown below:
+
+$ chmod 0600 ~/.ssh/config
+
+--end note]
 
 ---------------------------------------------------------------------------
 $ cd ~/.ssh/
 
-$ cp ~/git/ece3220/ssh/config .
+$ install -m 0600 ~/git/ece3220/ssh/config ~/ssh/
 
-$ chmod 0600 config
 $ ls -l ~/.ssh/config
 -rw------- 1 pawprint pawprint 3475 Oct 22 15:50 /home/pawprint/.ssh/config
 

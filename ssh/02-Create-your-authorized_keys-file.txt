@@ -22,7 +22,7 @@ the dollar sign when entering a command. --end note]
 should be your Mizzou single sign-on (SSO) pawprint; it is not the word
 `pawprint'.  --end note]
 
-[Note 4.  The file access permission on file `~/.ssh/authorized_keys' must
+[Note 4.  The file access permissions on file `~/.ssh/authorized_keys' must
 be 0600 (i.e. `-rw-------') as shown below. --end note]
 
 ---------------------------------------------------------------------------
