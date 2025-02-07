@@ -5,28 +5,41 @@
 #
 
 # This is the ssh client configuration file.  See ssh_config(5) for more
-# :: IMPORTANT ::
-# As stated in 'man 5 ssh_config': "Since the first obtained value for each
-# parameter is used, more host-specific declarations should be given near the
-# beginning of the file, and general defaults at the end."
+# details.
 #
 # :: IMPORTANT ::
-# Older releases of Raspbian OS (e.g., Jessie) do not support modern SSH
-# protocols. To connect to hosts that use older versions of the Raspbian OS,
-# modify the SSH command line as described in Sang's blog post, "ssh handshake
-# is rejected with 'no mutual signature algorithm' error" [1]:
+# As stated in 'man 5 ssh_config': "Since the first obtained value for each
+# parameter is used, more host-specific declarations should be given near
+# the beginning of the file, and general defaults at the end."
+#
+# :: IMPORTANT ::
+# Older releases of Raspberry Pi OS (e.g., Jessie) do not support modern
+# SSH protocols. To connect to hosts that use older versions of the
+# Raspbian OS, modify the SSH command line as described in Sang's blog
+# post, "ssh handshake is rejected with 'no mutual signature algorithm'
+# error" [1]:
 #   $ ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' pi@EECSpi
-# Alternatively, use this config file to automatically supply those arguments
-# to the SSH command line.
+# Alternatively, use this config file to automatically supply those
+# arguments to the SSH command line.
+#
+# :: IMPORTANT ::
+# In this file, replace all instances of `__your_pawprint__' with your
+# actual pawprint.  For example, if your pawprint is `abc123', then:
+#   User __your_pawprint__  -->  User abc123
+# HINT: Use the stream editor program `sed' to replace all instances of the
+# string `__your_pawprint' with your pawprint (i.e., your user ID).  For
+# example, if your pawprint is `abc123', then,
+#   $ sed -i 's/__your_pawprint__/abc123/g' ~/.ssh/config
+#
 
 # Linux desktop PCs in Naka Hall 144
 # NB: Do not pass the local system's locale to the remote host [2].
 Host naka144-li-??
     HostName %h.engineering.missouri.edu
 Host naka144-li-?? 128.206.23.101 128.206.23.102 128.206.23.103 128.206.23.104 128.206.23.105 128.206.23.106 128.206.23.107 128.206.23.108 128.206.23.109 128.206.23.110 128.206.23.111 128.206.23.112 128.206.23.113 128.206.23.114 128.206.23.115 128.206.23.116 128.206.23.117 128.206.23.118
-    User fischerjd
+    User __your_pawprint__
     PreferredAuthentications publickey,password
-    IdentityFile ~/.ssh/mizzou/engr/naka144/id_ed25519
+    IdentityFile ~/.ssh/id_ed25519
     SendEnv -LC_* -LANG*
 
 # Raspberry Pis in Naka Hall 144
@@ -37,16 +50,15 @@ Host naka144-pi-?? 128.206.22.101 128.206.22.102 128.206.22.103 128.206.22.104 1
     User pi
     PreferredAuthentications publickey,password
     # PubkeyAcceptedKeyTypes +ssh-rsa
-    # IdentityFile ~/.ssh/mizzou/eecs/eecspi/id_rsa
-    IdentityFile ~/.ssh/mizzou/eecs/eecspi/id_ed25519
+    IdentityFile ~/.ssh/id_ed25519
     SendEnv -LC_* -LANG*
     ServerAliveInterval 180
 
 Host remoteapps-li.engineering.missouri.edu remoteapps-li remoteapps
     Hostname remoteapps-li.engineering.missouri.edu
-    User fischerjd
+    User __your_pawprint__
     PreferredAuthentications publickey,password
-    IdentityFile ~/.ssh/mizzou/engr/remoteapps-li/id_ed25519
+    IdentityFile ~/.ssh/id_ed25519
 
 # General defaults (<- put at the very end of this file)
 Host *
@@ -59,12 +71,12 @@ Host *
 
 # REFERENCES
 # [1]  T. Sang. "Method 2: offer the RSA algorithm to the server", ssh
-#      handshake is rejected with 'no mutual signature algorithm' error. Tran
-#      Sang Dev Blog. Jan. 6, 2022. Accessed: Oct. 5, 2022. [Online].
+#      handshake is rejected with 'no mutual signature algorithm' error.
+#      Tran Sang Dev Blog. Jan. 6, 2022. Accessed: Oct. 5, 2022. [Online].
 #      Available: https://transang.me/ssh-handshake-is-rejected-with-no-mutual-signature-algorithm-error/
 # [2]  T. Frenech, "How not to pass the locale through an ssh connection
-#      command," StackOverflow.com, Nov. 23, 2016. Accessed: Aug. 28, 2024. [Online]. Available:
-#      https://stackoverflow.com/a/63935109/5051940
+#      command," StackOverflow.com, Nov. 23, 2016. Accessed: Aug. 28, 2024.
+#      [Online]. Available: https://stackoverflow.com/a/63935109/5051940
 # [3]  P. Cahalan, "Bad Security 201 - Remote X Sessions over SSH", /Pat's
 #      Daily Grind/, July 9, 2007. Accessed: Aug. 28, 2024. [Online].
 #      Available: https://padraic2112.wordpress.com/2007/07/09/bad-security-201-remote-x-sessions-over-ssh/
