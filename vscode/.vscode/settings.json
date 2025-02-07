@@ -82,6 +82,8 @@
         "editor.wordWrap": "wordWrapColumn"
     },
     "cSpell.words": [
+        "cerr",
+        "cin",
         "cout",
         "endl",
         "RAII"
