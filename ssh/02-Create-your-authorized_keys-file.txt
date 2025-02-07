@@ -1,11 +1,13 @@
 Create Your `authorized_keys' File
 
-These instructions
-    * Create a file named `~/.ssh/authorized_keys', and
-    * Store the contents of your public SSH key file (i.e.,
-      ~/.ssh/id_ed25519.pub) within the `authorized_keys' file, and
-    * Configure the required file access permissions (0600) on the
-      `authorized_keys' file.
+These instructions perform the tasks listed below, and in the same order as
+shown here:
+    
+    * Creates a file named `~/.ssh/authorized_keys' if it doesn't yet exist.
+    * Sets the file access permission on file `authorized_keys' to the
+      required value of 0600 (i.e., -rw-------).
+    * Stores the contents of your public SSH key file `id_ed25519.pub'
+      in your `authorized_keys' file.
 
 [Note 1.  The commands shown below must be executed on the Linux computer
 that has your SSH key files.  If you have not yet created your SSH key
@@ -28,12 +30,20 @@ be 0600 (i.e. `-rw-------') as shown below. --end note]
 ---------------------------------------------------------------------------
 $ cd ~/.ssh/
 
-$ cat id_ed25519.pub >> authorized_keys
+# Create file `authorized_keys' if it doesn't yet exist.
+$ touch authorized_keys
 
-$ chmod 0600 authorized_keys
-
+# Set the required file access permission on file `authorized_keys'.
+$ chmod 0600 authorized_keys.
 $ ls -l authorized_keys 
 -rw------- 1 pawprint pawprint 130 Feb  7 00:14 authorized_keys
+
+# If your `authorized_keys' file does not yet contain a copy of your public
+# key `id_ed25519.pub', then store the contents of file `id_ed25519.pub' in
+# your `authorized_keys' file.
+$ fingerprint="$(cut -d " " -f2 id_ed25519.pub)"
+$ grep -q "$fingerprint" authorized_keys || cat id_ed25519.pub >> authorized_keys
+$ unset fingerprint
 
 ===========================================================================
 Copyright 2025 James D. Fischer
