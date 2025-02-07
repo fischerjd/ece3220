@@ -1,0 +1,33 @@
+Create Your SSH Configuration File
+
+[Note 1.  The commands shown below must be executed on the Linux computer
+that has your SSH key files.  If you have not yet created your SSH key
+files, follow the instructions in the files named
+    01-Create-your-SSH-key-files.txt
+    02-Create-your-authorized_keys-file.txt
+before you perform the instructions in this file. --end note]
+
+[Note 2.  The dollar sign '$' at the beginning of each command line is the
+Bash shell's command prompt.  The command line text appears to the right of
+the dollar sign--i.e., to the right of the command prompt '$'. Do not type
+the dollar sign when entering a command. --end note]
+
+[Note 3.  In the examples below, wherever you see the word `pawprint', this
+should be your Mizzou single sign-on (SSO) pawprint; it is not the word
+`pawprint'.  --end note]
+
+[Note 4.  The file access permission on file `~/.ssh/config' must be 0600
+(i.e. `-rw-------') as shown below. --end note]
+
+---------------------------------------------------------------------------
+$ cd ~/.ssh/
+
+$ cp ~/git/ece3220/ssh/config .
+
+$ chmod 0600 config
+$ ls -l ~/.ssh/config
+-rw------- 1 pawprint pawprint 3475 Oct 22 15:50 /home/pawprint/.ssh/config
+
+===========================================================================
+Copyright 2025 James D. Fischer
+

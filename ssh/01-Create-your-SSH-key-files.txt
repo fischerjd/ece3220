@@ -1,0 +1,100 @@
+Create Your Secure Shell (SSH) Key Files
+
+[Note 1.  The commands shown below must be executed on a Linux computer.
+--end note]
+
+[Note 2.  The dollar sign '$' at the beginning of each command line is the
+Bash shell's command prompt.  The command line text appears to the right of
+the dollar sign--i.e., to the right of the command prompt '$'. Do not type
+the dollar sign when entering a command. --end note]
+
+[Note 3.  In the examples below, wherever you see the word `pawprint', this
+should be your Mizzou single sign-on (SSO) pawprint; it is not the word
+`pawprint'.  --end note]
+
+[Note 4.  On the `ssh-keygen' command line, the option '-C' must be an
+uppercase C, not a lowercase 'c'. --end note]
+
+[Note 5.  When the `ssh-keygen' program prompts you to "Enter [the name of
+the] file in which to save the key," press the keyboard's ENTER key to use
+the default file name and file path, i.e., ~/.ssh/id_ed25519. --end note]
+
+[Note 6.  When the `ssh-keygen' program prompts you to "Enter [a]
+passphrase for [your private key] '/home/pawprint/.ssh/id_ed25519'," enter
+an easy-to-remember passphrase for the private key, and then press the
+ENTER key. --end note]
+
+---------------------------------------------------------------------------
+$ ssh-keygen -t ed25519 -a 100 -C "$USER@umsystem.edu"
+Generating public/private ed25519 key pair.
+
+Enter file in which to save the key (/home/pawprint/.ssh/id_ed25519): 
+
+Enter passphrase for "/home/pawprint/.ssh/id_ed25519" (empty for no passphrase): 
+Enter same passphrase again: 
+
+Your identification has been saved in /home/pawprint/.ssh/id_ed25519
+Your public key has been saved in /home/pawprint/.ssh/id_ed25519.pub
+The key fingerprint is:
+SHA256:78rYSUVSMHSzuw0WysBTf/Rw+Gh65cRo4WIPDliHOHY pawprint@umsystem.edu
+The key's randomart image is:
++--[ED25519 256]--+
+|       o=o+ o..  |
+|     .+.E=.+o+   |
+|     .+=..=..*.  |
+|      .+.+++* =  |
+|        S+=B +   |
+|         +o+o .  |
+|        . o..    |
+|       = o       |
+|      . =..      |
++----[SHA256]-----+
+
+
+===========================================================================
+Verify the access permissions on folder ~/.ssh/:
+---------------------------------------------------------------------------
+$ ls -l -d ~/.ssh/
+drwx------ 4 pawprint pawprint 4096 Feb  5 13:08 /home/pawprint/.ssh/
+
+
+[Note 1.  The access permissions on folder `~/.ssh/' must be `drwx------'
+as shown above. If the access permissions on your `~/.ssh/' folder are
+different from this, use the `chmod' program to redefine that folder's
+access permissions as shown below:
+
+$ chmod 0700 ~/.ssh/
+
+--end note]
+
+
+===========================================================================
+Verify the access permissions on your SSH key files
+---------------------------------------------------------------------------
+$ ls -l ~/.ssh/id_ed25519*
+-rw------- 1 pawprint pawprint 509 Feb  5 13:08 /home/pawprint/.ssh/id_ed25519
+-rw-r--r-- 1 pawprint pawprint 130 Feb  5 13:08 /home/pawprint/.ssh/id_ed25519.pub
+
+
+[Note 1.  Your PRIVATE key file is `~/.ssh/id_ed25519'.  DO NOT SHARE YOUR
+PRIVATE KEY FILE WITH OTHERS.  The file access permissions on your PRIVATE
+key file must be `-rw-------' as shown above.  If the access permissions
+are different from this, use the `chmod' program to redefine that file's
+access permissions as shown below:
+
+$ chmod 0600 ~/.ssh/id_ed25519
+
+--end note]
+
+[Note 2.  Your PUBLIC key file is `~/.ssh/id_ed25519.pub'.  The file access
+permissions on your PUBLIC key file should be `-rw-r--r--' as shown above.
+If the access permissions are different from this, use the `chmod' program
+to redefine that file's access permissions as shown below:
+
+$ chmod 0644 ~/.ssh/id_ed25519.pub
+
+--end note]
+
+===========================================================================
+Copyright 2025 James D. Fischer
+
