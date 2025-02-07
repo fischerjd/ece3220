@@ -26,10 +26,9 @@
 # In this file, replace all instances of `__your_pawprint__' with your
 # actual pawprint.  For example, if your pawprint is `abc123', then:
 #   User __your_pawprint__  -->  User abc123
-# HINT: Use the stream editor program `sed' to replace all instances of the
-# string `__your_pawprint' with your pawprint (i.e., your user ID).  For
-# example, if your pawprint is `abc123', then,
-#   $ sed -i 's/__your_pawprint__/abc123/g' ~/.ssh/config
+# HINT: The stream editor program `sed' can automatically make these
+# changes for you.  For example, if your pawprint is `abc123', then:
+#   $ USER='abc123' sed -i.bak -E "s/User[ \t]+__your_pawprint__/User $USER/g" ~/.ssh/config
 #
 
 # Linux desktop PCs in Naka Hall 144
@@ -80,5 +79,4 @@ Host *
 # [3]  P. Cahalan, "Bad Security 201 - Remote X Sessions over SSH", /Pat's
 #      Daily Grind/, July 9, 2007. Accessed: Aug. 28, 2024. [Online].
 #      Available: https://padraic2112.wordpress.com/2007/07/09/bad-security-201-remote-x-sessions-over-ssh/
-
 
