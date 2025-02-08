@@ -16,14 +16,8 @@ the dollar sign when entering a command. --end note]
 should be your Mizzou single sign-on (SSO) pawprint; it is not the word
 `pawprint'.  --end note]
 
-[Note 4.  The file access permissions on file `~/.ssh/config' must be 0600
-(i.e. `-rw-------') as shown below.  If the file access permissions are not
-0600, use the `chmod' program to redefine that file's access permissions as
-shown below:
-
-$ chmod 0600 ~/.ssh/config
-
---end note]
+[Note 4.  The file access permissions on file `~/.ssh/config' must be
+`-rw-------' (0600) as shown in the instructions below. --end note]
 
 ---------------------------------------------------------------------------
 $ cd ~/.ssh/
@@ -33,12 +27,25 @@ $ install -m 0600 ~/git/ece3220/ssh/config ~/.ssh/
 $ ls -l ~/.ssh/config
 -rw------- 1 pawprint pawprint 3475 Oct 22 15:50 /home/pawprint/.ssh/config
 
-# Within file `config', replace all instances of "User __your_pawprint__"
-# with "User pawprint', where `pawprint' is your actual pawprint.  As an
-# example, if your pawprint is `abc123', then:
+# PAWPRINT
+# The command line shown below creates a Bash shell environment variable
+# named `PAWPRINT', and it initializes the variable's value as `abc123'.
+# When you define the environment variable `PAWPRINT', enter your own
+# pawprint as the variable's value; do not use the example pawprint value
+# `abc123'.
+
 $ PAWPRINT='abc123'
+
+
+# Use the stream editor program `sed' to replace all instances of
+#   User __your_pawprint__
+# in your `config' file with
+#   User $PAWPRINT
+# Note that the Bash shell replaces the expression `$PAWPRINT' with the
+# value that is stored in the PAWPRINT environment variable, which is your
+# Mizzou pawprint.
+
 $ sed -i.bak -E "s/User[ \t]+__your_pawprint__/User $PAWPRINT/g" ~/.ssh/config
-$ unset PAWPRINT
 
 ===========================================================================
 Copyright 2025 James D. Fischer
