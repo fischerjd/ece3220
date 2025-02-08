@@ -42,7 +42,7 @@ $ ls -l authorized_keys
 # key `id_ed25519.pub', then store the contents of file `id_ed25519.pub' in
 # your `authorized_keys' file.
 $ fingerprint="$(cut -d " " -f2 id_ed25519.pub)"
-$ grep -q "$fingerprint" authorized_keys || cat id_ed25519.pub >> authorized_keys
+$ grep -q "$fingerprint" authorized_keys 2>/dev/null || cat id_ed25519.pub >> authorized_keys
 $ unset fingerprint
 
 ===========================================================================
