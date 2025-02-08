@@ -22,14 +22,6 @@
 # Alternatively, use this config file to automatically supply those
 # arguments to the SSH command line.
 #
-# :: IMPORTANT ::
-# In this file, replace all instances of `__your_pawprint__' with your
-# actual pawprint.  For example, if your pawprint is `abc123', then:
-#   User __your_pawprint__  -->  User abc123
-# HINT: The stream editor program `sed' can automatically make these
-# changes for you.  For example, if your pawprint is `abc123', then:
-#   $ USER='abc123' sed -i.bak -E "s/User[ \t]+__your_pawprint__/User $USER/g" ~/.ssh/config
-#
 
 # Linux desktop PCs in Naka Hall 144
 # NB: Do not pass the local system's locale to the remote host [2].
