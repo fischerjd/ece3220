@@ -1,0 +1,173 @@
+#!/bin/bash
+# error_exit - print formatted error message and exit with non-zero status
+# Copyright 2018-2025 James D. Fischer
+# See also: README and COPYING in this project's top-level folder.
+# File: ece3220.git/bin/error_exit
+#--------------------------------------------------------------------------
+set -eu
+shopt -s inherit_errexit
+
+# shellcheck disable=SC2034,SC2155
+readonly SCRIPTNAME=$( basename "$0" )
+# shellcheck disable=SC2034,SC2155
+readonly SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
+# Programs
+readonly BASENAME=/usr/bin/basename
+readonly CAT=/usr/bin/cat
+readonly CUT=/usr/bin/cut
+readonly GETOPT=/usr/bin/getopt
+readonly PRINTF=/usr/bin/printf
+readonly TR=/usr/bin/tr
+readonly TTY=/usr/bin/tty
+readonly XHOST=/usr/bin/xhost
+readonly ZENITY=/usr/bin/zenity
+
+# Character constants
+readonly NEWLINE=$'\n'
+
+
+#==========================================================================
+# catch STDOUT STDERR cmd [args...]
+# Captures simultaneously into variables STDOUT and STDERR the output sent
+# to stdout and stderr, respectively, by the command `cmd'.
+#
+# I'm assuming the copyright holder for this code is the author of this
+# post on StackOverflow.com: https://stackoverflow.com/a/41069638/5051940
+#==========================================================================
+
+function catch()
+{
+set +e
+    eval "$({
+    __2="$(
+      { __1="$("${@:3}")"; } 2>&1;
+      ret=$?;
+      "${PRINTF}" '%q=%q\n' "$1" "$__1" >&2;
+      exit $ret
+      )"
+    ret=$?;
+    "${PRINTF}" '%s=%q\n' "$2" "$__2" >&2;
+    "${PRINTF}" 'return %q\n' "$ret" >&2;
+    } 2>&1 )";
+set -e
+}
+
+
+#==========================================================================
+# ParseTheCommandLine() "$@"
+#==========================================================================
+
+function ParseTheCommandLine()
+{
+    # Parameter values for `lopts' and `sopts'
+    # X   no operand
+    # X:  required operand--e.g., -X required_value, --ex=required_value
+    # X:: optional operand--e.g., -X  =OR=  -X value
+    local lopts='error-app: error-message: error-summary: exit-code: quiet'
+    local sopts='a: m: s: x: q'
+    local getopt_exit_code
+    local getopt_stdout
+    local getopt_stderr
+
+set +e
+    catch getopt_stdout getopt_stderr \
+        "${GETOPT}" -o "${sopts}" -l "${lopts}" -a -n$-1 -s bash -- "$@"
+    getopt_exit_code=$?
+set -e
+
+    if [[ "${getopt_exit_code}" -ne 0 ]]; then
+        >&2 echo "${getopt_stderr[@]}"
+        exit "${getopt_exit_code}"
+    fi
+
+    eval set -- "${getopt_stdout}"
+
+    while [[ $# -gt 0 ]]
+    do
+        case "$1" in
+            -a|--error-app) cloErrorApp=${2}; shift ;;
+            -m|--error-message) cloErrorMessage=${2}; shift ;;
+            -q|--quiet) cloQuiet=$1 ;;
+            -s|--error-summary) cloErrorSummary=$2; shift ;;
+            -x|--exit-code) cloExitCode=$2; shift ;;
+            --) break ;;
+            *) : ;;     # unsupported -Y options
+        esac
+        shift
+    done
+}
+
+
+#==========================================================================
+#  main()
+#==========================================================================
+
+#--------------------------------------------------------------------------
+#  Parse the command line
+#--------------------------------------------------------------------------
+
+# Automatic detection of the calling (error app) script's name.
+error_app_path=$( "${CAT}" /proc/$PPID/cmdline | "${TR}" '\000' ' ' | "${CUT}" -d ' ' -f 2 )
+cloErrorApp="$( "${BASENAME}" "${error_app_path}" )"
+
+cloErrorSummary='Unknown Error'
+cloErrorMessage=
+cloExitCode=1
+cloQuiet=
+
+ParseTheCommandLine "$@"
+
+
+#--------------------------------------------------------------------------
+#  In the error message string, replace '<br>' with newline.
+#--------------------------------------------------------------------------
+
+cloErrorMessage=${cloErrorMessage//<[bB][rR]>/${NEWLINE}}
+
+
+#--------------------------------------------------------------------------
+#  Display the error message
+#--------------------------------------------------------------------------
+
+ERROR_BANNER="::  ERROR  (${cloErrorApp})  ::"
+
+# For a console TTY, use "compact" formatting for the error summary and
+# error message:
+#   ::  ERROR  (rpi-checkup)  ::                           << banner
+#   Check if the Raspberry Pi is 'UP'                      << error summary
+#   No response from the device at '192.168.1.3:22 (TCP)'. << error message
+#
+# Otherwise, assume the error text is being deisplayed on GUI dialog, in
+# which case it's visually beneficial to insert a blank line between the
+# error summary and the error message.
+#
+if "${TTY}" -s
+then
+    errorTextLineBreak="${NEWLINE}"
+else
+    errorTextLineBreak="${NEWLINE}${NEWLINE}"
+fi
+ERROR_TEXT="${cloErrorSummary}${errorTextLineBreak}${cloErrorMessage}${NEWLINE}"
+
+# If the -q|--quiet flag is present, then suppress all output. Otherwise,
+# if this script is invoked within a TTY (a console window), display the
+# error message to the TTY via stderr.  If this script is invoked within an
+# X environment, use zenity to display a GUI diglog box that displays the
+# error message. Otherwise, simply return a non-zero exit status.
+if [ -z "${cloQuiet:+x}" ]
+then
+    if "${TTY}" -s
+    then
+        "${CAT}" << ERROR_MSG_EOF >&2
+
+${ERROR_BANNER}
+${ERROR_TEXT}
+ERROR_MSG_EOF
+    elif "${XHOST}" >& /dev/null
+    then
+        "${ZENITY}" --info --title="${ERROR_BANNER}" --width=500 --height=100 --text="${ERROR_TEXT}" >& /dev/null
+    fi
+fi
+
+exit "$cloExitCode"

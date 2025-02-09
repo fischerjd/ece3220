@@ -1,0 +1,331 @@
+#!/usr/bin/env bash
+# SYNOPSIS
+#   ssh-setup [OPTION] [pawprint]
+# 
+# OPTIONS
+#   -e, --employee
+#       The syntax rules for students' pawprints are different from the
+#       syntax rules for employees' pawprints.  By default, ssh-setup
+#       validates pawprint strings in accordance with the syntax rules for
+#       students' pawprints.  If this option is used, ssh-setup validates
+#       pawprint strings in accordance with the syntax rules for employees.
+#
+#   -i identity_file
+#       Selects a file from which the identity (private key) for public key
+#       authentication is read.  See the description of the '-i' option in
+#       the ssh(1) manual.
+#
+set -eu
+
+source /usr/local/libexec/eceugl-utils/trace
+
+# Programs
+readonly BASENAME=/usr/bin/basename
+readonly CAT=/usr/bin/cat
+readonly CHMOD=/usr/bin/chmod
+readonly CUT=/usr/bin/cut
+readonly DIRNAME=/usr/bin/dirname
+readonly GETOPT=/usr/bin/getopt
+readonly GREP=/usr/bin/grep
+readonly INSTALL=/usr/bin/install
+readonly PRINTF=/usr/bin/printf
+readonly SED=/usr/bin/sed
+readonly SSH_KEYGEN=/usr/bin/ssh-keygen
+readonly TOUCH=/usr/bin/touch
+
+# shellcheck disable=SC2034,SC2155
+readonly SCRIPTNAME=$( "${BASENAME}" "$0" )
+# shellcheck disable=SC2034,SC2155
+readonly SCRIPTPATH="$( cd "$("${DIRNAME}" "$0")" ; pwd -P )"
+
+# Libraries
+readonly ERROR_EXIT="${SCRIPTPATH}/error_exit"
+
+# Exit status codes
+declare -ri EXIT_STATUS__SUCCESS=0
+declare -ri EXIT_STATUS__INVALID_PAWPRINT=1
+declare -ri EXIT_STATUS__SSH_PUBLIC_KEY_NOT_FOUND=2
+
+
+#==========================================================================
+# catch STDOUT STDERR cmd [args...]
+# Captures simultaneously into variables STDOUT and STDERR the output sent
+# to stdout and stderr, respectively, by the command `cmd'.
+#
+# I'm assuming the copyright holder for this code is the author of this
+# post on StackOverflow.com: https://stackoverflow.com/a/41069638/5051940
+#==========================================================================
+
+function catch()
+{
+set +e
+    eval "$({
+    __2="$(
+      { __1="$("${@:3}")"; } 2>&1;
+      ret=$?;
+      "${PRINTF}" '%q=%q\n' "$1" "$__1" >&2;
+      exit $ret
+      )"
+    ret=$?;
+    "${PRINTF}" '%s=%q\n' "$2" "$__2" >&2;
+    "${PRINTF}" 'return %q\n' "$ret" >&2;
+    } 2>&1 )";
+set -e
+}
+
+
+#==========================================================================
+# parse_the_command_line() "$@"
+#==========================================================================
+
+function parse_the_command_line()
+{
+    # Parameter values for `lopts' and `sopts'
+    # X   no operand
+    # X:  required operand--e.g., -X required_value, --ex=required_value
+    # X:: optional operand--e.g., -X  =OR=  -X value
+    local lopts="employee"
+    local sopts="e i:"
+    local getopt_stdout
+    local getopt_stderr
+
+set +e
+    catch getopt_stdout getopt_stderr \
+        "${GETOPT}" -o "${sopts}" -l "${lopts}" -a -n$-1 -s bash -- "$@"
+    getopt_exit_code=$?
+set -e
+
+    if [[ "$getopt_exit_code" -ne 0 ]]; then
+        "${ERROR_EXIT}" --error-summary='getopt error' \
+            --error-message="${getopt_stderr}" \
+            --exit-code="${getopt_exit_code}"
+    fi
+
+    eval set -- "${getopt_stdout}"
+
+    while [[ $# -gt 0 ]]
+    do
+        case "$1" in
+            -e|--employee) cloUserCategory='employee' ;;
+            -i) cloSshIdentityFile=${2}; shift ;;
+            --) if [[ $# -ge 2 ]]; then cloPawprint=${2}; shift; fi ;;
+            *) : ;; # unsupported options
+        esac
+        shift
+    done
+}
+
+
+#==========================================================================
+#  create_authorized_keys_file "ssh_private_identity_file_path"
+#==========================================================================
+
+function create_authorized_keys_file()
+{
+    local -r ssh_public_identity_file_path="${1}.pub"
+    local -r authorized_keys_file_dir="$HOME/.ssh"
+    local -r authorized_keys_file_path="${authorized_keys_file_dir}/authorized_keys"
+    local public_key_fingerprint
+
+    # CHECK: Ensure the public SSH identity file exists as a regular file,
+    # and it is readable.
+    if ! [ -f "${ssh_public_identity_file_path}" ]; then
+        "${ERROR_EXIT}" \
+            -a "${SCRIPTNAME}" \
+            -s "Task: ${FUNCNAME[0]}" \
+            -m "The public SSH identity file '${ssh_public_identity_file_path}' does not exist." \
+            -x $EXIT_STATUS__SSH_PUBLIC_KEY_NOT_FOUND
+    elif ! [ -r "${ssh_public_identity_file_path}" ]; then
+        "${ERROR_EXIT}" \
+            -a "${SCRIPTNAME}" \
+            -s "Task: ${FUNCNAME[0]}" \
+            -m "The public SSH identity file '${ssh_public_identity_file_path}' is not readable." \
+            -x $EXIT_STATUS__SSH_PUBLIC_KEY_NOT_FOUND
+    fi
+
+    # Create the 'authorized_keys' file if it doesn't yet exist.
+    if ! [ -d "${authorized_keys_file_dir}" ]; then
+        "${INSTALL}" -m 0700 -d "${authorized_keys_file_dir}"
+    fi
+    if ! [ -f "${authorized_keys_file_path}" ]; then
+        "${TOUCH}" "${authorized_keys_file_path}"
+    fi
+    "${CHMOD}" 0600 "${authorized_keys_file_path}"
+
+    # Ensure the 'authorized_keys' file contains a copy of the public SSH
+    # identity.
+    public_key_fingerprint="$( "${CUT}" -d " " -f2 "${ssh_public_identity_file_path}" )"
+    if ! "${GREP}" -q "${public_key_fingerprint}" "${authorized_keys_file_path}" 2>/dev/null
+    then
+        "${CAT}" "${ssh_public_identity_file_path}" >> "${authorized_keys_file_path}"
+    fi
+}
+
+
+#==========================================================================
+#  create_ssh_config_file "pawprint"
+#==========================================================================
+
+function create_ssh_config_file()
+{
+    local -r pawprint="${1}"
+    local -r user_ssh_config_file_path="$HOME/.ssh/config"
+    local -r git_repo_ssh_config_file_path="${SCRIPTPATH}/../ssh/config"
+
+    # If this user does not yet have an SSH config file, install the 
+    # template SSH config file that's provided with this Git repository.
+    if ! [ -f "$user_ssh_config_file_path" ]; then
+        "${INSTALL}" -m 0600 "${git_repo_ssh_config_file_path}" "${user_ssh_config_file_path}"
+
+        # In the newly installed SSH config file, replace all instances of 
+        #   User __your_pawprint__
+        # with
+        #   User $pawprint
+        "${SED}" -i.bak -E "s/User[ \t]+__your_pawprint__/User $pawprint/g" "${user_ssh_config_file_path}"
+    else
+        >&2 echo -e "\n:: NOTE :: Using the existing SSH configuration file '${user_ssh_config_file_path}'."
+        >&2 echo -e "(This script does not modify or replace your existing SSH configuration file.)"
+    fi
+}
+
+
+#==========================================================================
+#  create_ssh_identity_file "pawprint" "$cloSshIdentityFile"
+#==========================================================================
+
+function create_ssh_identity_file()
+{
+    local -r pawprint="$1"
+    local -r ssh_private_identity_file_path="${2:-$HOME/.ssh/id_ed25519}"
+    local key_dir
+
+    # CHECK: Does this user already have a private SSH identity file?
+    if [ -f "$ssh_private_identity_file_path" ]; then
+        # The private SSH identity file exists: use that file.
+        >&2 echo -e "\n:: NOTE :: You already have a private SSH identity file '${ssh_private_identity_file_path}'."
+        >&2 echo -e "(This script does not modify or replace your existing SSH key files.)"
+    else
+        # Generate a new ED25519 public/private key pair
+        key_dir="$( "${DIRNAME}" "${ssh_private_identity_file_path}" )"
+        [ -d "$key_dir" ] || "${INSTALL}" -m 0700 -d "${key_dir}"
+        "${SSH_KEYGEN}" -t ed25519 -a 100 -C "${pawprint}@umsystem.edu" -f "${ssh_private_identity_file_path}"
+    fi
+
+    echo "$ssh_private_identity_file_path"
+}
+
+
+#==========================================================================
+#  validate_employee_pawprint_format()
+#==========================================================================
+
+function validate_employee_pawprint_format()
+{
+    local pawprint="$1"
+    local exit_status=1
+
+    if [[ "$pawprint" =~ ^[a-z]{3,}$ ]]; then
+        exit_status=0
+    fi
+
+    if (( exit_status != 0 )); then
+        >&2 cat << MESSAGE_EOF
+
+:: INVALID EMPLOYEE PAWPRINT ::
+An employee's pawprint string must satisfy these requirements:
+* The pawprint must contain only lowercase alpha characters [a-z].
+* The string length must be at least three characters.
+MESSAGE_EOF
+    fi
+
+    return $exit_status
+}
+
+
+#==========================================================================
+#  validate_student_pawprint_format()
+#==========================================================================
+
+function validate_student_pawprint_format()
+{
+    local pawprint="$1"
+    local az_char_count=0
+    local exit_status=1
+
+    if [[ "$pawprint" =~ ^[a-z][0-9a-z]{4,5}$ ]]; then
+        for (( i=0; i<${#pawprint}; ++i )); do
+            if [[ "${pawprint:i:1}" =~ [a-z] ]]; then
+                (( ++az_char_count ))
+            fi
+        done
+        if (( az_char_count >= 3 )); then
+            exit_status=0
+        fi
+    fi
+
+    if (( exit_status != 0 )); then
+        >&2 cat << MESSAGE_EOF
+
+:: INVALID STUDENT PAWPRINT ::
+A student's pawprint string must satisfy these requirements:
+* The first letter must be a lowercase alpha character [a-z].
+* The pawprint must contain only lowercase alpha characters [a-z] and digits [0-9].
+* The pawprint must contain at least three lowercase alpha characters [a-z].
+* The pawprint length must be either five or six characters.
+MESSAGE_EOF
+    fi
+
+    return $exit_status
+}
+
+
+#==========================================================================
+#  main()
+#==========================================================================
+
+#--------------------------------------------------------------------------
+#  Parse the command line
+#--------------------------------------------------------------------------
+
+cloUserCategory=student
+cloPawprint=
+cloSshIdentityFile=
+
+parse_the_command_line "$@"
+
+#--------------------------------------------------------------------------
+#  Obtain and validate the user's pawprint
+#--------------------------------------------------------------------------
+
+if [ -n "${cloPawprint}" ]; then
+    pawprint=$cloPawprint
+else
+    echo -n -e "\nPlease enter your Mizzou pawprint (not your email address)\n> "
+    read pawprint
+fi
+
+case $cloUserCategory in
+    student) 
+        if ! validate_student_pawprint_format "${pawprint}"; then
+            exit $EXIT_STATUS__INVALID_PAWPRINT
+        fi
+        ;;
+
+    employee)
+        if ! validate_employee_pawprint_format "${pawprint}"; then
+            exit $EXIT_STATUS__INVALID_PAWPRINT
+        fi
+        ;;
+
+    *) >&2 echo ":: ERROR :: Invalid value for variable 'cloUserCategory'; aborting..."
+        exit $EXIT_STATUS__INVALID_PAWPRINT
+        ;;
+esac
+
+#--------------------------------------------------------------------------
+#  SSH Setup Engine
+#--------------------------------------------------------------------------
+
+ssh_private_identity_file_path=$( create_ssh_identity_file "$pawprint" "$cloSshIdentityFile" )
+create_authorized_keys_file "$ssh_private_identity_file_path"
+create_ssh_config_file "$pawprint"
