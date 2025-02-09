@@ -17,7 +17,12 @@
 #
 set -eu
 
-source /usr/local/libexec/eceugl-utils/trace
+if [ -r /usr/local/libexec/eceugl-utils/trace ]; then
+    source /usr/local/libexec/eceugl-utils/trace
+elif [ -r "$HOME/libexec/eceugl-utils/trace" ]; then
+    source "$HOME/libexec/eceugl-utils/trace"
+fi
+
 
 # Programs
 readonly BASENAME=/usr/bin/basename
@@ -45,6 +50,9 @@ readonly ERROR_EXIT="${SCRIPTPATH}/error_exit"
 declare -ri EXIT_STATUS__SUCCESS=0
 declare -ri EXIT_STATUS__INVALID_PAWPRINT=1
 declare -ri EXIT_STATUS__SSH_PUBLIC_KEY_NOT_FOUND=2
+
+# Global variables
+g_ssh_private_identity_file_path=
 
 
 #==========================================================================
@@ -75,7 +83,19 @@ set -e
 
 
 #==========================================================================
-# parse_the_command_line() "$@"
+# Function: parse_the_command_line
+#
+# Description:
+#   
+# Parameters:
+#   "$@": Zero or more command line arguments
+#   
+# Modifies Global Variables:
+#   * cloUserCategory (CLI options: -e, --employee)
+#   * cloSshIdentityFile (CLI option: -i)
+#
+# Returns
+#   None.
 #==========================================================================
 
 function parse_the_command_line()
@@ -117,15 +137,29 @@ set -e
 
 
 #==========================================================================
-#  create_authorized_keys_file "ssh_private_identity_file_path"
+# Function: configure_authorized_keys_file
+#
+# Description:
+#
+# Parameters:
+#   $1 ssh_public_identity_file_path (string, required): The canonical path
+#           to the user's public SSH identity key file.
+#
+# Modifies Global Variables: None.
+#
+# Creates/Modifies File(s): ~/.ssh/authorized_keys
+#
+# Returns: None.
 #==========================================================================
 
-function create_authorized_keys_file()
+function configure_authorized_keys_file()
 {
     local -r ssh_public_identity_file_path="${1}.pub"
     local -r authorized_keys_file_dir="$HOME/.ssh"
     local -r authorized_keys_file_path="${authorized_keys_file_dir}/authorized_keys"
     local public_key_fingerprint
+
+    print_configure_task_banner "Configuring Your Authorized Keys File '~/.ssh/authorized_keys'"
 
     # CHECK: Ensure the public SSH identity file exists as a regular file,
     # and it is readable.
@@ -158,19 +192,41 @@ function create_authorized_keys_file()
     if ! "${GREP}" -q "${public_key_fingerprint}" "${authorized_keys_file_path}" 2>/dev/null
     then
         "${CAT}" "${ssh_public_identity_file_path}" >> "${authorized_keys_file_path}"
+    else
+        print_horizontal_rule '-'
+        cat << NOTICE_EOF
+:: NOTICE :: Nothing to do.
+Your SSH folder already contains an 'authorized_keys' file.
+File path: ${authorized_keys_file_path}
+And, your public SSH identity ('${ssh_public_identity_file_path}')
+already exists in your SSH authorized keys file.
+NOTICE_EOF
     fi
 }
 
 
 #==========================================================================
-#  create_ssh_config_file "pawprint"
+# Function: configure_ssh_config_file
+#
+# Description:
+#
+# Parameters:
+#   $1 pawprint (string, required): The user's pawprint value.
+#
+# Modifies Global Variables: None.
+#
+# Creates/Modifies Files: ~/.ssh/config
+#
+# Returns: None.
 #==========================================================================
 
-function create_ssh_config_file()
+function configure_ssh_config_file()
 {
     local -r pawprint="${1}"
     local -r user_ssh_config_file_path="$HOME/.ssh/config"
     local -r git_repo_ssh_config_file_path="${SCRIPTPATH}/../ssh/config"
+
+    print_configure_task_banner "Configuing Your SSH Configuration File '~/.ssh/config'"
 
     # If this user does not yet have an SSH config file, install the 
     # template SSH config file that's provided with this Git repository.
@@ -183,46 +239,149 @@ function create_ssh_config_file()
         #   User $pawprint
         "${SED}" -i.bak -E "s/User[ \t]+__your_pawprint__/User $pawprint/g" "${user_ssh_config_file_path}"
     else
-        >&2 echo -e "\n:: NOTE :: Using the existing SSH configuration file '${user_ssh_config_file_path}'."
-        >&2 echo -e "(This script does not modify or replace your existing SSH configuration file.)"
+        print_horizontal_rule '-'
+        cat << NOTICE_EOF
+:: NOTICE :: Nothing to do.
+Your SSH folder already contains an SSH configuration file.
+File path: ${user_ssh_config_file_path}
+This script does not modify or replace your existing configuration file.
+NOTICE_EOF
     fi
 }
 
 
 #==========================================================================
-#  create_ssh_identity_file "pawprint" "$cloSshIdentityFile"
+# Function: configure_ssh_identity_file
+#
+# Description:
+#
+# Parameters:
+#   $1 pawprint (string, required): The user's pawprint value.
+#   $2 ssh_private_identity_file_path (string, required): The canonical
+#           path to the user's private SSH identity key file.
+#
+# Modifies Global Variables:
+#   * g_ssh_private_identity_file_path (string): The canonical path to the
+#           user's private SSH identity key file.
+#
+# Creates Files:
+#   The following files are created if they do not yet exist:
+#   * ~/.ssh/id_ed25519 (private key)
+#   * ~/.ssh/id_ed25519.pub (public key)
+#
+# Returns: None.
 #==========================================================================
 
-function create_ssh_identity_file()
+function configure_ssh_identity_file()
 {
     local -r pawprint="$1"
     local -r ssh_private_identity_file_path="${2:-$HOME/.ssh/id_ed25519}"
     local key_dir
 
+    print_configure_task_banner "Configuring Your SSH Identity (ED25519 Key Pair)" "true"
+
     # CHECK: Does this user already have a private SSH identity file?
     if [ -f "$ssh_private_identity_file_path" ]; then
         # The private SSH identity file exists: use that file.
-        >&2 echo -e "\n:: NOTE :: You already have a private SSH identity file '${ssh_private_identity_file_path}'."
-        >&2 echo -e "(This script does not modify or replace your existing SSH key files.)"
+        print_horizontal_rule '-'
+        cat << NOTICE_EOF
+:: NOTICE :: Nothing to do.
+You already have a private SSH identity file.
+File path: ${ssh_private_identity_file_path}
+This script does not modify or replace your existing SSH identity files.
+NOTICE_EOF
     else
         # Generate a new ED25519 public/private key pair
+        print_horizontal_rule '-'
+        cat << INSTRUCTIONS_EOF
+Invoking 'ssh-keygen' to create a new SSH identity (an ED25519 key pair).
+You will be prompted to enter a passphrase for your private ED25519 key.
+Enter a passphrase you can easily remember.
+INSTRUCTIONS_EOF
+        print_horizontal_rule '-'
         key_dir="$( "${DIRNAME}" "${ssh_private_identity_file_path}" )"
         [ -d "$key_dir" ] || "${INSTALL}" -m 0700 -d "${key_dir}"
         "${SSH_KEYGEN}" -t ed25519 -a 100 -C "${pawprint}@umsystem.edu" -f "${ssh_private_identity_file_path}"
     fi
 
-    echo "$ssh_private_identity_file_path"
+    g_ssh_private_identity_file_path="$ssh_private_identity_file_path"
 }
 
 
 #==========================================================================
-#  validate_employee_pawprint_format()
+# Function: print_configure_task_banner
+#
+# Description:
+#
+# Parameters:
+#   $1 section_heading_text (string, required):
+#
+# Returns:
+#   None.
+#==========================================================================
+
+function print_configure_task_banner()
+{
+    local -r section_heading_text="$1"
+    print_horizontal_rule '='
+    echo "  $section_heading_text"
+}
+
+
+#==========================================================================
+# Function: print_horizontal_rule
+#
+# Description:
+#
+# Parameters:
+#   $1 rule_character (character, optional):
+#   $2 rule_length (integer, optional): (default: 75)
+#
+# Returns:
+#   None.
+#==========================================================================
+
+function print_horizontal_rule()
+{
+    local -r rule_character="${1:-'-'}"
+    local -r rule_length=${2:-75}
+    local -i i
+    local horizontal_rule
+
+    horizontal_rule=
+    for (( i=0; i<rule_length; ++i )); do
+        horizontal_rule+="$rule_character"
+    done
+    if [ -n "$horizontal_rule" ]; then
+        echo "$horizontal_rule"
+    fi
+}
+
+
+#==========================================================================
+# Function: validate_employee_pawprint_format
+#
+# Description:
+#
+# Parameters:
+#   $1 pawprint (string, required): The employee's pawprint string.
+#
+# Modifies Global Variables: None.
+#
+# Creates/Modifies Files: None.
+#
+# Prints:
+#   (required): If the pawprint string is invalid, prints an error message.
+#
+# Returns:
+#   0: Success
+#   $EXIT_STATUS__INVALID_PAWPRINT: Invalid pawprint.
 #==========================================================================
 
 function validate_employee_pawprint_format()
 {
     local pawprint="$1"
-    local exit_status=1
+    local -i exit_status=$EXIT_STATUS__INVALID_PAWPRINT
 
     if [[ "$pawprint" =~ ^[a-z]{3,}$ ]]; then
         exit_status=0
@@ -243,7 +402,23 @@ MESSAGE_EOF
 
 
 #==========================================================================
-#  validate_student_pawprint_format()
+# Function: validate_student_pawprint_format
+#
+# Description:
+#
+# Parameters:
+#   $1 pawprint (string, required): The student's pawprint string.
+#
+# Modifies Global Variables: None.
+#
+# Creates/Modifies Files: None.
+#
+# Prints:
+#   (required): If the pawprint string is invalid, prints an error message.
+#
+# Returns:
+#   0: Success
+#   $EXIT_STATUS__INVALID_PAWPRINT: Invalid pawprint.
 #==========================================================================
 
 function validate_student_pawprint_format()
@@ -326,6 +501,13 @@ esac
 #  SSH Setup Engine
 #--------------------------------------------------------------------------
 
-ssh_private_identity_file_path=$( create_ssh_identity_file "$pawprint" "$cloSshIdentityFile" )
-create_authorized_keys_file "$ssh_private_identity_file_path"
-create_ssh_config_file "$pawprint"
+configure_ssh_identity_file "$pawprint" "$cloSshIdentityFile"
+configure_authorized_keys_file "$g_ssh_private_identity_file_path"
+configure_ssh_config_file "$pawprint"
+
+#--------------------------------------------------------------------------
+#  Done!
+#--------------------------------------------------------------------------
+
+print_horizontal_rule '='
+echo "Success!"
