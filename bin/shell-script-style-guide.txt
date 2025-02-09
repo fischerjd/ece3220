@@ -1,0 +1,98 @@
+Shell Script Style Guide
+Copyright 2025 James D. Fischer
+
+
+Google AI generated the two code samples shown below in response to
+questions I asked it.  Those questions are shown in the heading banners.
+
+
+# ========================================================================
+# Question: shell script functions how to document parameters
+# ========================================================================
+
+# Function: greet
+#
+# Description: Greets a user with a personalized message.
+#
+# Parameters:
+#   $1 (name): The name of the user to greet.
+#   $2 (greeting): The greeting message to use (optional, defaults to "Hello").
+#
+# Returns:
+#   None. Prints the greeting message to standard output.
+greet() {
+  local name="$1"
+  local greeting="${2:-Hello}" # Use default if $2 is not provided
+
+  echo "$greeting, $name!"
+}
+
+greet "Alice" "Good morning" # Output: Good morning, Alice!
+greet "Bob" # Output: Hello, Bob!
+
+
+# ========================================================================
+# Question: shell script functions how to document optional parameters
+# ========================================================================
+
+ # Function to process data
+ # Parameters:
+ #   - $1 (required): Input data
+ #   - $2 (optional): Processing mode (default: "standard")
+ process_data() {
+  data="$1"
+  mode="${2:-standard}" # Use default if $2 is empty or unset
+
+  # Function logic using data and mode
+  echo "Processing data: $data with mode: $mode"
+ }
+
+ # Example calls
+ process_data "input1" "advanced"
+ process_data "input2"
+
+
+# ========================================================================
+# Question: shell script function how to document a parameter's data type
+# ========================================================================
+
+#!/bin/bash
+
+# Function: process_data
+# Description: Processes data based on the given parameters.
+# Parameters:
+#   1: file_path (string, required) - Path to the input data file.
+#   2: num_lines (integer, optional, default=10) - Number of lines to process.
+#   3: output_format (string, optional, values: "csv", "json") - Format for the output data.
+# Returns: None
+
+process_data() {
+  local file_path="$1"
+  local num_lines="${2:-10}" # Default value if not provided
+  local output_format="${3:-csv}"
+
+  # Validate parameters (optional)
+  if [[ ! -f "$file_path" ]]; then
+    echo "Error: Invalid file path: $file_path"
+    return 1
+  fi
+
+  if ! [[ "$num_lines" =~ ^[0-9]+$ ]]; then
+    echo "Error: Invalid number of lines: $num_lines"
+    return 1
+  fi
+  
+  if [[ "$output_format" != "csv" && "$output_format" != "json" ]]; then
+      echo "Error: Invalid output format: $output_format"
+      return 1
+  fi
+
+  # Function logic using parameters
+  head -n "$num_lines" "$file_path" |
+  # process data here...
+  
+  echo "Processing data from $file_path, $num_lines lines, output format: $output_format"
+}
+
+# Example usage
+process_data "data.txt" 20 "json"
