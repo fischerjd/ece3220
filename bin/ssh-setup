@@ -138,7 +138,7 @@ set -e
 
 
 #==========================================================================
-# Function: configure_this_authorized_keys_file
+# Function: configure_the_authorized_keys_file
 #
 # Description: Configures the user's '~/.ssh/authorized_keys' file.  If the
 # file doesn't yet exist, it is created.  The file's access permissions are
@@ -158,7 +158,7 @@ set -e
 # Returns: None.
 #==========================================================================
 
-function configure_this_authorized_keys_file()
+function configure_the_authorized_keys_file()
 {
     local -r ssh_public_identity_file_path="${1}.pub"
     local -r authorized_keys_file_dir="$HOME/.ssh"
@@ -186,6 +186,13 @@ function configure_this_authorized_keys_file()
     # Create the 'authorized_keys' file if it doesn't yet exist.
     if ! [ -f "${authorized_keys_file_path}" ]; then
         "${TOUCH}" "${authorized_keys_file_path}"
+    else
+        print_horizontal_rule '-'
+        cat << NOTICE_EOF
+:: NOTICE :: Nothing to do.
+Your SSH folder already contains an 'authorized_keys' file.
+File path: ${authorized_keys_file_path}
+NOTICE_EOF
     fi
     "${CHMOD}" 0600 "${authorized_keys_file_path}"
 
@@ -199,17 +206,17 @@ function configure_this_authorized_keys_file()
         print_horizontal_rule '-'
         cat << NOTICE_EOF
 :: NOTICE :: Nothing to do.
-Your SSH folder already contains an 'authorized_keys' file.
-File path: ${authorized_keys_file_path}
-And, your public SSH identity ('${ssh_public_identity_file_path}')
-already exists in your SSH authorized keys file.
+Your public SSH identity (a.k.a., your 'public key') already exists in your
+SSH authorized keys file.
+File path (public key): ${ssh_public_identity_file_path} 
+File path (authorized_keys): ${authorized_keys_file_path}
 NOTICE_EOF
     fi
 }
 
 
 #==========================================================================
-# Function: configure_this_ssh_config_file
+# Function: configure_the_ssh_config_file
 #
 # Description: Configures the user's ssh configuration file.  If the file
 # doesn't yet exist, it is created from the template configuration file
@@ -227,7 +234,7 @@ NOTICE_EOF
 # Returns: None.
 #==========================================================================
 
-function configure_this_ssh_config_file()
+function configure_the_ssh_config_file()
 {
     local -r pawprint="${1}"
     local -r user_ssh_config_file_path="$HOME/.ssh/config"
@@ -244,21 +251,21 @@ function configure_this_ssh_config_file()
         #   User __your_pawprint__
         # with
         #   User $pawprint
-        "${SED}" -i.bak -E "s/User[ \t]+__your_pawprint__/User $pawprint/g" "${user_ssh_config_file_path}"
+        "${SED}" -i -E "s/User[ \t]+__your_pawprint__/User $pawprint/g" "${user_ssh_config_file_path}"
     else
         print_horizontal_rule '-'
         cat << NOTICE_EOF
 :: NOTICE :: Nothing to do.
-Your SSH folder already contains an SSH configuration file.
+Your SSH folder already contains an SSH configuration file.  This script
+does not modify or replace your existing SSH configuration file.
 File path: ${user_ssh_config_file_path}
-This script does not modify or replace your existing configuration file.
 NOTICE_EOF
     fi
 }
 
 
 #==========================================================================
-# Function: create_this_users_ssh_identity
+# Function: create_an_ssh_identity
 #
 # Description: If this user does not yet have an ED25519-based SSH
 # identity, this script creates one.
@@ -280,13 +287,13 @@ NOTICE_EOF
 # Returns: None.
 #==========================================================================
 
-function create_this_users_ssh_identity()
+function create_an_ssh_identity()
 {
     local -r pawprint="$1"
     local -r ssh_private_identity_file_path="${2:-$HOME/.ssh/id_ed25519}"
     local key_dir
 
-    print_configure_task_banner "Configuring Your SSH Identity (ED25519 Key Pair)" "true"
+    print_configure_task_banner "Creating Your SSH Identity (ED25519 Key Pair)" "true"
 
     # CHECK: Does this user already have a private SSH identity file?
     if [ -f "$ssh_private_identity_file_path" ]; then
@@ -294,9 +301,9 @@ function create_this_users_ssh_identity()
         print_horizontal_rule '-'
         cat << NOTICE_EOF
 :: NOTICE :: Nothing to do.
-You already have a private SSH identity file.
-File path: ${ssh_private_identity_file_path}
+You already have a private SSH identity file (a.k.a., a 'private key').
 This script does not modify or replace your existing SSH identity files.
+File path (private key): ${ssh_private_identity_file_path}
 NOTICE_EOF
     else
         # Generate a new ED25519 public/private key pair
@@ -317,7 +324,7 @@ INSTRUCTIONS_EOF
 
 
 #==========================================================================
-# Function: configure_this_users_ssh_folder
+# Function: configure_the_ssh_folder
 #
 # Description: Configures this user's SSH folder by (a) creating the folder
 # if it doesn't yet exist, and (b) ensuring the folder's file access
@@ -334,7 +341,7 @@ INSTRUCTIONS_EOF
 # Returns: None.
 #==========================================================================
 
-function configure_this_users_ssh_folder()
+function configure_the_ssh_folder()
 {
     print_configure_task_banner "Configuring Your SSH directory"
 
@@ -348,6 +355,7 @@ function configure_this_users_ssh_folder()
         # permissions are set to 0700 (drwx------), as recommended in the
         # SSH manual; see ssh(1).
         "${CHMOD}" 0700 "$HOME/.ssh/"
+    fi
 }
 
 
@@ -551,17 +559,18 @@ case $cloUserCategory in
 esac
 
 #--------------------------------------------------------------------------
-#  SSH Setup Engine
+#  Create an SSH configuration for the currently logged on user.
+#  [Note: The tasks performed below do not modify the host computer's SSH
+#  settings. --end note]
 #--------------------------------------------------------------------------
 
-configure_this_users_ssh_folder
-create_this_users_ssh_identity "$pawprint" "$cloSshIdentityFile"
-configure_this_authorized_keys_file "$g_ssh_private_identity_file_path"
-configure_this_ssh_config_file "$pawprint"
+configure_the_ssh_folder
+create_an_ssh_identity "$pawprint" "$cloSshIdentityFile"
+configure_the_authorized_keys_file "$g_ssh_private_identity_file_path"
+configure_the_ssh_config_file "$pawprint"
 
 #--------------------------------------------------------------------------
 #  Done!
 #--------------------------------------------------------------------------
 
-print_horizontal_rule '='
-echo "Success!"
+print_configure_task_banner "Success!"
