@@ -1,26 +1,62 @@
 #!/usr/bin/env bash
+# Copyright 2025 James D. Fischer
+#
+# <help_begin>
+#
 # SYNOPSIS
-#   ssh-setup [OPTION] [pawprint]
+#   ssh-setup [option]... [pawprint]
 # 
+# DESCRIPTION
+#   This script automates various tasks that are typically performed when
+#   setting up a user's SSH configuration for the first time.  The
+#   following tasks are performed, and in the same order as shown here:
+#       (1) If the user does not yet have a folder named '.ssh' in their
+#           HOME directory, that folder is created.  The script sets that
+#           folder's access permissions to 0700 (drwx------), as
+#           recommended in ssh(1).
+#       (2) If the user does not yet have an ED25519-based SSH identity,
+#           an ED25519 identity is created.
+#       (3) If the user does not yet have an authorized_keys file (i.e.,
+#           ~/.ssh/authorized_keys), that file is created.  The script sets
+#           that file's access permissions to 0600 (-rw-------) as recom-
+#           mended in ssh(1).
+#       (4) If the user does not yet have an SSH configuration file
+#           (~/.ssh/config), the script creates that file from a template
+#           configuration file (provided in this Git repository). The
+#           script sets that file's access permissions to 0600 (-rw-------)
+#           as recommended in ssh(1).
+#   If any of the SSH configuration elements mentioned above exists prior
+#   to invoking this script, this script does not delete or replace those
+#   elements.  This script does, however, set the file access permissions
+#   on those elements to the permissions recommended in ssh(1).
+#
+#   If the user does not provide their pawprint on the command line, the
+#   script prompts them to enter their pawprint. [Note: The user should
+#   enter their pawprint, not their email address. --end note]  This script
+#   performs verification checks on the user's pawprint value before
+#   accepting the pawprint value.
+#
 # OPTIONS
 #   -e, --employee
 #       The syntax rules for students' pawprints are different from the
 #       syntax rules for employees' pawprints.  By default, ssh-setup
 #       validates pawprint strings in accordance with the syntax rules for
-#       students' pawprints.  If this option is used, ssh-setup validates
+#       students' pawprints.  When this option is used, ssh-setup validates
 #       pawprint strings in accordance with the syntax rules for employees.
 #
 #   -i identity_file
 #       Selects a file from which the identity (private key) for public key
-#       authentication is read.  See the description of the '-i' option in
-#       the ssh(1) manual.
+#       authentication is read.  See the description of option '-i' in the
+#       ssh(1) manual.
+#
+# <help_end>
 #
 set -eu
 
 if [ -r /usr/local/libexec/eceugl-utils/trace ]; then
     source /usr/local/libexec/eceugl-utils/trace
-elif [ -r "$HOME/libexec/eceugl-utils/trace" ]; then
-    source "$HOME/libexec/eceugl-utils/trace"
+elif [ -r "$HOME/.local/libexec/eceugl-utils/trace" ]; then
+    source "$HOME/.local/libexec/eceugl-utils/trace"
 fi
 
 
@@ -105,8 +141,8 @@ function parse_the_command_line()
     # X   no operand
     # X:  required operand--e.g., -X required_value, --ex=required_value
     # X:: optional operand--e.g., -X  =OR=  -X value
-    local lopts="employee"
-    local sopts="e i:"
+    local lopts="employee help"
+    local sopts="e h i:"
     local getopt_stdout
     local getopt_stderr
 
@@ -128,6 +164,7 @@ set -e
     do
         case "$1" in
             -e|--employee) cloUserCategory='employee' ;;
+            -h|--help) cloHelp=true ;;
             -i) cloSshIdentityFile=${2}; shift ;;
             --) if [[ $# -ge 2 ]]; then cloPawprint=${2}; shift; fi ;;
             *) : ;; # unsupported options
@@ -523,11 +560,21 @@ MESSAGE_EOF
 #  Parse the command line
 #--------------------------------------------------------------------------
 
-cloUserCategory=student
+cloHelp=false
 cloPawprint=
 cloSshIdentityFile=
+cloUserCategory=student
 
 parse_the_command_line "$@"
+
+#--------------------------------------------------------------------------
+#  If the user asked for help, display the help information and quit.
+#--------------------------------------------------------------------------
+
+if $cloHelp; then
+    "${SED}" -n -e '/help_begin/,/help_end/{ /help_begin/d; /help_end/q; s/#\( \)\?//; p }' "$0"
+    exit 0
+fi
 
 #--------------------------------------------------------------------------
 #  Obtain and validate the user's pawprint
