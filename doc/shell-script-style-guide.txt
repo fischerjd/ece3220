@@ -2,8 +2,8 @@ Shell Script Style Guide
 Copyright 2025 James D. Fischer
 
 
-Google AI generated the two code samples shown below in response to
-questions I asked it.  Those questions are shown in the heading banners.
+Google AI generated the code samples shown below in response to questions I
+asked it.  Those questions I asked are shown in the heading banners.
 
 
 # ========================================================================
