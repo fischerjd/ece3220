@@ -60,7 +60,7 @@ g_ssh_private_identity_file_path=
 # Captures simultaneously into variables STDOUT and STDERR the output sent
 # to stdout and stderr, respectively, by the command `cmd'.
 #
-# I'm assuming the copyright holder for this code is the author of this
+# I'm assuming the copyright holder for this function is the author of this
 # post on StackOverflow.com: https://stackoverflow.com/a/41069638/5051940
 #==========================================================================
 
@@ -85,10 +85,11 @@ set -e
 #==========================================================================
 # Function: parse_the_command_line
 #
-# Description:
+# Description: This script parses the arguments, if any, that are present
+# on the command line that invokes this script.
 #   
 # Parameters:
-#   "$@": Zero or more command line arguments
+#   "$@": The set of zero or more command line arguments
 #   
 # Modifies Global Variables:
 #   * cloUserCategory (CLI options: -e, --employee)
@@ -137,9 +138,13 @@ set -e
 
 
 #==========================================================================
-# Function: configure_authorized_keys_file
+# Function: configure_this_authorized_keys_file
 #
-# Description:
+# Description: Configures the user's '~/.ssh/authorized_keys' file.  If the
+# file doesn't yet exist, it is created.  The file's access permissions are
+# set to 0600 (-rwx------) as recommended in the "FILES" section of ssh(1).
+# If the user's 'authorized_keys' file does not contain a copy of the
+# user's public SSH identity key, that key is added into the file.
 #
 # Parameters:
 #   $1 ssh_public_identity_file_path (string, required): The canonical path
@@ -147,12 +152,13 @@ set -e
 #
 # Modifies Global Variables: None.
 #
-# Creates/Modifies File(s): ~/.ssh/authorized_keys
+# Creates/Modifies File(s): 
+#   * ~/.ssh/authorized_keys
 #
 # Returns: None.
 #==========================================================================
 
-function configure_authorized_keys_file()
+function configure_this_authorized_keys_file()
 {
     local -r ssh_public_identity_file_path="${1}.pub"
     local -r authorized_keys_file_dir="$HOME/.ssh"
@@ -178,9 +184,6 @@ function configure_authorized_keys_file()
     fi
 
     # Create the 'authorized_keys' file if it doesn't yet exist.
-    if ! [ -d "${authorized_keys_file_dir}" ]; then
-        "${INSTALL}" -m 0700 -d "${authorized_keys_file_dir}"
-    fi
     if ! [ -f "${authorized_keys_file_path}" ]; then
         "${TOUCH}" "${authorized_keys_file_path}"
     fi
@@ -206,9 +209,13 @@ NOTICE_EOF
 
 
 #==========================================================================
-# Function: configure_ssh_config_file
+# Function: configure_this_ssh_config_file
 #
-# Description:
+# Description: Configures the user's ssh configuration file.  If the file
+# doesn't yet exist, it is created from the template configuration file
+# that's provided with this git repository (ece3220.git/ssh/config).  The
+# files access permissions on the user's SSH configuration file are set to
+# 0600 (-rwx------), as recommended in the "FILES" section of ssh(1).
 #
 # Parameters:
 #   $1 pawprint (string, required): The user's pawprint value.
@@ -220,7 +227,7 @@ NOTICE_EOF
 # Returns: None.
 #==========================================================================
 
-function configure_ssh_config_file()
+function configure_this_ssh_config_file()
 {
     local -r pawprint="${1}"
     local -r user_ssh_config_file_path="$HOME/.ssh/config"
@@ -251,9 +258,10 @@ NOTICE_EOF
 
 
 #==========================================================================
-# Function: configure_ssh_identity_file
+# Function: create_this_users_ssh_identity
 #
-# Description:
+# Description: If this user does not yet have an ED25519-based SSH
+# identity, this script creates one.
 #
 # Parameters:
 #   $1 pawprint (string, required): The user's pawprint value.
@@ -265,14 +273,14 @@ NOTICE_EOF
 #           user's private SSH identity key file.
 #
 # Creates Files:
-#   The following files are created if they do not yet exist:
-#   * ~/.ssh/id_ed25519 (private key)
+#   If these files do not yet exist, they are created:
+#   * ~/.ssh/id_ed25519     (private key)
 #   * ~/.ssh/id_ed25519.pub (public key)
 #
 # Returns: None.
 #==========================================================================
 
-function configure_ssh_identity_file()
+function create_this_users_ssh_identity()
 {
     local -r pawprint="$1"
     local -r ssh_private_identity_file_path="${2:-$HOME/.ssh/id_ed25519}"
@@ -309,9 +317,45 @@ INSTRUCTIONS_EOF
 
 
 #==========================================================================
+# Function: configure_this_users_ssh_folder
+#
+# Description: Configures this user's SSH folder by (a) creating the folder
+# if it doesn't yet exist, and (b) ensuring the folder's file access
+# permissions are set to the recommended value of 0700 (drwx------) (see
+# the "FILES" section in ssh(1).)
+#
+# Parameters: None.
+#
+# Modifies Global Variables: None.
+#
+# Creates/Modifies Files:
+#    * ~/.ssh/
+#
+# Returns: None.
+#==========================================================================
+
+function configure_this_users_ssh_folder()
+{
+    print_configure_task_banner "Configuring Your SSH directory"
+
+    # Create folder ~/.ssh/ if it doesn't exist, and set its access
+    # permissions to 0700 (drwx------) as recommended in the SSH manual;
+    # see ssh(1).
+    if ! [ -d "$HOME/.ssh/" ]; then
+        "${INSTALL}" -m 0700 -d "$HOME/.ssh"
+    else
+        # Folder '~/.ssh/' already exists.  Ensure this folder's access
+        # permissions are set to 0700 (drwx------), as recommended in the
+        # SSH manual; see ssh(1).
+        "${CHMOD}" 0700 "$HOME/.ssh/"
+}
+
+
+#==========================================================================
 # Function: print_configure_task_banner
 #
-# Description:
+# Description: Prints a thick horizontal rule, and on the next line a
+# summary description of the task that's about to be performed.
 #
 # Parameters:
 #   $1 section_heading_text (string, required):
@@ -331,7 +375,7 @@ function print_configure_task_banner()
 #==========================================================================
 # Function: print_horizontal_rule
 #
-# Description:
+# Description: Prints a horizontal rule (a line) to stdout.
 #
 # Parameters:
 #   $1 rule_character (character, optional):
@@ -361,7 +405,9 @@ function print_horizontal_rule()
 #==========================================================================
 # Function: validate_employee_pawprint_format
 #
-# Description:
+# Description: Validates an employee's pawprint value.  The pawprint must
+# contain only lowercase alpha characters, and must be a minimum of three
+# characters in length.
 #
 # Parameters:
 #   $1 pawprint (string, required): The employee's pawprint string.
@@ -404,7 +450,14 @@ MESSAGE_EOF
 #==========================================================================
 # Function: validate_student_pawprint_format
 #
-# Description:
+# Description: Validates a student's pawprint value.  A student's pawprint
+# string must satisfy these requirements:
+#  * The first letter must be a lowercase alpha character [a-z].
+#  * The pawprint string must contain only lowercase alpha characters [a-z]
+#    and digits [0-9].
+#  * The pawprint string must contain at least three lowercase alpha
+#    characters [a-z].
+#  * The pawprint length must be either five or six characters.
 #
 # Parameters:
 #   $1 pawprint (string, required): The student's pawprint string.
@@ -501,9 +554,10 @@ esac
 #  SSH Setup Engine
 #--------------------------------------------------------------------------
 
-configure_ssh_identity_file "$pawprint" "$cloSshIdentityFile"
-configure_authorized_keys_file "$g_ssh_private_identity_file_path"
-configure_ssh_config_file "$pawprint"
+configure_this_users_ssh_folder
+create_this_users_ssh_identity "$pawprint" "$cloSshIdentityFile"
+configure_this_authorized_keys_file "$g_ssh_private_identity_file_path"
+configure_this_ssh_config_file "$pawprint"
 
 #--------------------------------------------------------------------------
 #  Done!
