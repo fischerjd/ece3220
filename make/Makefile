@@ -571,6 +571,11 @@ $(BUILDDIR)%.o: %.cpp $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
 	$(COMPILE.cpp) $(CPPFLAGS.d) $(OUTPUT_OPTION) $<
 	$(POSTCOMPILE)
 
+%.o: %.cxx
+$(BUILDDIR)%.o: %.cxx $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
+	$(COMPILE.cxx) $(CPPFLAGS.d) $(OUTPUT_OPTION) $<
+	$(POSTCOMPILE)
+
 
 # Create the build directory if it doesn't exist.
 $(BUILDDIR): ; @mkdir -p $@ >/dev/null
@@ -597,7 +602,7 @@ $(DEPDIR): ; @mkdir -p $@ >/dev/null
 # compiler invocation that creates an object code file %.o, 
 #
 #   $ gcc -MMD -c main.c
-#   ; main.c -> (cpp)--> (gcc)--> main.o
+#   ; main.c -> (cpp)--> main.i -> (cc1)--> main.s -> (as) --> main.o
 #   ;                `-> main.d
 #   $ cat main.d
 #   main.o: main.c hello.h world.h
