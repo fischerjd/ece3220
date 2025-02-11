@@ -21,6 +21,11 @@
 #   are specified, the patterns filter the output. 
 #
 # OPTIONS
+#   -d, --defaults
+#       The printed listing shows the default values for make's built-in
+#       variables and rules, ignoring any environment variables that might
+#       affect make's output, and ignoring any user-defined makefile(s).
+#
 #   -f file, --file=file, --makefile=file
 #       Use `file' as the makefile.
 #
@@ -43,14 +48,15 @@ clear
 
 # shellcheck disable=SC1091
 
-#source /usr/local/libexec/eceugl-utils/trace
+source /usr/local/libexec/eceugl-utils/trace
 
 ## Program paths
 # [Note 1: Use Bash's builtin `cd' and not /usr/bin/cd. --end note]
 declare -r CAT=/usr/bin/cat
-declare -r ECHO=/usr/bin/echo
+declare -r ENV=/usr/bin/env
 declare -r GETOPT=/usr/bin/getopt
 declare -r GREP=/usr/bin/grep
+declare -r LESS_PAGER=/usr/bin/less
 declare -r MAKE=/usr/bin/make
 declare -r PRINTF=/usr/bin/printf
 declare -r RM=/usr/bin/rm
@@ -94,8 +100,8 @@ function ParseTheCommandLine()
     # X   no operand
     # X:  required operand--e.g., -X required_value, --ex=required_value
     # X:: optional operand--e.g., -X  =OR=  -X value
-    local lopts="file: help makefile: Wundefined-variables Wno-undefined-variables"
-    local sopts="f: h"
+    local lopts="defaults file: help makefile: Wundefined-variables Wno-undefined-variables"
+    local sopts="d f: h"
     local getopt_stdout
     local getopt_stderr
 
@@ -106,7 +112,7 @@ set +e
 set -e
 
     if [[ "${getopt_exit_code}" -ne 0 ]]; then
-        >&2 "${ECHO}" "${getopt_stderr[@]}"
+        >&2 echo "${getopt_stderr[@]}"
         exit "${getopt_exit_code}"
     fi
 
@@ -115,6 +121,7 @@ set -e
     while [[ $# -gt 0 ]]
     do
         case "$1" in
+            -d|--defaults) cloDefaults=true ;;
             -f|--file|--makefile) cloMakefile=${2}; shift; ;;
             -h|--help) cloHelp=true ;;
             --Wundefined-variables) cloWarnUndefinedVariables=true ;;
@@ -128,6 +135,61 @@ set -e
 
 
 #==========================================================================
+# Function: print_banner
+#
+# Description:
+#   Prints a thick horizontal rule, followed on the next line by the
+#   batter_title text, followed on the next line by a thin horizontal rule.
+#
+# Parameters:
+#   $1 banner_title (string, required): The banner's title string
+#
+# Modifies Global Variables: None.
+#
+# Creates/Modifies Files: None.
+#
+# Returns: None.
+#==========================================================================
+function print_banner()
+{
+    local -r banner_title="$1"
+    print_horizontal_rule '='
+    echo " ${banner_title}"
+    print_horizontal_rule '-'
+}
+
+
+#==========================================================================
+# Function: print_horizontal_rule
+#
+# Description: Prints a horizontal rule (a line) to stdout.
+#
+# Parameters:
+#   $1 rule_character (character, optional):
+#   $2 rule_length (integer, optional): (default: 75)
+#
+# Returns:
+#   None.
+#==========================================================================
+
+function print_horizontal_rule()
+{
+    local -r rule_character="${1:-'-'}"
+    local -r rule_length=${2:-75}
+    local -i i
+    local horizontal_rule
+
+    horizontal_rule=
+    for (( i=0; i<rule_length; ++i )); do
+        horizontal_rule+="$rule_character"
+    done
+    if [ -n "$horizontal_rule" ]; then
+        echo "$horizontal_rule"
+    fi
+}
+
+
+#==========================================================================
 #  main
 #==========================================================================
 
@@ -135,6 +197,7 @@ cloHelp=false
 cloMakefile=
 cloPatterns=()
 cloNoWarnUndefinedVariables=false
+cloDefaults=false
 cloWarnUndefinedVariables=false
 
 ParseTheCommandLine "$@"
@@ -146,19 +209,28 @@ if $cloHelp; then
     exit 0
 fi
 
-TMPFILE=$(/usr/bin/mktemp)
+# Create a temporary file and configure this script to automatically delete
+# that file when the script exits.
+declare -r TMPFILE=$(/usr/bin/mktemp)
 trap '"${RM}" -f -- "${TMPFILE}"' EXIT
 
 make_flags=(
-    --warn-undefined-variables
     --dry-run
     --print-data-base
+    --warn-undefined-variables
     )
 if [ -n "$cloMakefile" ]; then
     make_flags+=( --file="$cloMakefile" )
 fi
 set +e
-"${MAKE}" "${make_flags[@]}" >& "${TMPFILE}"
+if $cloDefaults; then
+#   Constrain the output to make's built-in variables and rules, ignoring
+#   any environment variables that might affect make's output, and ignoring
+#   any user-defined makefile(s).
+    "${ENV}" -i "${MAKE}" --makefile=/dev/null "${make_flags[@]}" >& "${TMPFILE}"
+else
+    "${MAKE}" "${make_flags[@]}" >& "${TMPFILE}"
+fi
 set -e
 
 # Remove ANSI escape codes (e.g., color codes) in TMPFILE
@@ -175,9 +247,7 @@ if ! $cloWarnUndefinedVariables; then
         "${CAT}" "${TMPFILE}"
     else
         for pattern in "${cloPatterns[@]}"; do
-            "${ECHO}" -e "\n=========================================================================="
-            "${ECHO}" "PATTERN: |${pattern}|"
-            "${ECHO}" "---------------------------------------------------------------------------"
+            print_banner "PATTERN: |${pattern}|"
             "${GREP}" --color "$pattern" "${TMPFILE}" || true
         done
     fi
@@ -185,12 +255,9 @@ fi
 
 # If option --Wno-undefined-variables was used, ignore this section.
 if ! $cloNoWarnUndefinedVariables; then
-    "${ECHO}" -e "\n==========================================================================="
-    "${ECHO}" "UNDEFINED VARIABLES"
-    "${ECHO}" "---------------------------------------------------------------------------"
+    print_banner "UNDEFINED VARIABLES"
     if ! "${GREP}" --color ' warning: undefined variable ' "${TMPFILE}"
     then
-        "${ECHO}" "There are no undefined variables."
+        echo "There are no undefined variables."
     fi
 fi
-
