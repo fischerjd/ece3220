@@ -166,8 +166,8 @@ set -e
         case "$1" in
             -e|--employee) cloUserCategory='employee' ;;
             -h|--help) cloHelp=true ;;
-            -i) cloSshIdentityFile=${2}; shift ;;
-            --) if [[ $# -ge 2 ]]; then cloPawprint=${2}; shift; fi ;;
+            -i) cloSshIdentityFile="${2}"; shift ;;
+            --) if [[ $# -ge 2 ]]; then cloPawprint="${2}"; shift; fi ;;
             *) : ;; # unsupported options
         esac
         shift

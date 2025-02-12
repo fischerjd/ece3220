@@ -122,7 +122,7 @@ set -e
     do
         case "$1" in
             -d|--defaults) cloDefaults=true ;;
-            -f|--file|--makefile) cloMakefile=${2}; shift; ;;
+            -f|--file|--makefile) cloMakefile="${2}"; shift ;;
             -h|--help) cloHelp=true ;;
             --Wundefined-variables) cloWarnUndefinedVariables=true ;;
             --Wno-undefined-variables) cloNoWarnUndefinedVariables=true ;;
