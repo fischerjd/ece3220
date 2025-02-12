@@ -86,8 +86,7 @@
 				"debug"
 			],
 			"group": {
-				"kind": "build",
-				"isDefault": true
+				"kind": "build"
 			},
 			"options": {
 				"cwd": "${fileDirname}",
