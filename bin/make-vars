@@ -48,7 +48,7 @@ clear
 
 # shellcheck disable=SC1091
 
-source /usr/local/libexec/eceugl-utils/trace
+#source /usr/local/libexec/eceugl-utils/trace
 
 ## Program paths
 # [Note 1: Use Bash's builtin `cd' and not /usr/bin/cd. --end note]
