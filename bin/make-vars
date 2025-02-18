@@ -55,6 +55,7 @@ declare -r SCRIPT_NAME="$(/usr/bin/basename $BASH_SOURCE)"
 
 ## Program paths
 # [Note 1: Use Bash's builtin `cd' and not /usr/bin/cd. --end note]
+# [Note 2: Use Bash's builtin `echo' and not /usr/bin/echo. --end note]
 declare -r CAT=/usr/bin/cat
 declare -r ENV=/usr/bin/env
 declare -r GETOPT=/usr/bin/getopt
