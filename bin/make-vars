@@ -50,6 +50,9 @@ clear
 
 #source /usr/local/libexec/eceugl-utils/trace
 
+declare -r SCRIPT_NAME="$(/usr/bin/basename $BASH_SOURCE)"
+
+
 ## Program paths
 # [Note 1: Use Bash's builtin `cd' and not /usr/bin/cd. --end note]
 declare -r CAT=/usr/bin/cat
@@ -122,7 +125,7 @@ set -e
     do
         case "$1" in
             -d|--defaults) cloDefaults=true ;;
-            -f|--file|--makefile) cloMakefile="${2}"; shift ;;
+            -f|--file|--makefile) cloMakefile=${2}; shift; ;;
             -h|--help) cloHelp=true ;;
             --Wundefined-variables) cloWarnUndefinedVariables=true ;;
             --Wno-undefined-variables) cloNoWarnUndefinedVariables=true ;;
@@ -202,12 +205,18 @@ cloWarnUndefinedVariables=false
 
 ParseTheCommandLine "$@"
 
+
+#--------------------------------------------------------------------------
+#  Command line options -h,--help
+#--------------------------------------------------------------------------
+
 if $cloHelp; then
-    export LESS="--prompt=\ Help for ssh-setup\: ?ltline %lt?L/%L.:byte %bB?s/%s..?e (END):?pB %pB\%.. (press h for help or q to quit)\ "
+    export LESS="--prompt=\ Help for ${SCRIPT_NAME}\: ?ltline %lt?L/%L.:byte %bB?s/%s..?e (END):?pB %pB\%.. (press h for help or q to quit)\ "
     "${SED}" -n -e '/help_begin/,/help_end/{ /help_begin/d; /help_end/q; s/#\( \)\?//; p }' "$0" \
         | "${LESS_PAGER}"
     exit 0
 fi
+
 
 # Create a temporary file and configure this script to automatically delete
 # that file when the script exits.
