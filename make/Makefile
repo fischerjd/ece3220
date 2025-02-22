@@ -160,8 +160,7 @@ DEPS.cxx  := $(SOURCES.cxx:%.cxx=$(DEPDIR)%.d)
 # Dependency file created by Microsoft Visual Studio Code
 DEPS.vscode := null.d
 
-# Aggregate lists of C/C++ source files, object files, and dependency
-# files.
+# Manifests of C/C++ source files, object files, and dependency files.
 SOURCES.c_plus_plus := $(SOURCES.cc) $(SOURCES.cpp) $(SOURCES.cxx)
 SOURCES   := $(SOURCES.c) $(SOURCES.c_plus_plus)
 OBJS      := $(OBJS.c) $(OBJS.cc) $(OBJS.cpp) $(OBJS.cxx)
@@ -588,15 +587,15 @@ $(DEPDIR): ; @mkdir -p $@ >/dev/null
 #
 # Empty recipe rule for the %.d dependency files
 #
-# If a make rule lists file X as as a dependency of target Y, and X is
-# created as a side effect of creating Y, then an empty recipe rule is
-# required for the dependency file X:
+# If a make rule lists file Y as as a dependency of target Z, and Y is
+# created as a side effect of creating Z, then an empty recipe rule is
+# required for the dependency file Y:
 #
-#  Y: X
-#       recipe that creates Y and, as a side effect, also creates X
+#  Z: X Y
+#       recipe that creates Z and, as a side effect, also creates Y
 #
-#  # Empty recipe rule for dependency X
-#  X:
+#  # Empty recipe rule for dependency Y
+#  Y: ;
 #
 # For example, if a dependency file %.d is created by the same C/C++
 # compiler invocation that creates an object code file %.o, 
@@ -613,15 +612,25 @@ $(DEPDIR): ; @mkdir -p $@ >/dev/null
 #  main.o: main.c main.d
 #       gcc -MMD -c $<
 #
-#  main.d:
+#  main.d: ;
 #
 # See also [7].
 #
-$(DEPS):
+$(DEPS): ;
 
 
-# Include the automatically-generated dependency rules from folder DEPDIR
-include $(wildcard $(DEPS))
+#
+# Empty recipe rules for this project's C/C++ source code files.  This
+# prevents main from performing a rule search for these source code files,
+# which speeds up the build process.
+#
+
+$(SOURCES): ;
+$(HEADERS): ;
+
+
+# Include the automatically-generated dependency rules from folder DEPDIR.
+include $(wildcard $(DEPDIR)/*.d)
 
 
 # doxygen documentation
@@ -679,14 +688,12 @@ mostly-clean:: _basic_clean
 
 # Delete all build products that are files (do not delete directories).
 .PHONY: clean
-clean:: _basic_clean
+clean:: mostly-clean
 	-rm -f $(PROGRAM_NAME)
 
 # Delete all build products.
 .PHONY: distclean
 distclean:: clean
-	$(call remove_folder,$(DEPDIR))
-	$(call remove_folder,$(BUILDDIR))
 
 # Delete all build products, and delete symbol cross-reference files.
 .PHONY: maintainer-clean
