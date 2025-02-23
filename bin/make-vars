@@ -47,7 +47,6 @@ set -eu
 clear
 
 # shellcheck disable=SC1091
-
 #source /usr/local/libexec/eceugl-utils/trace
 
 declare -r SCRIPT_NAME="$(/usr/bin/basename $BASH_SOURCE)"
@@ -208,7 +207,7 @@ ParseTheCommandLine "$@"
 
 
 #--------------------------------------------------------------------------
-#  Command line options -h,--help
+#  If the user requested help, display the help information and exit.
 #--------------------------------------------------------------------------
 
 if $cloHelp; then
@@ -219,10 +218,18 @@ if $cloHelp; then
 fi
 
 
+#--------------------------------------------------------------------------
 # Create a temporary file and configure this script to automatically delete
 # that file when the script exits.
+#--------------------------------------------------------------------------
+
 declare -r TMPFILE=$(/usr/bin/mktemp)
 trap '"${RM}" -f -- "${TMPFILE}"' EXIT
+
+
+#--------------------------------------------------------------------------
+# Perform a "dry run" make and redirect make's output into the TMPFILE.
+#--------------------------------------------------------------------------
 
 make_flags=(
     --dry-run
@@ -243,14 +250,21 @@ else
 fi
 set -e
 
-# Remove ANSI escape codes (e.g., color codes) in TMPFILE
+
+#--------------------------------------------------------------------------
+# Remove ANSI escape codes (e.g., color codes) from the text in TMPFILE
 # References:
 # [1] https://unix.stackexchange.com/a/55547/121145
 # [2] https://stackoverflow.com/q/17998978/5051940
-#
+#--------------------------------------------------------------------------
+
 "${SED}" -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "${TMPFILE}"
 
+
+#--------------------------------------------------------------------------
 # If option --Wundefined-variables was used, ignore this section.
+#--------------------------------------------------------------------------
+
 if ! $cloWarnUndefinedVariables; then
     if [ ${#cloPatterns[@]} -eq 0 ]; then
         # Print everything
@@ -263,7 +277,11 @@ if ! $cloWarnUndefinedVariables; then
     fi
 fi
 
+
+#--------------------------------------------------------------------------
 # If option --Wno-undefined-variables was used, ignore this section.
+#--------------------------------------------------------------------------
+
 if ! $cloNoWarnUndefinedVariables; then
     print_banner "UNDEFINED VARIABLES"
     if ! "${GREP}" --color ' warning: undefined variable ' "${TMPFILE}"
@@ -271,3 +289,4 @@ if ! $cloNoWarnUndefinedVariables; then
         echo "There are no undefined variables."
     fi
 fi
+
