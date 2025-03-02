@@ -49,7 +49,8 @@ clear
 # shellcheck disable=SC1091
 #source /usr/local/libexec/eceugl-utils/trace
 
-declare -r SCRIPT_NAME="$(/usr/bin/basename $BASH_SOURCE)"
+SCRIPT_NAME="$(/usr/bin/basename "${BASH_SOURCE[0]}")"
+declare -r SCRIPT_NAME
 
 
 ## Program paths
@@ -59,7 +60,7 @@ declare -r CAT=/usr/bin/cat
 declare -r ENV=/usr/bin/env
 declare -r GETOPT=/usr/bin/getopt
 declare -r GREP=/usr/bin/grep
-declare -r LESS_PAGER=/usr/bin/less
+declare -r PAGER=/usr/bin/pager
 declare -r MAKE=/usr/bin/make
 declare -r PRINTF=/usr/bin/printf
 declare -r RM=/usr/bin/rm
@@ -125,8 +126,8 @@ set -e
     do
         case "$1" in
             -d|--defaults) cloDefaults=true ;;
-            -f|--file|--makefile) cloMakefile=${2}; shift; ;;
-            -h|--help) cloHelp=true ;;
+            -f|--file|--makefile) cloMakefile="${2}"; shift ;;
+            -h|--help) cloHelpRequested=true ;;
             --Wundefined-variables) cloWarnUndefinedVariables=true ;;
             --Wno-undefined-variables) cloNoWarnUndefinedVariables=true ;;
             --) ;;
@@ -196,7 +197,7 @@ function print_horizontal_rule()
 #  main
 #==========================================================================
 
-cloHelp=false
+cloHelpRequested=false
 cloMakefile=
 cloPatterns=()
 cloNoWarnUndefinedVariables=false
@@ -210,10 +211,10 @@ ParseTheCommandLine "$@"
 #  If the user requested help, display the help information and exit.
 #--------------------------------------------------------------------------
 
-if $cloHelp; then
+if $cloHelpRequested; then
     export LESS="--prompt=\ Help for ${SCRIPT_NAME}\: ?ltline %lt?L/%L.:byte %bB?s/%s..?e (END):?pB %pB\%.. (press h for help or q to quit)\ "
     "${SED}" -n -e '/help_begin/,/help_end/{ /help_begin/d; /help_end/q; s/#\( \)\?//; p }' "$0" \
-        | "${LESS_PAGER}"
+        | "${PAGER}"
     exit 0
 fi
 
@@ -223,7 +224,9 @@ fi
 # that file when the script exits.
 #--------------------------------------------------------------------------
 
-declare -r TMPFILE=$(/usr/bin/mktemp)
+TMPFILE=$(/usr/bin/mktemp)
+declare -r TMPFILE
+
 trap '"${RM}" -f -- "${TMPFILE}"' EXIT
 
 
