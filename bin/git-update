@@ -1,6 +1,9 @@
 #!/bin/bash
+# git-update
+# Copyright 2024,2025 James D. Fischer
+#
 # NAME
-#   git-update - performs `git pull' on branches develop and main
+#   git-update - performs `git pull' on branches main and develop
 #
 # SYNOPSYS
 #   git-update [dir]
@@ -17,6 +20,7 @@
 #       1) $ test -d ~/.local/bin/ || mkdir -p ~/.local/bin/
 #       2) $ ln -s ~/git/ece3220/bin/git-update ~/.local/bin/
 #       3) $ git config --global alias.update '!'"$HOME/.local/bin/git-update"
+#  	4) Log out and log back in for these changes to take effect.
 #
 # NOTES
 #   Within the local Git repository, if the main or develop branch has
@@ -32,65 +36,30 @@
 #
 set -eu
 
-declare -r GIT=/usr/bin/git
+#source /usr/local/libexec/eceugl-utils/trace
 
-#==========================================================================
-#  git_checkout_branch()
-#==========================================================================
+SCRIPT_REALPATH=$(/usr/bin/realpath "$0")
+SCRIPT_NAME=$(/usr/bin/basename "$SCRIPT_REALPATH")
+SCRIPTDIR=$(dirname "$SCRIPT_REALPATH")
 
-function git_checkout_branch()
-{
-    local branch_name=$1
-    local exit_value=0
-
-    if "${GIT}" show-ref --quiet refs/heads/${branch_name}; then
-        echo "Updating branch '${branch_name}'"
-        "$GIT" checkout "${branch_name}"
-    else
-        >&2 echo ":: NOTICE :: This Git repository does not have a local branch named '${branch_name}'."
-        >&2 echo "Skipping branch '${branch_name}'."
-        exit_value=1
-    fi
-    return $exit_value
-}
+source "${SCRIPTDIR}/git-update-function.sh"
 
 
-#==========================================================================
-#  git_pull_branch()
-#==========================================================================
+###########################################################################
+##  main()
+###########################################################################
 
-function git_pull_branch()
-{
-    local branch_name=$1
-    if git_checkout_branch "${branch_name}"; then
-        "$GIT" pull
-    fi
-}
-
-
-#==========================================================================
-#  main()
-#==========================================================================
-
-# Save the name of the currently selected Git branch
-saved_git_branch_name=$("${GIT}" branch --show-current)
+# The default git repository directory is the current working directory. 
+git_repo_directory="$(/usr/bin/pwd)"
 
 if [[ $# -gt 0 ]]; then
     if [[ -d $1 ]]; then
-        # [Note 1: Use the Bash shell's builtin command `cd' and not the
-        # program /usr/bin/cd. --end note]
-        cd "$1"
+        git_repo_directory="$1"
     else
-        >&2 echo ":: ERROR ::  Directory '$1' does not exist."
+        >&2 echo "[$SCRIPT_NAME] :: ERROR ::  Directory '$1' does not exist."
         exit 1
     fi
 fi
 
-echo -n "Updating folder: "
-pwd
-
-git_pull_branch "develop"
-git_pull_branch "main"
-
-git_checkout_branch "${saved_git_branch_name}"
+git_update "$git_repo_directory"
 
