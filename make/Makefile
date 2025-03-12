@@ -661,18 +661,6 @@ endif
 #
 ###########################################################################
 
-# [Optional]  Create a makefile named `clean.mk' that provides
-# project-specific for one or more of these clean-up targets:
-#   * _basic_clean
-#   * mostly-clean
-#   * clean
-#   * distclean
-#   * maintainer-clean
-#
-ifneq ($(wildcard clean.mk),)
-include clean.mk
-endif
-
 # Clean-up tasks that are common to goals `mostly-clean' and `clean'.
 .PHONY: _basic_clean
 _basic_clean::
@@ -699,6 +687,20 @@ distclean:: clean
 .PHONY: maintainer-clean
 maintainer-clean:: distclean
 	-@rm -f cscope.out tags TAGS
+
+# [Optional]  Create a makefile named `clean.mk' that provides
+# project-specific clean-up tasks for one or more of the targets listed
+# below. These clean-up tasks will be performed after the corresponding
+# clean-up tasks listed above are performed.
+#   * _basic_clean
+#   * mostly-clean
+#   * clean
+#   * distclean
+#   * maintainer-clean
+#
+ifneq ($(wildcard clean.mk),)
+include clean.mk
+endif
 
 
 ###########################################################################
