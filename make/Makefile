@@ -771,9 +771,17 @@ endif
 
 
 # Removes a folder only if it resides within the current working directory.
+# [Note 1. If a path string contains one or more backslash characters '\',
+# each backslash is converted into an underscore. --end note]
 define remove_folder
-	if [ -n "$(1)" -a -d "$(1)" ]; then \
-	if realpath $(1) | grep -q `realpath .` ; then rm -fr $(1); fi; \
+	@if [ -n "$(1)" -a -d "$(1)" ]; then \
+		realpath_one="$$(realpath "$(1)")"; \
+		realpath_one="$${realpath_one//\\/_}"; \
+		realpath_pwd="$$(realpath .)"; \
+		realpath_pwd=$${realpath_pwd//\\/_}; \
+		if grep -q "$${realpath_pwd}" <<< "$${realpath_one}"; then \
+			rm -fr "$(1)"; \
+		fi; \
 	fi
 endef
 
