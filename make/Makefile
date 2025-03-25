@@ -772,14 +772,16 @@ endif
 
 # Removes a folder only if it resides within the current working directory.
 # [Note 1. If a path string contains one or more backslash characters '\',
-# each backslash is converted into an underscore. --end note]
+# each backslash is converted into an underscore. (And don't forget! 
+# Ubuntu and Raspberry Pi OS use dash, not sh or bash, to execute shell
+# commands.) --end note]
 define remove_folder
 	@if [ -n "$(1)" -a -d "$(1)" ]; then \
-		realpath_one="$$(realpath "$(1)")"; \
-		realpath_one="$${realpath_one//\\/_}"; \
-		realpath_pwd="$$(realpath .)"; \
-		realpath_pwd=$${realpath_pwd//\\/_}; \
-		if grep -q "$${realpath_pwd}" <<< "$${realpath_one}"; then \
+		realpath_one="$$(/usr/bin/realpath "$(1)")"; \
+		realpath_one="$$(echo "$${realpath_one}" | /usr/bin/tr '\\' '_')"; \
+		realpath_pwd="$$(/usr/bin/realpath .)"; \
+		realpath_pwd="$$(echo "$${realpath_pwd}" | /usr/bin/tr '\\' '_')"; \
+		if echo "$${realpath_one}" | /usr/bin/grep -q "$${realpath_pwd}"; then \
 			rm -fr "$(1)"; \
 		fi; \
 	fi
