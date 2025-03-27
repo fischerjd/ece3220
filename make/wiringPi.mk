@@ -1,5 +1,5 @@
+#
 # wiringPi.mk
-# Copyright 2019-2024 James D. Fischer.  All rights reserved.
 #
 # When building with a cross toolchain, the toolchain requires access to
 # the wiringPi header files and library files which are installed on the
@@ -44,6 +44,8 @@
 # ===============================       ===================
 # ${HOME}/rpifs$(PREFIX)/include        $(PREFIX)/include
 # ${HOME}/rpifs$(PREFIX)/lib            $(PREFIX)/lib
+#
+# Copyright 2019-2024 James D. Fischer
 #
 
 ifndef WIRINGPI.MK

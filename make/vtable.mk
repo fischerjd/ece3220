@@ -6,6 +6,7 @@
 #  about each class's virtual function lookup table (vtable).
 #
 #  2024-04-10 Jim Fischer <fischerjd@missouri.edu>
+#  Copyright 2024 James D. Fischer
 #
 
 ifndef VTABLE.MK

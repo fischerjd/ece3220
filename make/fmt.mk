@@ -6,6 +6,7 @@
 #  C++ iostreams. See also, https://github.com/fmtlib/fmt
 #
 #  2022-05-22 Jim Fischer <fischerjd@missouri.edu>
+#  Copyright 2022 James D. Fischer
 #
 
 ifndef FMT.MK

@@ -2,6 +2,7 @@
 #  pthreads.mk
 #
 #  2019-05-02 Jim Fischer <fischerjd@missouri.edu>
+#  Copyright 2019 James D. Fischer
 #
 
 ifndef PTHREADS.MK

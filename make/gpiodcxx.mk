@@ -1,5 +1,5 @@
+#
 # gpiodcxx.mk
-# Copyright 2025 James D. Fischer
 #
 # This makefile assumes Makefile variable RPIFS expands to a canonical path
 # string that identifies a folder on your Linux desktop onto which the
@@ -18,6 +18,9 @@
 # When cross compiling, your makefile must add these paths to the
 # preprocessor's header file search path, and to the linker's library file
 # search path.
+#
+# 2025-03-27 Jim Fischer <fischerjd@missouri.edu>
+# Copyright 2025 James D. Fischer
 #
 
 ifndef GPIODCXX.MK
