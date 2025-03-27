@@ -2,6 +2,12 @@
 # Copyright 2025 James D. Fischer
 # Source this file into the script that requires it.
 #
+# If you want this script to restore the original/starting branch after
+# it updates branches 'main' and 'develop', define an environment variable
+# named RESTORE_STARTING_BRANCH, e.g.,
+#
+#   $ RESTORE_STARTING_BRANCH=1 git update
+#
 
 ###########################################################################
 ##  git_update()
@@ -36,13 +42,16 @@ function git_update()
 
     pushd "$git_repo_directory" >/dev/null
 
-    starting_branch=$("$GIT" branch --show-current)
+    if [ -n "${RESTORE_STARTING_BRANCH:+x}" ]; then
+        starting_branch="$("$GIT" branch --show-current)"
+    fi
 
     "$GIT" fetch --all
 
+    # Update branches 'main' and 'develop', in that order.
     for branch_name in main develop; do
-        if "$GIT" show-ref --quiet refs/heads/${branch_name}; then
-            if "$GIT" checkout "${branch_name}"; then
+        if "$GIT" show-ref --quiet "refs/heads/${branch_name}"; then
+            if "$GIT" switch "${branch_name}"; then
                 "$GIT" pull
             fi
         else
@@ -50,8 +59,9 @@ function git_update()
         fi
     done
 
-    # Checkout the starting branch
-    #"$GIT" checkout "$starting_branch"
+    if [ -n "${RESTORE_STARTING_BRANCH:+x}" ]; then
+        "$GIT" switch "$starting_branch"
+    fi
     
     popd >/dev/null
 }
