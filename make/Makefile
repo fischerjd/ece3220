@@ -304,47 +304,80 @@ endif
 ## Raspberry Pi Libraries
 # [Optional]
 #
-# You may optionally link your program against one of these libraries:
-#  	* pigpio
-#  	* wiringPi
+# You may optionally link your program against any one of these libraries:
+#   * gpiodcxx      // gpiod C++ library
+#   * gpiod         // gpiod C library
+#  	* pigpio        // depricated (as of RPI OS 'bookworm')
+#  	* wiringPi      // depricated
 #
+# If cross compiling, ensure the Raspberry Pi's file system is mounted onto
+# the folder specified by the makefile variable RPIFS. The header files and
+# libraries are installed on the Raspberry Pi, not on the desktop computer.
+# HINT: The shell script `mount.rpifs' provided with Jim Fischer's rpiutils
+# software package mounts the Raspberry Pi's file system onto a folder
+# named `rpifs` within your HOME directory on the Linux desktop PC you are
+# using, i.e., 
+# 	$ mount.rpifs   # mounts the RPI's file system onto $HOME/rpifs/
+# -------------------------------------------------------------------------
+# :: gpiodcxx ::
+# If you are building software for the Raspberry Pi and that software uses
+# the gpiodcxx library, store a copy of makefile `gpiodcxx.mk` in the
+# same directory as this Makefile. That makefile provides preprocessor
+# (cpp), compiler (gcc/g++), and linker (ld) options that build and link
+# your program with the gpiodcxx library.
+ifneq (,$(wildcard gpiodcxx.mk))
+  include gpiodcxx.mk
+  ifneq (,$(GPIOD__INCLUDEDIR))
+    ifeq ($(wildcard) $(GPIOD__INCLUDEDIR)/gpiod.hpp,)
+      $(shell mount.rpifs -q || true)
+    endif
+  endif
+# -------------------------------------------------------------------------
+# :: gpiod ::
+# If you are building software for the Raspberry Pi and that software uses
+# the gpiod library, store a copy of makefile `gpiod.mk' in the same
+# directory as this Makefile.  That makefile provides preprocessor (cpp),
+# compiler (gcc/g++), and linker (ld) options to build and link your
+# program with the gpiod library.
+else ifneq (,$(wildcard gpiod.mk))
+  include gpiod.mk
+  ifneq (,$(GPIOD__INCLUDEDIR))
+    ifeq ($(wildcard) $(GPIOD__INCLUDEDIR)/gpiod.h,)
+      $(shell mount.rpifs -q || true)
+    endif
+  endif
 # -------------------------------------------------------------------------
 # :: pigpio ::
+# [Note 1:  This library is deprecated and should not be used in new
+# projects. --end note]
 # If you are building software for the Raspberry Pi, and that software uses
-# the pigpio library, store a copy of makefile `pigpio.mk' in the current
-# working directory. That makefile provides preprocessor (cpp), compiler
-# (gcc/g++), and linker (ld) options to build and link your program with
-# the pigpio library.
-ifneq ($(wildcard pigpio.mk),)
-include pigpio.mk
-# If cross compiling, ensure the Raspberry Pi's file system is mounted onto
-# the folder specified by variable RPIFS. The pigpio header files and
-# libraries are installed on the Raspberry Pi, not on the desktop computer.
-# (NB: The shell script `mount.rpifs' is provided with Jim Fischer's
-# `rpiutils' software package.)
-ifeq ($(wildcard) $(WIRINGPI__INCLUDEDIR)/pigpio.h,)
-$(shell mount.rpifs -q || true)
-endif
+# the pigpio library, store a copy of makefile `pigpio.mk' in the same
+# directory as this Makefile.  That makefile provides preprocessor (cpp),
+# compiler (gcc/g++), and linker (ld) options to build and link your
+# program with the pigpio library.
+else ifneq (,$(wildcard pigpio.mk))
+  include pigpio.mk
+  ifneq (,$(PIGPIO__INCLUDEDIR))
+    ifeq ($(wildcard) $(PIGPIO__INCLUDEDIR)/pigpio.h,)
+      $(shell mount.rpifs -q || true)
+    endif
+  endif
 # -------------------------------------------------------------------------
 # :: wiringPi ::
 # [Note 1:  This library is deprecated and should not be used in new
 # projects. --end note]
-#
 # If you are building software for the Raspberry Pi, and that software uses
 # the wiringPi library, store a copy of makefile `wiringPi.mk' in the
-# current working directory. That makefile provides preprocessor (cpp),
-# compiler (gcc/g++), and linker (ld) options to build and link your
+# same directory as this Makefile. That makefile provides preprocessor
+# (cpp), compiler (gcc/g++), and linker (ld) options to build and link your
 # program with the wiringPi library.
-else ifneq ($(wildcard wiringPi.mk),)
-include wiringPi.mk
-# If cross compiling, ensure the Raspberry Pi's file system is mounted onto
-# the folder specified by variable RPIFS. The wiringPi header files and
-# libraries are installed on the Raspberry Pi, not on the desktop computer.
-# (NB: The shell script `mount.rpifs' is provided with Jim Fischer's
-# `rpiutils' software package.)
-ifeq ($(wildcard) $(WIRINGPI__INCLUDEDIR)/wiringPi.h,)
-$(shell mount.rpifs -q || true)
-endif
+else ifneq (,$(wildcard wiringPi.mk))
+  include wiringPi.mk
+  ifneq (,$(WIRINGPI__INCLUDEDIR))
+    ifeq ($(wildcard) $(WIRINGPI__INCLUDEDIR)/wiringPi.h,)
+      $(shell mount.rpifs -q || true)
+    endif
+  endif
 # -------------------------------------------------------------------------
 endif
 
