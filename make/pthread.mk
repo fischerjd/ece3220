@@ -1,12 +1,12 @@
 #
-#  pthreads.mk
+#  pthread.mk
 #
-#  2019-05-02 Jim Fischer <fischerjd@missouri.edu>
-#  Copyright 2019 James D. Fischer
+#  2025-03-29 Jim Fischer <fischerjd@missouri.edu>
+#  Copyright 2019,2025 James D. Fischer
 #
 
-ifndef PTHREADS.MK
-PTHREADS.MK := 1
+ifndef PTHREAD.MK
+PTHREAD.MK := 1
 
 # GNU C/C++'s `-pthread' option.  If compiling and linking are performed in
 # separate steps, the `-pthread' option needs to be supplied via make's
@@ -15,5 +15,5 @@ CFLAGS   += -pthread
 CXXFLAGS += -pthread
 LDFLAGS  += -pthread
 
-endif # PTHREADS.MK
+endif # PTHREAD.MK
 
