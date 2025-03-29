@@ -1,0 +1,11 @@
+{
+    "cSpell.ignoreWords": [
+        "GPIOD",
+        "GPIODCXX",
+        "PIGPIO",
+        "RPIFS",
+        "WIRINGPI"
+    ],
+    "vim.textwidth": 75,
+    "editor.wordWrapColumn": 75
+}

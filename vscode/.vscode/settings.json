@@ -86,6 +86,16 @@
         "cin",
         "cout",
         "endl",
+        "gpiochip",
+        "gpiod",
+        "gpiodetect",
         "RAII"
+    ],
+    "cSpell.ignoreWords": [
+        "GPIOD",
+        "GPIODCXX",
+        "PIGPIO",
+        "RPIFS",
+        "WIRINGPI"
     ]
 }
