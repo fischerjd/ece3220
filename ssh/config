@@ -44,6 +44,7 @@ Host naka144-pi-?? 128.206.22.101 128.206.22.102 128.206.22.103 128.206.22.104 1
     IdentityFile ~/.ssh/id_ed25519
     #SendEnv -LC_* -LANG*
     ServerAliveInterval 180
+    ConnectTimeout 3
 
 Host remoteapps-li.engineering.missouri.edu remoteapps-li remoteapps
     Hostname remoteapps-li.engineering.missouri.edu
