@@ -9,6 +9,31 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "[ECE3220] Makefile Project (gdb)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/demo",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "[ECE3220] make debug",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "[ECE3220] C File (gdb)",
             "type": "cppdbg",
             "request": "launch",
@@ -59,31 +84,6 @@
             ]
         },
         {
-            "name": "[ECE3220] Makefile Project (gdb)",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${fileDirname}/demo",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "preLaunchTask": "[ECE3220] make debug",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-                {
-                    "description": "Set Disassembly Flavor to Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
             // See also: https://stackoverflow.com/a/63738783/5051940
             "name": "[ECE3220] Makefile Project (sudo gdb)",
             "type": "cppdbg",
@@ -95,7 +95,7 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "${userHome}/git/ece3220/vscode/sudo-gdb.sh",
+            "miDebuggerPath": "${userHome}/git/ece3220/vscode/.vscode/sudo-gdb.sh",
             "preLaunchTask": "[ECE3220] make debug",
             "setupCommands": [
                 {
