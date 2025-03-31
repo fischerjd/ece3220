@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['didn_20t_20fit_20anywhere_20else_0',['Stuff that didn&apos;t fit anywhere else',['../group__misc.html',1,'']]]
+  ['high_2dlevel_20api_0',['High-level API',['../group__high__level.html',1,'']]]
 ];

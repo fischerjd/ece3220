@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['deprecated_20list_0',['Deprecated List',['../deprecated.html',1,'']]]
+  ['libgpiod_20public_20api_0',['libgpiod public API',['../index.html',1,'']]]
 ];

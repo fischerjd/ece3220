@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['num_5flines_0',['num_lines',['../structgpiod__line__bulk.html#a16a716968d1a7b6bbdf6e66d43807220',1,'gpiod_line_bulk']]]
+  ['operating_20on_20multiple_20lines_0',['Operating on multiple lines',['../group__line__bulk.html',1,'']]]
 ];

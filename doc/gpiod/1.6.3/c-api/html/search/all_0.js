@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['and_20lines_0',['Iterators for GPIO chips and lines',['../group__iterators.html',1,'']]],
-  ['anywhere_20else_1',['Stuff that didn&apos;t fit anywhere else',['../group__misc.html',1,'']]],
-  ['api_2',['API',['../group__high__level.html',1,'High-level API'],['../index.html',1,'libgpiod public API']]]
+  ['common_20helper_20macros_0',['Common helper macros',['../group__common.html',1,'']]],
+  ['consumer_1',['consumer',['../structgpiod__line__request__config.html#a130194a15629e74cc66c8c6f4b30a00d',1,'gpiod_line_request_config']]]
 ];

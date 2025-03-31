@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['else_0',['Stuff that didn&apos;t fit anywhere else',['../group__misc.html',1,'']]],
-  ['events_20handling_1',['Line events handling',['../group__line__event.html',1,'']]]
+  ['iterators_20for_20gpio_20chips_20and_20lines_0',['Iterators for GPIO chips and lines',['../group__iterators.html',1,'']]]
 ];

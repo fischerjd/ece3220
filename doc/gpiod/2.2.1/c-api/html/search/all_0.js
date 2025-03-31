@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['anywhere_20else_0',['Stuff that didn&apos;t fit anywhere else',['../group__misc.html',1,'']]]
+  ['chip_20info_0',['Chip info',['../group__chip__info.html',1,'']]]
 ];

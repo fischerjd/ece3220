@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['info_0',['Line info',['../group__line__info.html',1,'']]],
-  ['iterators_20for_20gpio_20chips_20and_20lines_1',['Iterators for GPIO chips and lines',['../group__iterators.html',1,'']]]
+  ['reading_20_26_20setting_20line_20values_0',['Reading &amp; setting line values',['../group__line__value.html',1,'']]]
 ];

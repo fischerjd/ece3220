@@ -1,0 +1,4 @@
+<map id="gpiod::line_event" name="gpiod::line_event">
+<area shape="rect" id="node1" title="Describes a single GPIO line event." alt="" coords="5,95,140,121"/>
+<area shape="rect" id="node2" href="$classgpiod_1_1line.html" title="Represents a single GPIO line." alt="" coords="27,5,118,32"/>
+</map>

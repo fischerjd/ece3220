@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['on_20multiple_20lines_0',['Operating on multiple lines',['../group__line__bulk.html',1,'']]],
-  ['operating_20on_20multiple_20lines_1',['Operating on multiple lines',['../group__line__bulk.html',1,'']]],
-  ['operations_2',['operations',['../group__chips.html',1,'GPIO chip operations'],['../group__lines.html',1,'GPIO line operations']]]
+  ['reading_20_26_20setting_20line_20values_0',['Reading &amp; setting line values',['../group__line__value.html',1,'']]],
+  ['request_5ftype_1',['request_type',['../structgpiod__line__request__config.html#a92e3ff6d9a7837006305f33428fa2c71',1,'gpiod_line_request_config']]]
 ];
