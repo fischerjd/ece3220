@@ -27,9 +27,8 @@
 # INSTALLATION
 #   I recommend you use the following procedure to "install" this script:
 #       1) $ test -d ~/.local/bin/ || mkdir -p ~/.local/bin/
-#       2) $ ln -s ~/git/ece3220/bin/git-update ~/.local/bin/
-#       3) $ git config --global alias.update '!'"$HOME/.local/bin/git-update"
-#       4) Log out and log back in for these changes to take effect.
+#       2) $ ln -s ../../git/ece3220/bin/git-update ~/.local/bin/
+#       3) Log out and log back in for these changes to take effect.
 #
 # NOTES
 #   Within the Git repository, if the active branch, the develop branch, or
