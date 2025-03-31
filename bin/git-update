@@ -146,10 +146,6 @@ cloRestoreActiveBranch=false
 
 ParseTheCommandLine "$@"
 
-tracev cloGitRepoDirectory
-tracev cloHelpRequested
-tracev cloRestoreActiveBranch
-
 #--------------------------------------------------------------------------
 #  If the user requested help, display the help information and exit.
 #--------------------------------------------------------------------------
