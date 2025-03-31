@@ -123,7 +123,7 @@ set -e
         case "$1" in
             -h|--help) cloHelpRequested=true ;;
             -r|--restore-active-branch) cloRestoreActiveBranch=true ;;
-            --) if [[ $# -ge 2 ]]; then cloGetRepoDirectory=${2}; shift; fi ;;
+            --) if [[ $# -ge 2 ]]; then cloGitRepoDirectory=${2}; shift; fi ;;
             *) : ;; # unsupported -Y options
         esac
         shift
