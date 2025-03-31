@@ -1,12 +1,12 @@
 #!/bin/bash
-# git-update
 # Copyright 2024,2025 James D. Fischer
 #
+# <help_begin>
 # NAME
 #   git-update - performs `git pull' on branches main and develop
 #
 # SYNOPSYS
-#   git-update [dir]
+#   git-update [options] [dir]
 #
 # DESCRIPTION
 #   git-update performs a `git pull' operation on branches `develop' and
@@ -15,24 +15,36 @@
 #   Otherwise, the `git pull' tasks are performed within the current
 #   directory.
 #
+# OPTIONS
+#   -r, --restore-active-branch
+#       If this option is specified, whichever branch was active prior to
+#       invoking git-update, that same branch will be active after
+#       git-update exits.  Otherwise, when git-update exits, the 'develop'
+#       branch will be the active branch, if it exists.  If there is no
+#       'develop' branch, the 'main' branch will be active when get-update
+#       exits.
+#
 # INSTALLATION
 #   I recommend you use the following procedure to "install" this script:
 #       1) $ test -d ~/.local/bin/ || mkdir -p ~/.local/bin/
 #       2) $ ln -s ~/git/ece3220/bin/git-update ~/.local/bin/
 #       3) $ git config --global alias.update '!'"$HOME/.local/bin/git-update"
-#  	4) Log out and log back in for these changes to take effect.
+#  	    4) Log out and log back in for these changes to take effect.
 #
 # NOTES
-#   Within the local Git repository, if the main or develop branch has
-#   unstaged changes, git-update will fail to update that branch.  You'll
-#   need to either commit or stash the branch's unstaged changes prior to
-#   invoking git-update.
+#   Within the Git repository, if the active branch, the develop branch, or
+#   the main branch has unchanged and/or untracked files, those files are
+#   stashed prior to performing 'git pull' on that branch, and any stashed
+#   files are popped off the stash after 'git pull' is performed on the
+#   branch.
 #
 # EXAMPLE
-#   $ git update ~/git/ece3220
-#   OR,
-#   $ cd ~/git/ece3220
-#   $ git update
+#       $ git update ~/git/ece3220
+#       OR,
+#       $ cd ~/git/ece3220
+#       $ git update
+#
+# <help_end>
 #
 set -eu
 
@@ -44,22 +56,114 @@ SCRIPTDIR=$(dirname "$SCRIPT_REALPATH")
 
 source "${SCRIPTDIR}/git-update-function.sh"
 
+# Program paths
+declare -rx GETOPT=/usr/bin/getopt
+declare -rx PAGER=/usr/bin/less
+declare -rx PRINTF=/usr/bin/printf
+declare -rx SED=/usr/bin/sed
+
+#==========================================================================
+# catch STDOUT STDERR cmd [args...]
+# Captures simultaneously into variables STDOUT and STDERR the output sent
+# to stdout and stderr, respectively, by the command `cmd'.
+#
+# I'm assuming the copyright holder for this code is the author of this
+# post on StackOverflow.com: https://stackoverflow.com/a/41069638/5051940
+#==========================================================================
+
+function catch()
+{
+set +e
+    eval "$({
+    __2="$(
+      { __1="$("${@:3}")"; } 2>&1;
+      ret=$?;
+      "${PRINTF}" '%q=%q\n' "$1" "$__1" >&2;
+      exit $ret
+      )"
+    ret=$?;
+    "${PRINTF}" '%s=%q\n' "$2" "$__2" >&2;
+    "${PRINTF}" 'return %q\n' "$ret" >&2;
+    } 2>&1 )";
+set -e
+}
+
+
+#==========================================================================
+# ParseTheCommandLine() "$@"
+#==========================================================================
+
+function ParseTheCommandLine()
+{
+    # Parameter values for `lopts' and `sopts'
+    # X   no operand
+    # X:  required operand--e.g., -X required_value, --ex=required_value
+    # X:: optional operand--e.g., -X  =OR=  -X value
+    local lopts="help restore-active-branch"
+    local sopts="h r"
+    local getopt_exit_code
+    local getopt_stdout
+    local getopt_stderr
+
+set +e
+    catch getopt_stdout getopt_stderr \
+        "${GETOPT}" -o "${sopts}" -l "${lopts}" -a -n$-1 -s bash -- "$@"
+    getopt_exit_code=$?
+set -e
+
+    if [[ "$getopt_exit_code" -ne 0 ]]; then
+        >&2 echo ":: GETOPT ERROR :: ${getopt_stderr}"
+        exit ${getopt_exit_code}
+    fi
+
+    eval set -- "${getopt_stdout}"
+
+    while [[ $# -gt 0 ]]
+    do
+        case "$1" in
+            -h|--help) cloHelpRequested=true ;;
+            -r|--restore-active-branch) cloRestoreActiveBranch=true ;;
+            --) if [[ $# -ge 2 ]]; then cloGetRepoDirectory=${2}; shift; fi ;;
+            *) : ;; # unsupported -Y options
+        esac
+        shift
+    done
+}
+
 
 ###########################################################################
 ##  main()
 ###########################################################################
 
-# The default git repository directory is the current working directory. 
-git_repo_directory="$(/usr/bin/pwd)"
+#--------------------------------------------------------------------------
+#  Process the command line
+#--------------------------------------------------------------------------
 
-if [[ $# -gt 0 ]]; then
-    if [[ -d $1 ]]; then
-        git_repo_directory="$1"
-    else
-        >&2 echo "[$SCRIPT_NAME] :: ERROR ::  Directory '$1' does not exist."
-        exit 1
-    fi
+# The default git repository directory is the current working directory. 
+cloGitRepoDirectory="$(/usr/bin/pwd)"
+cloHelpRequested=false
+cloRestoreActiveBranch=false
+
+ParseTheCommandLine "$@"
+
+tracev cloGitRepoDirectory
+tracev cloHelpRequested
+tracev cloRestoreActiveBranch
+
+#--------------------------------------------------------------------------
+#  If the user requested help, display the help information and exit.
+#--------------------------------------------------------------------------
+
+if $cloHelpRequested; then
+    export LESS="--prompt=\ Help for ${SCRIPT_NAME}\: ?ltline %lt?L/%L.:byte %bB?s/%s..?e (END):?pB %pB\%.. (press h for help or q to quit)\ "
+    "${SED}" -n -e '/help_begin/,/help_end/{ /help_begin/d; /help_end/q; s/#\( \)\?//; p }' "$0" \
+        | "${PAGER}"
+    exit 0
 fi
 
-git_update "$git_repo_directory"
+#--------------------------------------------------------------------------
+#  Update the specified Git repository 
+#--------------------------------------------------------------------------
+
+git_update "$cloGitRepoDirectory" "$cloRestoreActiveBranch"
 
