@@ -26,10 +26,10 @@ function git_update()
     local git_repo_directory="${1%/}"
     local restore_starting_branch="${2:-false}"
     local branch_name
+    local current_branch_files_were_stashed
     local git_repo_directory_realpath
-    local git_stash_starting_branch
-    local git_stash_current_branch
     local starting_branch
+    local starting_branch_files_were_stashed
     local -r GIT=/usr/bin/git
     local -r REALPATH=/usr/bin/realpath
 
@@ -61,10 +61,10 @@ function git_update()
 
     # If the starting branch has changed or untracked files, stash them
     # before continuing.
-    git_stash_starting_branch=false
+    starting_branch_files_were_stashed=false
     if [[ $("$GIT" status --porcelain) ]]; then
         "$GIT" stash --include-untracked
-        git_stash_starting_branch=true
+        starting_branch_files_were_stashed=true
     fi
 
     "$GIT" fetch --all
@@ -73,16 +73,30 @@ function git_update()
         if "$GIT" show-ref --quiet refs/heads/${branch_name}; then
             if "$GIT" switch "${branch_name}"; then
 
+                # CHECK: Does this branch have a remote branch?
+                if ! "$GIT" branch -r | /usr/bin/grep "origin/${branch_name}" &>/dev/null; then
+                    # This branch does not have a remote branch.
+                    # Ignore this branch.
+                    cat << MESSAGE_EOF
+:: NOTE ::
+Branch '${branch_name}' does not have a remote-tracking branch.  If you want to
+update the files in your '${branch_name}' branch, use git-merge(1) or git-rebase(1)
+to merge the contents of your main/master branch, for example, into your
+'${branch_name}' branch.
+MESSAGE_EOF
+                    continue
+                fi
+
                 # If this branch has changed or untracked files, stash them.
-                git_stash_current_branch=false
+                current_branch_files_were_stashed=false
                 if [[ $("$GIT" status --porcelain) ]]; then
                     "$GIT" stash --include-untracked
-                    git_stash_current_branch=true
+                    current_branch_files_were_stashed=true
                 fi
 
                 "$GIT" pull
 
-                if $git_stash_current_branch; then
+                if $current_branch_files_were_stashed; then
                     "$GIT" stash pop
                 fi
             fi
@@ -94,16 +108,28 @@ function git_update()
         fi
     done
 
-    # Checkout the starting branch and pop any stashed files
-    "$GIT" checkout "$starting_branch"
-    if $git_stash_starting_branch; then
+    current_branch="$(/usr/bin/git rev-parse --abbrev-ref HEAD)"
+
+    if $starting_branch_files_were_stashed; then
+        if [ "$current_branch" != "$starting_branch" ]; then
+            "$GIT" switch "$starting_branch"
+            current_branch="$starting_branch"
+        fi
         "$GIT" stash pop
     fi
 
-    # If restore_starting_branch != true, switch to the 'develop' branch.
-    # Otherwise, remain on this branch (the starting branch).
-    if [ "$restore_starting_branch" != "true" ]; then
-        "$GIT" switch develop
+    if [ "$restore_starting_branch" == "true" ]; then
+        if [ "$current_branch" != "$starting_branch" ]; then
+            "$GIT" switch "$starting_branch"
+        fi
+    else
+        # If this repository has a branch named 'develop', select the
+        # develop branch before returning from this function.
+        if [ "$current_branch" != "develop" ]; then
+            if "$GIT" show-ref --quiet refs/heads/develop; then
+                "$GIT" switch develop
+            fi
+        fi
     fi
 
     popd >/dev/null
