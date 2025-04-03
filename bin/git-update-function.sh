@@ -11,8 +11,9 @@
 #       is 'false'.
 # 
 # DESCRIPTION
-#   For branches 'main' and 'develop' within the Git repository located
-#   in the specified git_repo_directory, git_update performes these tasks:
+#   For branches 'main'/'master' and 'develop' within the Git repository
+#   located in the specified git_repo_directory, git_update performes these
+#   tasks:
 #   - git switch <branch>
 #   - <stash any changed and/or untracked files>
 #   - git pull
@@ -32,7 +33,7 @@ function git_update()
     local -r GIT=/usr/bin/git
     local -r REALPATH=/usr/bin/realpath
 
-    # If the path string beings with a tilde character '~', replace the
+    # If the path string begins with a tilde character '~', replace the
     # tilde with the canonical path to the user's HOME directory.
     # See also:  https://stackoverflow.com/a/27485157/5051940
     git_repo_directory="${git_repo_directory/#\~/$HOME}"
@@ -68,7 +69,7 @@ function git_update()
 
     "$GIT" fetch --all
 
-    for branch_name in main develop; do
+    for branch_name in main master develop; do
         if "$GIT" show-ref --quiet refs/heads/${branch_name}; then
             if "$GIT" switch "${branch_name}"; then
 
@@ -86,7 +87,10 @@ function git_update()
                 fi
             fi
         else
-            >&2 echo ":: NOTICE :: Branch '${branch_name}' doesn't exist; skipping..."
+            case ${branch_name} in
+            main | master ) : ;;
+            *) >&2 echo ":: NOTICE :: Branch '${branch_name}' doesn't exist; skipping..." ;;
+            esac
         fi
     done
 
@@ -96,9 +100,8 @@ function git_update()
         "$GIT" stash pop
     fi
 
-    # If restore_starting_branch != true, switch to the 'develop' branch
-    # and exit. Otherwise, remain on this branch (the starting branch) and
-    # exit.
+    # If restore_starting_branch != true, switch to the 'develop' branch.
+    # Otherwise, remain on this branch (the starting branch).
     if [ "$restore_starting_branch" != "true" ]; then
         "$GIT" switch develop
     fi
