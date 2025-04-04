@@ -1,4 +1,5 @@
 # Makefile
+# 2025-04-04
 # Copyright 2019-2025 James D. Fischer
 #
 # SYNOPSYS
@@ -107,10 +108,12 @@ include override.mk
 endif
 
 
-# The intermediate build products--e.g., object code files (%.o),
-# dependency files (%.Td, %.d), precompiled headers (%.gch), etc.--are
+# The intermediate build products--e.g., object code files (%.X.o),
+# dependency files (%.X.Td, %.X.d), precompiled headers (%.gch), etc.--are
 # created within the BUILDDIR folder.  The program itself (PROGRAM_NAME) is
 # created within the current working directory.
+# [Note 1. The 'X' is a placeholder for the source file's file type, e.g., 
+# c, cc, cpp, or cxx:  %.c.o, %.cc.o, %.cpp.o, or %.cxx.o. --end note]
 #
 BUILDDIR ?= build
 
@@ -121,9 +124,9 @@ endif
 
 
 # DEPDIR is the folder that contains the automatically-generated dependency
-# files (%.Td, %.d). Each object file (%.o) has an associated dependency
-# file within folder DEPDIR--e.g.,
-#    foo.o -> $(DEPDIR)foo.d
+# files (%.X.Td, %.X.d). Each object file (%.X.o) has an associated depend-
+# ency file within folder DEPDIR--e.g.,
+#    foo.X.o -> $(DEPDIR)foo.X.d
 # By default, DEPDIR is a subdirectory within BUILDDIR:
 # $(BUILDDIR)
 #  `-- $(DEPDIR)
@@ -145,20 +148,20 @@ endif
 # `patsubst' function.)
 #
 SOURCES.c := $(wildcard *.c)
-OBJS.c    := $(SOURCES.c:%.c=$(BUILDDIR)%.o)
-DEPS.c    := $(SOURCES.c:%.c=$(DEPDIR)%.d)
+OBJS.c    := $(SOURCES.c:%=$(BUILDDIR)%.o)
+DEPS.c    := $(SOURCES.c:%=$(DEPDIR)%.d)
 
 SOURCES.cc := $(wildcard *.cc)
-OBJS.cc   := $(SOURCES.cc:%.cc=$(BUILDDIR)%.o)
-DEPS.cc   := $(SOURCES.cc:%.cc=$(DEPDIR)%.d)
+OBJS.cc   := $(SOURCES.cc:%=$(BUILDDIR)%.o)
+DEPS.cc   := $(SOURCES.cc:%=$(DEPDIR)%.d)
 
 SOURCES.cpp := $(wildcard *.cpp)
-OBJS.cpp  := $(SOURCES.cpp:%.cpp=$(BUILDDIR)%.o)
-DEPS.cpp  := $(SOURCES.cpp:%.cpp=$(DEPDIR)%.d)
+OBJS.cpp  := $(SOURCES.cpp:%=$(BUILDDIR)%.o)
+DEPS.cpp  := $(SOURCES.cpp:%=$(DEPDIR)%.d)
 
 SOURCES.cxx := $(wildcard *.cxx)
-OBJS.cxx  := $(SOURCES.cxx:%.cxx=$(BUILDDIR)%.o)
-DEPS.cxx  := $(SOURCES.cxx:%.cxx=$(DEPDIR)%.d)
+OBJS.cxx  := $(SOURCES.cxx:%=$(BUILDDIR)%.o)
+DEPS.cxx  := $(SOURCES.cxx:%=$(DEPDIR)%.d)
 
 # Dependency file created by Microsoft Visual Studio Code
 DEPS.vscode := null.d
@@ -179,26 +182,29 @@ HEADERS := \
 	$(wildcard *.H)
 
 
-# Use the C preprocessor to generate dependency files $(DEPDIR)%.d that
+# Use the C preprocessor to generate dependency files $(DEPDIR)%.X.d that
 # contain makefile-compatible dependency rules that list the set of build
-# prerequisites (dependencies) for each object code (%.o) file. For
-# example: consider a translation unit consisting of files x.c, a.h, and
-# b.h, that produces an object code file named x.o.  We want to command the
-# C preprocessor to automatically create a file named $(DEPDOR)x.d that
-# contains/provides a dependency rule for object code file $(BUILDDIR)x.o:
+# prerequisites (dependencies) for each object code (%.X.o) file, where 'X'
+# is the source file's file extension--e.g., c, cc, cpp, or cxx.  For
+# example: consider a translation unit consisting of files z.c, a.h, and
+# b.h, that produces an object code file named z.c.o.  We want to command
+# the C preprocessor to automatically create a file named $(DEPDOR)z.c.d
+# that contains/provides a dependency rule for object code file
+# $(BUILDDIR)z.c.o:
 #
-#	$(BUILDDIR)x.o: x.c a.h b.h
+#	$(BUILDDIR)z.c.o: z.c a.h b.h
 #
-# where '$(BUILDDIR)x.o' is the rule's target (the object code file we want
-# to create), and files x.c, a.h, and b.h are the rule's prerequisite
+# where '$(BUILDDIR)z.c.o' is the rule's target (the object code file we
+# want to create), and files z.c, a.h, and b.h are the rule's prerequisite
 # (a.k.a., dependency) files.
 #
-# [Note 1:  Variable CPPFLAGS.d provides the command line flags that compel
-# the C preprocessor to create the desired dependency files ($(DEPDIR)%.d).
+# [Note 1:  A set of variables named CPPFLAGS.X.d provide the command line
+# flags that compel the C preprocessor to create the desired dependency
+# files ($(DEPDIR)%.X.d).
 #
 #   -MT target
 #         Specifies a custom name for the makefile rule's target, which in
-#         this case is $(BUILDDIR)%.o.
+#         this case is $(BUILDDIR)%.X.o.
 #   -MMD
 #         List only this project's header files, and not system header
 #         files (e.g., standard C/C++ library header files), in the rule's
@@ -207,20 +213,22 @@ HEADERS := \
 #         the flag -MD instead of -MMD.)
 #   -MF file
 #         Stores the automatically-generated dependency rule in the
-#         specified file, which in this case is $(DEPDIR)%.d.
+#         specified file, which in this case is $(DEPDIR)%.X.d.
 #
 # See also: man 1 cpp
 # --end note]
 #
-# [Note 2:  Variable CPPFLAGS.d must be a recursively expanded variable
-# because it contains references to other variables `$@' and `$*' whose
-# values are unknown at this point in the makefile.  These variables must
-# be evaluated later in this makefile, at each point variable CPPFLAGS.d is
-# expanded.  So use `=' here (deferred evaluation) and not `:=' (immediate
-# evaluation). --end note]
+# [Note 2:  Each variable 'CPPFLAGS.X.d' must be a recursively expanded
+# variable because it contains references to other variables `$@' and `$*'
+# whose values are unknown at this point in the makefile.  These variables
+# must be evaluated later in this makefile, at the point where each vari-
+# able CPPFLAGS.X.d is expanded.  So use `=' here (deferred evaluation) and
+# not `:=' (immediate evaluation). --end note]
 #
-CPPFLAGS.d =
-CPPFLAGS.d += -MT $@ -MMD -MF $(DEPDIR)$*.Td
+CPPFLAGS.c.d += -MT $@ -MMD -MF $(DEPDIR)$*.c.Td
+CPPFLAGS.cc.d += -MT $@ -MMD -MF $(DEPDIR)$*.cc.Td
+CPPFLAGS.cpp.d += -MT $@ -MMD -MF $(DEPDIR)$*.cpp.Td
+CPPFLAGS.cxx.d += -MT $@ -MMD -MF $(DEPDIR)$*.cxx.Td
 
 # C/C++ preprocessor flags
 # NOTES
@@ -292,7 +300,10 @@ endif
 
 
 # Post-compile tasks
-POSTCOMPILE = @mv -f $(DEPDIR)$*.Td $(DEPDIR)$*.d && touch $@
+POSTCOMPILE.c = @mv -f $(DEPDIR)$*.c.Td $(DEPDIR)$*.c.d && touch $@
+POSTCOMPILE.cc = @mv -f $(DEPDIR)$*.cc.Td $(DEPDIR)$*.cc.d && touch $@
+POSTCOMPILE.cpp = @mv -f $(DEPDIR)$*.cpp.Td $(DEPDIR)$*.cpp.d && touch $@
+POSTCOMPILE.cxx = @mv -f $(DEPDIR)$*.cxx.Td $(DEPDIR)$*.cxx.d && touch $@
 
 
 # [Optional]  Variable customizations for this build should be defined in a
@@ -596,24 +607,25 @@ endif
 #     whether to update [the %.o target] again.
 #
 %.o: %.c
-$(BUILDDIR)%.o: %.c $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
-	$(COMPILE.c) $(CPPFLAGS.d) $(OUTPUT_OPTION) $<
-	$(POSTCOMPILE)
+$(BUILDDIR)%.c.o: %.c $(DEPDIR)%.c.d | $(BUILDDIR) $(DEPDIR)
+	$(COMPILE.c) $(CPPFLAGS.c.d) $(OUTPUT_OPTION) $<
+	$(POSTCOMPILE.c)
 
 %.o: %.cc
-$(BUILDDIR)%.o: %.cc $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
-	$(COMPILE.cc) $(CPPFLAGS.d) $(OUTPUT_OPTION) $<
-	$(POSTCOMPILE)
+$(BUILDDIR)%.cc.o: %.cc $(DEPDIR)%.cc.d | $(BUILDDIR) $(DEPDIR)
+	$(COMPILE.cc) $(CPPFLAGS.cc.d) $(OUTPUT_OPTION) $<
+	$(POSTCOMPILE.cc)
 
 %.o: %.cpp
-$(BUILDDIR)%.o: %.cpp $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
-	$(COMPILE.cpp) $(CPPFLAGS.d) $(OUTPUT_OPTION) $<
-	$(POSTCOMPILE)
+$(BUILDDIR)%.cpp.o: %.cpp $(DEPDIR)%.cpp.d | $(BUILDDIR) $(DEPDIR)
+	$(COMPILE.cpp) $(CPPFLAGS.cpp.d) $(OUTPUT_OPTION) $<
+	$(POSTCOMPILE.cpp)
 
 %.o: %.cxx
-$(BUILDDIR)%.o: %.cxx $(DEPDIR)%.d | $(BUILDDIR) $(DEPDIR)
-	$(COMPILE.cxx) $(CPPFLAGS.d) $(OUTPUT_OPTION) $<
-	$(POSTCOMPILE)
+COMPILE.cxx = $(COMPILE.cc)
+$(BUILDDIR)%.cxx.o: %.cxx $(DEPDIR)%.cxx.d | $(BUILDDIR) $(DEPDIR)
+	$(COMPILE.cxx) $(CPPFLAGS.cxx.d) $(OUTPUT_OPTION) $<
+	$(POSTCOMPILE.cxx)
 
 
 # Create the build directory if it doesn't exist.
@@ -706,7 +718,6 @@ endif
 _basic_clean::
 	@rm -fv $(DEPS)
 	@rm -fv $(OBJS)
-	@rm -fv $(notdir $(OBJS:%.o=%))
 
 # Delete all build products *except* the program file.
 .PHONY: mostly-clean
