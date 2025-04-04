@@ -5,8 +5,8 @@
 #  translation unit's class hierarchy information, including information
 #  about each class's virtual function lookup table (vtable).
 #
-#  2024-04-10 Jim Fischer <fischerjd@missouri.edu>
-#  Copyright 2024 James D. Fischer
+#  2025-04-04 Jim Fischer <fischerjd@missouri.edu>
+#  Copyright 2024,2025 James D. Fischer
 #
 
 ifndef VTABLE.MK
@@ -15,7 +15,7 @@ VTABLE.MK := 1
 CXXFLAGS += -fdump-lang-class
 
 .PHONY: clean
-clean:: ; -rm -f "$(BUILDDIR)"*.class
+clean:: ; @rm -fv "$(BUILDDIR)"*.class
 
 endif # VTABLE.MK
 
