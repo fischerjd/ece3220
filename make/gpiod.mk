@@ -19,7 +19,7 @@
 # preprocessor's header file search path, and to the linker's library file
 # search path.
 #
-# 2025-03-29 Jim Fischer <fischerjd@missouri.edu>
+# 2025-04-12 Jim Fischer <fischerjd@missouri.edu>
 # Copyright 2025 James D. Fischer
 #
 
@@ -29,31 +29,16 @@ GPIOD.MK = 1
 # The C compiler dialect must be C 17
 CFLAGS.dialect := c17
 
-# The Raspberry Pi 'bookworm' OS release provides an older version of the
-# gpiod software: v1.6.3.  If you want to use a newer version of gpiod,
-# download, configure, build, and install the software as shown below,
-# replacing `x.y.z` with the actual version number (e.g., 2.2.1):
-#
-# sudo mkdir -p /opt/gpiod/x.y.z
-# sudo chown -R pi:pi /opt/gpiod/
-#
-# mkdir ~/tmp
-# cd ~/tmp/
-#
-# wget https://mirrors.edge.kernel.org/pub/software/libs/libgpiod/libgpiod-x.y.z.tar.xz
-# tar -xvf ./libgpiod-x.y.z.tar.xz
-# cd ./libgpiod-x.y.z/
-# ./configure --enable-tools --prefix=/opt/gpiod/x.y.z/
-# make
-# make install
-#
 # To use the gpiod software that's installed in folder /opt/gpiod/x.y.z/, 
-# create in this makefile a variable named GPIOD__VERSION whose value is 
-# the gpiod version number you want to use, e.g.,
-#	
+# where `x.y.z` is the software version number, create in this makefile a
+# variable named GPIOD__VERSION whose value is the gpiodcxx version 
+# number you want to use, e.g.,
+#
 #		GPIOD__VERSION := x.y.z
 # 
-GPIOD__VERSION := 2.2.1
+#GPIOD__VERSION := x.y.z
+GPIOD__VERSION := 1.6.3
+
 
 # Cross toolchain configuration
 GPIOD__BUILD_CPU_ARCH := $(shell lscpu | grep 'Architecture:' | sed 's/Architecture:[[:blank:]]*//')
@@ -66,17 +51,22 @@ GPIOD__RPIFS_BASEDIR ?= $(HOME)/rpifs
 GPIOD__DEFINE_PATH_FLAGS := true
 endif
 
-ifdef GPIOD__VERSION
-GPIOD__INCLUDEDIR := $(GPIOD__RPIFS_BASEDIR)/opt/gpiod/$(GPIOD__VERSION)/usr/include
-GPIOD__LIBDIR := $(GPIOD__RPIFS_BASEDIR)/opt/gpiod/$(GPIOD__VERSION)/lib
-GPIOD__DEFINE_PATH_FLAGS := true
-else
+# Default paths
 GPIOD__INCLUDEDIR := $(GPIOD__RPIFS_BASEDIR)/usr/include
 GPIOD__LIBDIR := $(GPIOD__RPIFS_BASEDIR)/usr/lib/aarch64-linux-gnu
+
+# Version-specific paths
+ifdef GPIOD__VERSION
+GPIOD__VERSION_DIR := $(GPIOD__RPIFS_BASEDIR)/opt/gpiod/$(GPIOD__VERSION)
+ifneq ($(wildcard $(GPIOD__VERSION_DIR)/.),)
+GPIOD__INCLUDEDIR := $(GPIOD__VERSION_DIR)/include
+GPIOD__LIBDIR := $(GPIOD__VERSION_DIR)/lib
+GPIOD__DEFINE_PATH_FLAGS := true
+endif
 endif
 
 ifdef GPIOD__DEFINE_PATH_FLAGS
-CPPFLAGS += -I$(GPIOD__INCLUDEDIR)
+CPPFLAGS += -isystem $(GPIOD__INCLUDEDIR)
 LDFLAGS += -L$(GPIOD__LIBDIR)
 endif
 
@@ -92,7 +82,7 @@ endif
 #  * libgpiod.so
 #       ^^^^^ ----> -lgpiod
 #
-LDLIBS += -lgpiod
+LDLIBS.custom += -lgpiod
 
 endif # GPIOD.MK
 

@@ -19,7 +19,7 @@
 # preprocessor's header file search path, and to the linker's library file
 # search path.
 #
-# 2025-03-27 Jim Fischer <fischerjd@missouri.edu>
+# 2025-04-12 Jim Fischer <fischerjd@missouri.edu>
 # Copyright 2025 James D. Fischer
 #
 
@@ -29,14 +29,16 @@ GPIODCXX.MK = 1
 # The C++ compiler dialect must be C++ 17
 CXXFLAGS.dialect := c++17
 
-# To use the gpiodcxx software that's installed in folder /opt/gpiodcxx/x.y.z/, 
+# To use the gpiodcxx software that's installed in folder /opt/gpiod/x.y.z/, 
 # where `x.y.z` is the software version number, create in this makefile a
 # variable named GPIODCXX__VERSION whose value is the gpiodcxx version 
 # number you want to use, e.g.,
-#	
+#
 #		GPIODCXX__VERSION := 1.2.3
 # 
 #GPIODCXX__VERSION := x.y.z
+GPIODCXX__VERSION := 1.6.3
+
 
 # Cross toolchain configuration
 GPIODCXX__BUILD_CPU_ARCH := $(shell lscpu | grep 'Architecture:' | sed 's/Architecture:[[:blank:]]*//')
@@ -49,17 +51,22 @@ GPIODCXX__RPIFS_BASEDIR ?= $(HOME)/rpifs
 GPIODCXX__DEFINE_PATH_FLAGS := true
 endif
 
-ifdef GPIODCXX__VERSION
-GPIODCXX__INCLUDEDIR := $(GPIODCXX__RPIFS_BASEDIR)/opt/gpiodcxx/$(GPIODCXX__VERSION)/usr/include
-GPIODCXX__LIBDIR := $(GPIODCXX__RPIFS_BASEDIR)/opt/gpiodcxx/$(GPIODCXX__VERSION)/lib
-GPIODCXX__DEFINE_PATH_FLAGS := true
-else
+# Default paths
 GPIODCXX__INCLUDEDIR := $(GPIODCXX__RPIFS_BASEDIR)/usr/include
 GPIODCXX__LIBDIR := $(GPIODCXX__RPIFS_BASEDIR)/usr/lib/aarch64-linux-gnu
+
+# Version-specific paths
+ifdef GPIODCXX__VERSION
+GPIODCXX__VERSION_DIR := $(GPIODCXX__RPIFS_BASEDIR)/opt/gpiod/$(GPIODCXX__VERSION)
+ifneq ($(wildcard $(GPIODCXX__VERSION_DIR)/.),)
+GPIODCXX__INCLUDEDIR := $(GPIODCXX__VERSION_DIR)/include
+GPIODCXX__LIBDIR := $(GPIODCXX__VERSION_DIR)/lib
+GPIODCXX__DEFINE_PATH_FLAGS := true
+endif
 endif
 
 ifdef GPIODCXX__DEFINE_PATH_FLAGS
-CPPFLAGS += -I$(GPIODCXX__INCLUDEDIR)
+CPPFLAGS += -isystem $(GPIODCXX__INCLUDEDIR)
 LDFLAGS += -L$(GPIODCXX__LIBDIR)
 endif
 
@@ -75,7 +82,7 @@ endif
 #  * libgpiodcxx.so
 #       ^^^^^^^^ ----> -lgpiodcxx
 #
-LDLIBS += -lgpiodcxx
+LDLIBS.custom += -lgpiodcxx
 
 endif # GPIODCXX.MK
 
