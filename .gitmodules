@@ -1,0 +1,3 @@
+[submodule "doc/gpiod/1.6.3/c-api/examples"]
+	path = doc/gpiod/1.6.3/c-api/examples
+	url = https://github.com/starnight/libgpiod-example.git
