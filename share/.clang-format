@@ -92,17 +92,17 @@ BinPackParameters: OnePerLine
 BitFieldColonSpacing: Both
 BraceWrapping:
   AfterCaseLabel:  false
-  AfterClass:      false
+  AfterClass:      true
   AfterControlStatement: Never
   AfterEnum:       false
   AfterExternBlock: false
-  AfterFunction:   false
+  AfterFunction:   true
   AfterNamespace:  false
   AfterObjCDeclaration: false
-  AfterStruct:     false
+  AfterStruct:     true
   AfterUnion:      false
-  BeforeCatch:     false
-  BeforeElse:      false
+  BeforeCatch:     true
+  BeforeElse:      true
   BeforeLambdaBody: false
   BeforeWhile:     false
   IndentBraces:    false
@@ -115,7 +115,9 @@ BreakAfterJavaFieldAnnotations: false
 BreakAfterReturnType: Automatic
 BreakArrays:     true
 BreakBeforeBinaryOperators: None
-BreakBeforeBraces: Linux
+#BreakBeforeBraces: Linux
+#BreakBeforeBraces: Custom
+BreakBeforeBraces: Allman
 BreakBeforeConceptDeclarations: Always
 BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTernaryOperators: true
@@ -254,7 +256,7 @@ SpaceBeforeRangeBasedForLoopColon: true
 SpaceBeforeSquareBrackets: false
 SpaceInEmptyBlock: true
 SpacesBeforeTrailingComments: 1
-SpacesInAngles:  Never
+SpacesInAngles:  true
 SpacesInContainerLiterals: true
 SpacesInLineCommentPrefix:
   Minimum:         1
