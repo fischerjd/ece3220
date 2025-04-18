@@ -58,7 +58,6 @@ source "${SCRIPTDIR}/git-update-function.sh"
 # Program paths
 declare -rx GETOPT=/usr/bin/getopt
 declare -rx PAGER=/usr/bin/less
-declare -rx PRINTF=/usr/bin/printf
 declare -rx SED=/usr/bin/sed
 
 #==========================================================================
@@ -77,12 +76,12 @@ set +e
     __2="$(
       { __1="$("${@:3}")"; } 2>&1;
       ret=$?;
-      "${PRINTF}" '%q=%q\n' "$1" "$__1" >&2;
+      printf '%s=%q\n' "$1" "$__1" >&2;
       exit $ret
       )"
     ret=$?;
-    "${PRINTF}" '%s=%q\n' "$2" "$__2" >&2;
-    "${PRINTF}" 'return %q\n' "$ret" >&2;
+    printf '%s=%q\n' "$2" "$__2" >&2;
+    printf 'return %q\n' "$ret" >&2;
     } 2>&1 )";
 set -e
 }
@@ -101,8 +100,8 @@ function ParseTheCommandLine()
     local lopts="help restore-active-branch"
     local sopts="h r"
     local getopt_exit_code
-    local getopt_stdout
     local getopt_stderr
+    local getopt_stdout
 
 set +e
     catch getopt_stdout getopt_stderr \
@@ -110,7 +109,7 @@ set +e
     getopt_exit_code=$?
 set -e
 
-    if [[ "$getopt_exit_code" -ne 0 ]]; then
+    if [[ $getopt_exit_code -ne 0 ]]; then
         >&2 echo ":: GETOPT ERROR :: ${getopt_stderr}"
         exit ${getopt_exit_code}
     fi
