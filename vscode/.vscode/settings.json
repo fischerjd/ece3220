@@ -66,8 +66,28 @@
         "numbers": "cpp"
     },
     "git.openRepositoryInParentFolders": "never",
-    "rewrap.autoWrap.enabled": false,
     "terminal.integrated.cwd": "${fileDirname}",
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "bash",
+            "icon": "terminal-bash",
+            "args": ["--login"]
+        },
+        "zsh": {
+            "path": "zsh"
+        },
+        "fish": {
+            "path": "fish"
+        },
+        "tmux": {
+            "path": "tmux",
+            "icon": "terminal-tmux"
+        },
+        "pwsh": {
+            "path": "pwsh",
+            "icon": "terminal-powershell"
+        }
+    },
     "vim.disableExtension": true,
     "vim.textwidth": 75,
     "[c][cpp]": {
