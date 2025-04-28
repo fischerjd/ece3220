@@ -1,10 +1,33 @@
+// editor.wordwrap:
+//  https://code.visualstudio.com/updates/v1_10#_word-wrap-settings-redesign
+//  https://stackoverflow.com/a/66434593/5051940
 {
     "doxdocgen.file.copyrightTag": [
-        "@copyright Copyrigt {year} {author}"
+        "@copyright Copyright {year} James D. Fischer"
+    ],
+    "doxdocgen.file.fileOrder": [
+        "file",
+        "author", 
+        "brief",
+        "version",
+        "date",
+        "empty",
+        "copyright"
     ],
     "doxdocgen.file.versionTag": "@version 2025SP",
+    "doxdocgen.generic.authorEmail": "fischerjd@missouri.edu",
+    "doxdocgen.generic.authorName": "James D. Fischer",
+    "doxdocgen.generic.splitCasingSmartText": false,
+    "editor.acceptSuggestionOnEnter": "on",
+    "editor.hover.above": false,
+    "editor.quickSuggestions": {
+        "other": "off",
+        "comments": "off",
+        "strings": "off"
+    },
     "editor.rulers": [ 75 ],
     "editor.wordWrap": "on",
+    "editor.wordWrapColumn": 75,
     "files.associations": {
         "iostream": "cpp",
         "functional": "cpp",
@@ -70,6 +93,7 @@
         "numbers": "cpp"
     },
     "git.openRepositoryInParentFolders": "never",
+    "rewrap.autoWrap.enabled": false,
     "terminal.integrated.cwd": "${fileDirname}",
     "terminal.integrated.profiles.linux": {
         "bash": {
@@ -111,17 +135,32 @@
         "cerr",
         "cin",
         "cout",
+        "eecspi",
         "endl",
+        "getopt",
         "gpiochip",
         "gpiod",
-        "gpiodetect",
-        "RAII"
+        "imager",
+        "libgpiodcxx",
+        "lopts",
+        "RAII",
+        "ROOTFS",
+        "sdcard",
+        "sopts",
+        "usermod"
     ],
     "cSpell.ignoreWords": [
+        "Doxyfile",
         "GPIOD",
         "GPIODCXX",
         "PIGPIO",
         "RPIFS",
-        "WIRINGPI"
+        "WIRINGPI",
+        "Doxyfile",
+        "gpiodcxx",
+        "pawprint",
+        "pawrint",
+        "rpab",
+        "rpifs"
     ]
 }
