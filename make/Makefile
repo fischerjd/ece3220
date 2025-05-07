@@ -725,6 +725,10 @@ mostly-clean:: _basic_clean
 	@$(call remove_folder,$(DEPDIR))
 	@$(call remove_folder,$(BUILDDIR))
 
+# Delete all documentation build products.
+.PHONY: doc-clean
+doc-clean:: ;
+
 # Delete all build products that are files (do not delete directories).
 .PHONY: clean
 clean:: mostly-clean
