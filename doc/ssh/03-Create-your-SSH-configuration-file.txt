@@ -30,21 +30,20 @@ $ ls -l ~/.ssh/config
 
 # PAWPRINT
 # The command line shown below creates a Bash shell environment variable
-# named `PAWPRINT', and it initializes the variable's value as `abc123'.
-# When you define the environment variable `PAWPRINT', enter your own
-# pawprint as the variable's value; do not use the example pawprint value
-# `abc123'.
+# named `PAWPRINT' and initializes its value as `abc123'.  When you define
+# the environment variable `PAWPRINT', enter your own pawprint as the 
+# variable's value; do not use the example pawprint value `abc123'.
 
 $ PAWPRINT='abc123'
 
 
 # Use the stream editor program `sed' to replace all instances of
 #   User __your_pawprint__
-# in your `config' file with
+# in file ~/.ssh/config with
 #   User $PAWPRINT
-# Note that the Bash shell replaces the expression `$PAWPRINT' with the
-# value that is stored in the PAWPRINT environment variable, which is your
-# Mizzou pawprint.
+# Note that in the `sed' command line shown below, the Bash shell replaces
+# the expression `$PAWPRINT' with the value that is stored in the PAWPRINT
+# environment variable, which should be your Mizzou pawprint.
 
 $ sed -i.bak -E "s/User[ \t]+__your_pawprint__/User $PAWPRINT/g" ~/.ssh/config
 
