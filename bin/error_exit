@@ -7,10 +7,13 @@
 set -eu
 shopt -s inherit_errexit
 
-# shellcheck disable=SC2034,SC2155
-readonly SCRIPTNAME=$( basename "$0" )
-# shellcheck disable=SC2034,SC2155
-readonly SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+SCRIPTNAME="$(/usr/bin/basename "$0")"
+# shellcheck disable=SC2034
+readonly SCRIPTNAME
+
+SCRIPTPATH="$( cd "$(/usr/bin/dirname "$0")" ; pwd -P )"
+# shellcheck disable=SC2034
+readonly SCRIPTPATH
 
 # Programs
 readonly BASENAME=/usr/bin/basename
@@ -86,11 +89,11 @@ set -e
     while [[ $# -gt 0 ]]
     do
         case "$1" in
-            -a|--error-app) cloErrorApp=${2}; shift ;;
-            -m|--error-message) cloErrorMessage=${2}; shift ;;
-            -q|--quiet) cloQuiet=$1 ;;
-            -s|--error-summary) cloErrorSummary=$2; shift ;;
-            -x|--exit-code) cloExitCode=$2; shift ;;
+            -a|--error-app) cloErrorApp="${2}"; shift ;;
+            -m|--error-message) cloErrorMessage="${2}"; shift ;;
+            -q|--quiet) cloQuiet="${1}" ;;
+            -s|--error-summary) cloErrorSummary="${2}"; shift ;;
+            -x|--exit-code) cloExitCode="${2}"; shift ;;
             --) break ;;
             *) : ;;     # unsupported -Y options
         esac
@@ -108,7 +111,7 @@ set -e
 #--------------------------------------------------------------------------
 
 # Automatic detection of the calling (error app) script's name.
-error_app_path=$( "${CAT}" /proc/$PPID/cmdline | "${TR}" '\000' ' ' | "${CUT}" -d ' ' -f 2 )
+error_app_path="$( "${CAT}" /proc/$PPID/cmdline | "${TR}" '\000' ' ' | "${CUT}" -d ' ' -f 2 )"
 cloErrorApp="$( "${BASENAME}" "${error_app_path}" )"
 
 cloErrorSummary='Unknown Error'
@@ -123,7 +126,7 @@ ParseTheCommandLine "$@"
 #  In the error message string, replace '<br>' with newline.
 #--------------------------------------------------------------------------
 
-cloErrorMessage=${cloErrorMessage//<[bB][rR]>/${NEWLINE}}
+cloErrorMessage="${cloErrorMessage//<[bB][rR]>/${NEWLINE}}"
 
 
 #--------------------------------------------------------------------------

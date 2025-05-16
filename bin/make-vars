@@ -179,7 +179,7 @@ function print_banner()
 function print_horizontal_rule()
 {
     local -r rule_character="${1:-'-'}"
-    local -r rule_length=${2:-75}
+    local -r rule_length="${2:-75}"
     local -i i
     local horizontal_rule
 
@@ -224,7 +224,7 @@ fi
 # that file when the script exits.
 #--------------------------------------------------------------------------
 
-TMPFILE=$(/usr/bin/mktemp)
+TMPFILE="$(/usr/bin/mktemp)"
 declare -r TMPFILE
 
 trap '"${RM}" -f -- "${TMPFILE}"' EXIT

@@ -75,18 +75,25 @@ readonly SED=/usr/bin/sed
 readonly SSH_KEYGEN=/usr/bin/ssh-keygen
 readonly TOUCH=/usr/bin/touch
 
-# shellcheck disable=SC2034,SC2155
-readonly SCRIPTNAME=$( "${BASENAME}" "$0" )
-# shellcheck disable=SC2034,SC2155
-readonly SCRIPTPATH="$( cd "$("${DIRNAME}" "$0")" ; pwd -P )"
+# shellcheck disable=SC2034
+SCRIPT_NAME="$("${BASENAME}" "$0")"
+readonly SCRIPT_NAME
+
+# shellcheck disable=SC2034
+SCRIPT_PATH="$( cd "$("${DIRNAME}" "$0")" ; pwd -P )"
+readonly SCRIPT_PATH
 
 # Libraries
-readonly ERROR_EXIT="${SCRIPTPATH}/error_exit"
+readonly ERROR_EXIT="${SCRIPT_PATH}/error_exit"
 
 # Exit status codes
 declare -ri EXIT_STATUS__SUCCESS=0
+
 declare -ri EXIT_STATUS__INVALID_PAWPRINT=1
+declare -ri EXIT_STATUS__VALID_PAWPRINT=$EXIT_STATUS__SUCCESS
+
 declare -ri EXIT_STATUS__SSH_PUBLIC_KEY_NOT_FOUND=2
+
 
 # Global variables
 g_ssh_private_identity_file_path=
@@ -209,13 +216,13 @@ function configure_the_authorized_keys_file()
     # and it is readable.
     if ! [ -f "${ssh_public_identity_file_path}" ]; then
         "${ERROR_EXIT}" \
-            -a "${SCRIPTNAME}" \
+            -a "${SCRIPT_NAME}" \
             -s "Task: ${FUNCNAME[0]}" \
             -m "The public SSH identity file '${ssh_public_identity_file_path}' does not exist." \
             -x $EXIT_STATUS__SSH_PUBLIC_KEY_NOT_FOUND
     elif ! [ -r "${ssh_public_identity_file_path}" ]; then
         "${ERROR_EXIT}" \
-            -a "${SCRIPTNAME}" \
+            -a "${SCRIPT_NAME}" \
             -s "Task: ${FUNCNAME[0]}" \
             -m "The public SSH identity file '${ssh_public_identity_file_path}' is not readable." \
             -x $EXIT_STATUS__SSH_PUBLIC_KEY_NOT_FOUND
@@ -276,7 +283,7 @@ function configure_the_ssh_config_file()
 {
     local -r pawprint="${1}"
     local -r user_ssh_config_file_path="$HOME/.ssh/config"
-    local -r git_repo_ssh_config_file_path="${SCRIPTPATH}/../ssh/config"
+    local -r git_repo_ssh_config_file_path="${SCRIPT_PATH}/../ssh/config"
 
     print_configure_task_banner "Configuing Your SSH Configuration File '~/.ssh/config'"
 
@@ -476,10 +483,10 @@ function validate_employee_pawprint_format()
     local -i exit_status=$EXIT_STATUS__INVALID_PAWPRINT
 
     if [[ "$pawprint" =~ ^[a-z]{3,}$ ]]; then
-        exit_status=0
+        exit_status=$EXIT_STATUS__VALID_PAWPRINT
     fi
 
-    if (( exit_status != 0 )); then
+    if (( exit_status != EXIT_STATUS__VALID_PAWPRINT )); then
         >&2 cat << MESSAGE_EOF
 
 :: INVALID EMPLOYEE PAWPRINT ::
@@ -524,7 +531,7 @@ function validate_student_pawprint_format()
 {
     local pawprint="$1"
     local az_char_count=0
-    local exit_status=1
+    local exit_status=$EXIT_STATUS__INVALID_PAWPRINT
 
     if [[ "$pawprint" =~ ^[a-z][0-9a-z]{4,5}$ ]]; then
         for (( i=0; i<${#pawprint}; ++i )); do
@@ -533,11 +540,11 @@ function validate_student_pawprint_format()
             fi
         done
         if (( az_char_count >= 3 )); then
-            exit_status=0
+            exit_status=$EXIT_STATUS__VALID_PAWPRINT
         fi
     fi
 
-    if (( exit_status != 0 )); then
+    if (( exit_status != EXIT_STATUS__VALID_PAWPRINT )); then
         >&2 cat << MESSAGE_EOF
 
 :: INVALID STUDENT PAWPRINT ::
@@ -587,7 +594,7 @@ if [ -n "${cloPawprint}" ]; then
     pawprint=$cloPawprint
 else
     echo -n -e "\nPlease enter your Mizzou pawprint (not your email address)\n> "
-    read pawprint
+    read -r pawprint
 fi
 
 case $cloUserCategory in

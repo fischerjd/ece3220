@@ -49,9 +49,14 @@ set -eu
 
 #source /usr/local/libexec/eceugl-utils/trace
 
-SCRIPT_REALPATH=$(/usr/bin/realpath "$0")
-SCRIPT_NAME=$(/usr/bin/basename "$SCRIPT_REALPATH")
-SCRIPTDIR=$(dirname "$SCRIPT_REALPATH")
+SCRIPT_REALPATH="$(/usr/bin/realpath "$0")"
+readonly SCRIPT_REALPATH
+
+SCRIPT_NAME="$(/usr/bin/basename "$SCRIPT_REALPATH")"
+readonly SCRIPT_NAME
+
+SCRIPTDIR="$(/usr/bin/dirname "$SCRIPT_REALPATH")"
+readonly SCRIPTDIR
 
 source "${SCRIPTDIR}/git-update-function.sh"
 
@@ -121,7 +126,7 @@ set -e
         case "$1" in
             -h|--help) cloHelpRequested=true ;;
             -r|--restore-active-branch) cloRestoreActiveBranch=true ;;
-            --) if [[ $# -ge 2 ]]; then cloGitRepoDirectory=${2}; shift; fi ;;
+            --) if [[ $# -ge 2 ]]; then cloGitRepoDirectory="${2}"; shift; fi ;;
             *) : ;; # unsupported -Y options
         esac
         shift

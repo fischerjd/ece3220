@@ -55,9 +55,9 @@ function git_update()
         return
     fi
 
-    pushd "$git_repo_directory" >/dev/null
+    pushd "$git_repo_directory" >/dev/null || exit 1
 
-    starting_branch=$("$GIT" branch --show-current)
+    starting_branch="$("$GIT" branch --show-current)"
 
     # If the starting branch has changed or untracked files, stash them
     # before continuing.
@@ -132,6 +132,6 @@ MESSAGE_EOF
         fi
     fi
 
-    popd >/dev/null
+    popd >/dev/null || exit 1
 }
 
