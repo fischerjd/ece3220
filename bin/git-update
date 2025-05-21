@@ -3,26 +3,29 @@
 #
 # <help_begin>
 # NAME
-#   git-update - performs `git pull' on branches main and develop
+#   git-update - performs `git pull' on branches develop and main
 #
 # SYNOPSYS
 #   git-update [options] [dir]
 #
 # DESCRIPTION
 #   git-update performs a `git pull' operation on branches `develop' and
-#   `main', in that order.  If a directory name `dir' is specified on the
-#   command line, the `git pull' tasks are performed within that directory.
+#   `main', in that order.  If directory `dir' is specified on the command
+#   line, git-update performs the `git pull' tasks within that directory.
 #   Otherwise, the `git pull' tasks are performed within the current
 #   directory.
 #
 # OPTIONS
-#   -r, --restore-active-branch
-#       If this option is specified, whichever branch was active prior to
-#       invoking git-update, that same branch will be active after
-#       git-update exits.  Otherwise, when git-update exits, the 'develop'
-#       branch will be the active branch, if it exists.  If there is no
-#       'develop' branch, the 'main' branch will be active when get-update
-#       exits.
+#   -h, --help
+#       Displays this script's help information.
+#
+#   -r, --restore-starting-branch
+#       If this option is specified, the branch that is active prior to 
+#       invoking git-update will continue to be the active branch after
+#       git-update exits.  Otherwise, the 'develop' (if it exists) will be
+#       the active branch when git-update exits.  If the repository does
+#       not have a 'develop' branch, the 'main' branch will be active when
+#       get-update exits.
 #
 # INSTALLATION
 #   I recommend you use the following procedure to "install" this script:
@@ -33,9 +36,9 @@
 # NOTES
 #   Within the Git repository, if the active branch, the develop branch, or
 #   the main branch has unchanged and/or untracked files, those files are
-#   stashed prior to performing 'git pull' on that branch, and any stashed
-#   files are popped off the stash after 'git pull' is performed on the
-#   branch.
+#   stashed prior to switching to a different branch and/or performing 
+#   'git pull' on the branch. Any stashed files are popped off the stash
+#   after 'git pull' is performed on the branch.
 #
 # EXAMPLE
 #       $ git update ~/git/ece3220
@@ -49,21 +52,156 @@ set -eu
 
 #source /usr/local/libexec/eceugl-utils/trace
 
-SCRIPT_REALPATH="$(/usr/bin/realpath "$0")"
+# Program paths
+readonly BASENAME=/usr/bin/basename
+readonly DIRNAME=/usr/bin/dirname
+readonly GETOPT=/usr/bin/getopt
+readonly PAGER=/usr/bin/less
+readonly REALPATH=/usr/bin/realpath
+readonly SED=/usr/bin/sed
+
+
+SCRIPT_REALPATH="$("REALPATH" "$0")"
 readonly SCRIPT_REALPATH
 
-SCRIPT_NAME="$(/usr/bin/basename "$SCRIPT_REALPATH")"
+SCRIPT_NAME="$("BASENAME" "$SCRIPT_REALPATH")"
 readonly SCRIPT_NAME
 
-SCRIPTDIR="$(/usr/bin/dirname "$SCRIPT_REALPATH")"
-readonly SCRIPTDIR
+SCRIPT_DIR="$("DIRNAME" "$SCRIPT_REALPATH")"
+readonly SCRIPT_DIR
 
-source "${SCRIPTDIR}/git-update-function.sh"
 
-# Program paths
-declare -rx GETOPT=/usr/bin/getopt
-declare -rx PAGER=/usr/bin/less
-declare -rx SED=/usr/bin/sed
+#==========================================================================
+# git_update()
+#
+# @param[in] git_repo_directory
+# @param[in] restore_starting_branch (boolean, optional). Default value
+#       is 'false'.
+# 
+# DESCRIPTION
+#   For branches 'main'/'master' and 'develop' within the Git repository
+#   located in the specified git_repo_directory, git_update performes these
+#   tasks:
+#   - git switch <branch>
+#   - <stash any changed and/or untracked files>
+#   - git pull
+#   - <unstash any changed and/or untracked files>
+#   - if restore_starting_branch is true, restores the starting branch
+#
+#==========================================================================
+
+function git_update()
+{
+    local git_repo_directory="${1%/}"
+    local restore_starting_branch="${2:-false}"
+    local branch_name
+    local current_branch_files_were_stashed
+    local git_repo_directory_realpath
+    local starting_branch
+    local starting_branch_files_were_stashed
+
+    # If the path string begins with a tilde character '~', replace the
+    # tilde with the canonical path to the user's HOME directory.
+    # See also:  https://stackoverflow.com/a/27485157/5051940
+    git_repo_directory="${git_repo_directory/#\~/$HOME}"
+    git_repo_directory_realpath="$("${REALPATH}" "$git_repo_directory")"
+
+    echo
+    echo "==============================================================="
+    echo "  Processing: $git_repo_directory"
+    if [[ "${git_repo_directory}" != "${git_repo_directory_realpath}" ]]; then
+        echo "  Realpath  : $git_repo_directory_realpath"
+    fi
+    echo "==============================================================="
+
+    if [[ ! -d "${git_repo_directory}" ]]; then
+        >&2 echo ":: NOTICE :: Folder '${git_repo_directory}' does not exist."
+        return
+    elif [[ ! -d "${git_repo_directory}"/.git/ ]]; then
+        >&2 echo ":: NOTICE :: Folder '${git_repo_directory}' does not contain a Git repository."
+        return
+    fi
+
+    pushd "$git_repo_directory" >/dev/null || exit 1
+
+    starting_branch="$("$GIT" branch --show-current)"
+
+    # If the starting branch has changed or untracked files, stash them
+    # before continuing.
+    starting_branch_files_were_stashed=false
+    if [[ $("$GIT" status --porcelain) ]]; then
+        "$GIT" stash --include-untracked
+        starting_branch_files_were_stashed=true
+    fi
+
+    "$GIT" fetch --all
+
+    for branch_name in main master develop; do
+        if "$GIT" show-ref --quiet refs/heads/${branch_name}; then
+            if "$GIT" switch "${branch_name}"; then
+
+                # CHECK: Does this branch have a remote branch?
+                if ! "$GIT" branch -r | /usr/bin/grep "origin/${branch_name}" &>/dev/null; then
+                    # This branch does not have a remote branch.
+                    # Ignore this branch.
+                    cat << MESSAGE_EOF
+:: NOTE ::
+Branch '${branch_name}' does not have a remote-tracking branch.  If you want to
+update the files in your '${branch_name}' branch, use git-merge(1) or git-rebase(1)
+to merge the contents of your main/master branch, for example, into your
+'${branch_name}' branch.
+MESSAGE_EOF
+                    continue
+                fi
+
+                # If this branch has changed or untracked files, stash them.
+                current_branch_files_were_stashed=false
+                if [[ $("$GIT" status --porcelain) ]]; then
+                    "$GIT" stash --include-untracked
+                    current_branch_files_were_stashed=true
+                fi
+
+                "$GIT" pull
+
+                if $current_branch_files_were_stashed; then
+                    "$GIT" stash pop
+                fi
+            fi
+        else
+            case ${branch_name} in
+            main | master ) : ;;
+            *) >&2 echo ":: NOTICE :: Branch '${branch_name}' doesn't exist; skipping..." ;;
+            esac
+        fi
+    done
+
+    current_branch="$(/usr/bin/git rev-parse --abbrev-ref HEAD)"
+
+    if $starting_branch_files_were_stashed; then
+        if [ "$current_branch" != "$starting_branch" ]; then
+            "$GIT" switch "$starting_branch"
+            current_branch="$starting_branch"
+        fi
+        "$GIT" stash pop
+    fi
+
+    if [ "$restore_starting_branch" == "true" ]; then
+        if [ "$current_branch" != "$starting_branch" ]; then
+            "$GIT" switch "$starting_branch"
+        fi
+    else
+        # If this repository has a branch named 'develop', select the
+        # develop branch before returning from this function.
+        if [ "$current_branch" != "develop" ]; then
+            if "$GIT" show-ref --quiet refs/heads/develop; then
+                "$GIT" switch develop
+            fi
+        fi
+    fi
+
+    popd >/dev/null || exit 1
+}
+
 
 #==========================================================================
 # catch STDOUT STDERR cmd [args...]
@@ -102,7 +240,7 @@ function ParseTheCommandLine()
     # X   no operand
     # X:  required operand--e.g., -X required_value, --ex=required_value
     # X:: optional operand--e.g., -X  =OR=  -X value
-    local lopts="help restore-active-branch"
+    local lopts="help restore-starting-branch"
     local sopts="h r"
     local getopt_exit_code
     local getopt_stderr
@@ -124,8 +262,8 @@ set -e
     while [[ $# -gt 0 ]]
     do
         case "$1" in
-            -h|--help) cloHelpRequested=true ;;
-            -r|--restore-active-branch) cloRestoreActiveBranch=true ;;
+            -h|--help) cloHelpRequested=true; break ;;
+            -r|--restore-starting-branch) cloRestoreStartingBranch=true ;;
             --) if [[ $# -ge 2 ]]; then cloGitRepoDirectory="${2}"; shift; fi ;;
             *) : ;; # unsupported -Y options
         esac
@@ -134,9 +272,9 @@ set -e
 }
 
 
-###########################################################################
-##  main()
-###########################################################################
+#==========================================================================
+#  main()
+#==========================================================================
 
 #--------------------------------------------------------------------------
 #  Process the command line
@@ -145,7 +283,7 @@ set -e
 # The default git repository directory is the current working directory. 
 cloGitRepoDirectory="$(/usr/bin/pwd)"
 cloHelpRequested=false
-cloRestoreActiveBranch=false
+cloRestoreStartingBranch=false
 
 ParseTheCommandLine "$@"
 
@@ -164,5 +302,5 @@ fi
 #  Update the specified Git repository 
 #--------------------------------------------------------------------------
 
-git_update "$cloGitRepoDirectory" "$cloRestoreActiveBranch"
+git_update "$cloGitRepoDirectory" "$cloRestoreStartingBranch"
 
