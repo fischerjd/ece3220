@@ -56,18 +56,19 @@ set -eu
 readonly BASENAME=/usr/bin/basename
 readonly DIRNAME=/usr/bin/dirname
 readonly GETOPT=/usr/bin/getopt
+readonly GIT=/usr/bin/git
 readonly PAGER=/usr/bin/less
 readonly REALPATH=/usr/bin/realpath
 readonly SED=/usr/bin/sed
 
 
-SCRIPT_REALPATH="$("REALPATH" "$0")"
+SCRIPT_REALPATH="$("${REALPATH}" "$0")"
 readonly SCRIPT_REALPATH
 
-SCRIPT_NAME="$("BASENAME" "$SCRIPT_REALPATH")"
+SCRIPT_NAME="$("${BASENAME}" "$SCRIPT_REALPATH")"
 readonly SCRIPT_NAME
 
-SCRIPT_DIR="$("DIRNAME" "$SCRIPT_REALPATH")"
+SCRIPT_DIR="$("${DIRNAME}" "$SCRIPT_REALPATH")"
 readonly SCRIPT_DIR
 
 
@@ -292,7 +293,7 @@ ParseTheCommandLine "$@"
 #--------------------------------------------------------------------------
 
 if $cloHelpRequested; then
-    export LESS="--prompt=\ Help for ${SCRIPT_NAME}\: ?ltline %lt?L/%L.:byte %bB?s/%s..?e (END):?pB %pB\%.. (press h for help or q to quit)\ "
+    export LESS="--quit-if-one-screen --prompt=\ Help for ${SCRIPT_NAME}\: ?ltline %lt?L/%L.:byte %bB?s/%s..?e (END):?pB %pB\%.. (press h for help or q to quit)\ "
     "${SED}" -n -e '/help_begin/,/help_end/{ /help_begin/d; /help_end/q; s/#\( \)\?//; p }' "$0" \
         | "${PAGER}"
     exit 0
