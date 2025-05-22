@@ -580,7 +580,7 @@ parse_the_command_line "$@"
 #--------------------------------------------------------------------------
 
 if $cloHelp; then
-    export LESS="--prompt=\ Help for ssh-setup\: ?ltline %lt?L/%L.:byte %bB?s/%s..?e (END):?pB %pB\%.. (press h for help or q to quit)\ "
+    export LESS="--quit-if-one-screen --prompt=\ Help for ${SCRIPT_NAME}\: ?ltline %lt?L/%L.:byte %bB?s/%s..?e (END):?pB %pB\%.. (press h for help or q to quit)\ "
     "${SED}" -n -e '/help_begin/,/help_end/{ /help_begin/d; /help_end/q; s/#\( \)\?//; p }' "$0" \
         | "${LESS_PAGER}"
     exit 0
