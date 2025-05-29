@@ -38,7 +38,7 @@ CXXFLAGS.dialect := c++17
 # 
 #GPIODCXX__VERSION := x.y.z
 GPIODCXX__VERSION := 1.6.3
-
+#GPIODCXX__VERSION := 2.2.1
 
 # Cross toolchain configuration
 GPIODCXX__BUILD_CPU_ARCH := $(shell lscpu | grep 'Architecture:' | sed 's/Architecture:[[:blank:]]*//')
