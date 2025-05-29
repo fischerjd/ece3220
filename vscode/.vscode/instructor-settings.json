@@ -1,7 +1,19 @@
+// [workspace: ~/tmp/] settings.json
+//
 // editor.wordwrap:
-//  https://code.visualstudio.com/updates/v1_10#_word-wrap-settings-redesign
-//  https://stackoverflow.com/a/66434593/5051940
+// * https://code.visualstudio.com/updates/v1_10#_word-wrap-settings-redesign
+// * https://stackoverflow.com/a/66434593/5051940
 {
+    "cmake.useCMakePresets": "always",
+    "cSpell.customDictionaries": {
+        "custom-dictionary-user": {
+            "name": "custom-dictionary-user",
+            "path": "~/.local/share/cspell/custom-dictionary-user.txt",
+            "addWords": true,
+            "scope": "user"
+        }
+    },
+    "diffEditor.ignoreTrimWhitespace": false,
     "doxdocgen.file.copyrightTag": [
         "@copyright Copyright {year} James D. Fischer"
     ],
@@ -14,12 +26,13 @@
         "empty",
         "copyright"
     ],
-    "doxdocgen.file.versionTag": "@version 2025SP",
+    "doxdocgen.file.versionTag": "@version 2026SP",
     "doxdocgen.generic.authorEmail": "fischerjd@missouri.edu",
     "doxdocgen.generic.authorName": "James D. Fischer",
     "doxdocgen.generic.splitCasingSmartText": false,
     "editor.acceptSuggestionOnEnter": "on",
     "editor.hover.above": false,
+    "editor.mouseWheelZoom": true,
     "editor.quickSuggestions": {
         "other": "off",
         "comments": "off",
@@ -29,17 +42,21 @@
     "editor.wordWrap": "on",
     "editor.wordWrapColumn": 75,
     "files.associations": {
-        "iostream": "cpp",
-        "functional": "cpp",
+        "*.cc": "cpp",
+        "*.cpp": "cpp",
+        "*.hpp": "cpp",
+        "*.tcc": "cpp",
+        "algorithm": "cpp",
         "array": "cpp",
         "atomic": "cpp",
         "bit": "cpp",
-        "*.tcc": "cpp",
         "bitset": "cpp",
         "cctype": "cpp",
         "chrono": "cpp",
+        "cinttypes": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
+        "codecvt": "cpp",
         "compare": "cpp",
         "concepts": "cpp",
         "condition_variable": "cpp",
@@ -53,48 +70,51 @@
         "cwchar": "cpp",
         "cwctype": "cpp",
         "deque": "cpp",
-        "list": "cpp",
-        "map": "cpp",
-        "unordered_map": "cpp",
-        "vector": "cpp",
         "exception": "cpp",
-        "algorithm": "cpp",
-        "iterator": "cpp",
-        "memory": "cpp",
-        "memory_resource": "cpp",
-        "numeric": "cpp",
-        "optional": "cpp",
-        "random": "cpp",
-        "ratio": "cpp",
-        "string": "cpp",
-        "string_view": "cpp",
-        "system_error": "cpp",
-        "tuple": "cpp",
-        "type_traits": "cpp",
-        "utility": "cpp",
         "fstream": "cpp",
+        "functional": "cpp",
         "initializer_list": "cpp",
         "iomanip": "cpp",
         "iosfwd": "cpp",
+        "iostream": "cpp",
         "istream": "cpp",
+        "iterator": "cpp",
         "limits": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "memory_resource": "cpp",
+        "memory": "cpp",
         "mutex": "cpp",
         "new": "cpp",
+        "numbers": "cpp",
+        "numeric": "cpp",
+        "optional": "cpp",
         "ostream": "cpp",
+        "random": "cpp",
         "ranges": "cpp",
+        "ratio": "cpp",
         "sstream": "cpp",
         "stdexcept": "cpp",
         "stop_token": "cpp",
         "streambuf": "cpp",
+        "string_view": "cpp",
+        "string": "cpp",
+        "system_error": "cpp",
         "thread": "cpp",
-        "cinttypes": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
         "typeinfo": "cpp",
-        "codecvt": "cpp",
-        "numbers": "cpp"
+        "unordered_map": "cpp",
+        "utility": "cpp",
+        "vector": "cpp",
     },
+    "git.confirmSync": false,
     "git.openRepositoryInParentFolders": "never",
     "rewrap.autoWrap.enabled": false,
+    "rewrap.wholeComment": false,
     "terminal.integrated.cwd": "${fileDirname}",
+    "terminal.integrated.fontSize": 14,
+    "terminal.integrated.mouseWheelZoom": true,
     "terminal.integrated.profiles.linux": {
         "bash": {
             "path": "bash",
@@ -118,6 +138,19 @@
     },
     "vim.disableExtension": true,
     "vim.textwidth": 75,
+    "workbench.colorCustomizations": {
+        "[Default Dark+]": {
+            "editor.lineHighlightBackground": "#312b1e",
+            "editor.lineHighlightBorder": "#666666"
+        },
+        "[Default Light+]": {
+            "editor.lineHighlightBackground": "#fff4e2",
+            "editor.lineHighlightBorder": "#eeeeee"
+        }
+    },
+    "workbench.colorTheme": "Default Light+",
+    "workbench.preferredHighContrastColorTheme": "Default High Contrast Light",
+    "workbench.preferredLightColorTheme": "Default Light+",
     "[c][cpp]": {
         "editor.wordWrap": "off"
     },
@@ -131,36 +164,46 @@
         "editor.wordWrapColumn": 75,
         "editor.wordWrap": "wordWrapColumn"
     },
-    "cSpell.words": [
+    
+    // Code Spell Checker words for this user profile. To define workspace 
+    // specific words, add "cSpell.words": [ "word", "word", ... ] within
+    // the workspace's 'settings.json' file.  [Note that a profile uses
+    // 'cSpell.userWords' whereas a workspace uses 'cSpell.words'.]
+    // https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker
+    "cSpell.userWords": [
+        "imager"
+    ],
+
+    // Words to be ignored and not suggested.
+    "cSpell.ignoreWords": [
         "cerr",
         "cin",
         "cout",
+        "Doxyfile",
         "eecspi",
         "endl",
         "getopt",
         "gpiochip",
         "gpiod",
-        "imager",
+        "GPIOD",
+        "gpiodcxx",
+        "GPIODCXX",
+        "iomanip",
         "libgpiodcxx",
         "lopts",
-        "RAII",
-        "ROOTFS",
-        "sdcard",
-        "sopts",
-        "usermod"
-    ],
-    "cSpell.ignoreWords": [
-        "Doxyfile",
-        "GPIOD",
-        "GPIODCXX",
-        "PIGPIO",
-        "RPIFS",
-        "WIRINGPI",
-        "Doxyfile",
-        "gpiodcxx",
         "pawprint",
         "pawrint",
+        "pigpio",
+        "PIGPIO",
+        "RAII",
+        "ROOTFS",
         "rpab",
-        "rpifs"
+        "rpifs",
+        "RPIFS",
+        "sdcard",
+        "sopts",
+        "usermod",
+        "WIRINGPI",
+        "wiringPi"
     ]
 }
