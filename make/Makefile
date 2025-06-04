@@ -1,5 +1,5 @@
 # Makefile
-# 2025-04-04
+# 2025-06-04
 # Copyright 2019-2025 James D. Fischer
 #
 # SYNOPSYS
@@ -241,11 +241,19 @@ CPPFLAGS += $(CPPFLAGS.custom) -DPROGRAM_NAME=$(PROGRAM_NAME)
 # NOTES
 # * Use this command to determine which C/C++ dialects your GCC supports:
 #       gcc -v --help |& grep 'std='
-# * See also 'variables.mk' in this Makefile (e.g., for CFLAGS.custom)
+# * For teaching purposes, I prefer '-O0' as the optimization level for
+#   debug builds, and I add these two options:
+#		-fvar-tracking-assignments
+#		-fvar-tracking
+#   For non-teaching purposes, I usually specify '-Og' as the optimization
+#   level for debug builds. See also:
+#   https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
+# * See also: 'variables.mk' in this Makefile (e.g., for CFLAGS.custom)
 CFLAGS.dialect ?= c17
-CFLAGS.default ?= -Wall
+CFLAGS.default ?= -Wall -Wextra
 CFLAGS.release_build ?= -O3
-CFLAGS.debug_build   ?= -O0 -ggdb
+CFLAGS.debug_build ?= -O0 -ggdb -fvar-tracking-assignments -fvar-tracking
+#CFLAGS.debug_build ?= -Og -ggdb
 CFLAGS = -std=$(CFLAGS.dialect) $(CFLAGS.default) $(CFLAGS.custom)
 
 
@@ -253,13 +261,22 @@ CFLAGS = -std=$(CFLAGS.dialect) $(CFLAGS.default) $(CFLAGS.custom)
 # NOTES
 # * Use this command to determine which C/C++ dialects your GCC supports:
 #       g++ -v --help |& grep 'std='
+# * For teaching purposes, I prefer '-O0' as the optimization level for
+#   debug builds, and I add these two options:
+#		-fvar-tracking-assignments
+#		-fvar-tracking
+#   For non-teaching purposes, I usually specify '-Og' as the optimization
+#   level for debug builds. See also:
+#   https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
+# * For teaching purposes, it is sometimes helpful to add the GCC option
+#   '-fno-elide-constructors' to CXXFLAGS.release_build.
 # * See also 'variables.mk' in this Makefile (e.g., for CXXFLAGS.custom)
 # * For teaching purposes it is sometimes helpful to add the GCC option
 #   '-fno-elide-constructors' to CXXFLAGS.release_build.
 CXXFLAGS.dialect ?= c++17
-CXXFLAGS.default ?= -Wall
+CXXFLAGS.default ?= -Wall -Wextra
 CXXFLAGS.release_build ?= -O3
-CXXFLAGS.debug_build   ?= -O0 -ggdb
+CXXFLAGS.debug_build   ?= -O0 -ggdb -fvar-tracking-assignments -fvar-tracking
 CXXFLAGS = -std=$(CXXFLAGS.dialect) $(CXXFLAGS.default) $(CXXFLAGS.custom)
 
 
@@ -725,7 +742,7 @@ mostly-clean:: _basic_clean
 	@$(call remove_folder,$(DEPDIR))
 	@$(call remove_folder,$(BUILDDIR))
 
-# Delete all documentation build products.
+# Delete documentation-related build products.
 .PHONY: doc-clean
 doc-clean:: ;
 
