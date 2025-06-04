@@ -515,6 +515,15 @@ debug: CXXFLAGS += $(CXXFLAGS.debug_build)
 debug: build_program
 
 
+# [Optional]  Ordinarily, GCC deletes the temporary files it creates during
+# the translation process.  If you want to keep those temporary files, then
+# create within the current working directory a copy of, or a symlink to,
+# the makefile named 'save-gcc-temps.mk'.
+ifneq ($(wildcard save-gcc-temps.mk),)
+include save-gcc-temps.mk
+endif
+
+
 # [Optional] If you need to perform miscellaneous tasks before the
 # PROGRAM_NAME is built (e.g., building other libraries), create in the
 # current working directory a makefile named `prebuild.mk'.  In that
