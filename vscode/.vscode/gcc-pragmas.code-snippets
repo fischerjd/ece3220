@@ -36,6 +36,15 @@
 		"body": [ "#pragma GCC diagnostic push" ],
 		"description": ""
 	},
+	"GCC diagnostic ignored -Wreturn-type": {
+		"scope": "c,cpp",
+		"prefix": [
+			"gcc-diagnostic-return-type",
+			"pragma-gcc-diagnostic-return-type"
+		],
+		"body": [ "#pragma GCC diagnostic ignored \"-Wreturn-type\"" ],
+		"description": ""
+	},
 	"GCC diagnostic ignored -Wunused-but-set-variable": {
 		"scope": "c,cpp",
 		"prefix": [
