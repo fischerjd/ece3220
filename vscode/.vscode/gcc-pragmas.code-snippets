@@ -45,6 +45,15 @@
 		"body": [ "#pragma GCC diagnostic ignored \"-Wunused-but-set-variable\"" ],
 		"description": ""
 	},
+	"GCC diagnostic ignored -Wunused-parameter": {
+		"scope": "c,cpp",
+		"prefix": [
+			"gcc-diagnostic-unused-parameter",
+			"pragma-gcc-diagnostic-unused-parameter"
+		],
+		"body": [ "#pragma GCC diagnostic ignored \"-Wunused-parameter\"" ],
+		"description": ""
+	},
 	"GCC diagnostic ignored -Wunused-variable": {
 		"scope": "c,cpp",
 		"prefix": [
