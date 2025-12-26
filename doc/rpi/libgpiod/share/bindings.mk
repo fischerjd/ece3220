@@ -1,4 +1,4 @@
-# bindings-dirs.mk
+# bindings.mk
 # Builds the documentation in the supported language binding folders.
 # 2025-Dec-24
 # Copyright 2025 James D. Fischer

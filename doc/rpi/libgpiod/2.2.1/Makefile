@@ -1,1 +1,1 @@
-../share/bindings-dirs.mk
+../share/bindings.mk
