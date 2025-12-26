@@ -9,13 +9,13 @@ VERSIONS := \
 
 .PHONY: all
 all: $(VERSIONS)
-	$(MAKE) mostly-clean
 
 $(VERSIONS): FORCE
 		$(MAKE) -C $@
 
 .PHONY: clean mostly-clean
-clean mostly-clean: $(VERSIONS)
+clean mostly-clean:
+	for dir in $(VERSIONS); do $(MAKE) -C "$$dir" $@; done
 
 .PHONY: FORCE
 FORCE:
