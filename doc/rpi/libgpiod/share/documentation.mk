@@ -4,9 +4,12 @@
 # 2025-Dec-24
 # Copyright 2025 James D. Fischer
 
+# This included makefile defines values for these two variables:
+#	GPIOD_LIBRARY_NAME
+#	GPIOD_LIBRARY_VERSION
 include library_version.mk
 
-PDF_MANUAL := $(LIBGPIOD_LIBRARY_NAME)-$(LIBGPIOD_LIBRARY_VERSION).pdf
+PDF_MANUAL := $(GPIOD_LIBRARY_NAME)-$(GPIOD_LIBRARY_VERSION).pdf
 
 BUILD_TARGETS := \
 	$(PDF_MANUAL) \
