@@ -1,0 +1,254 @@
+File: libgpiod-notes.txt
+Date: Dec. 25, 2025
+Author: Jim Fischer <fischerjd@missouri.edu>
+Copyright 2025 James D. Fischer
+
+
+Some notes for obtaining, building, and installing library 'libgpiod' and
+its documentation.
+
+* The information in these notes pertains to these programming languages: 
+  C, C++, and Python.
+
+
+* This website provides the official documentation for library 'libgpiod':
+
+        https://libgpiod.readthedocs.io/en/latest/
+
+  According to this ^^^ website, "The libgpiod project provides a low-level
+  C library, bindings to high-level languages and tools for interacting
+  with the GPIO (General Purpose Input/Output) lines on Linux systems."
+
+  The website above provide documentation for the C library 'libgpiod'. It
+  does not provide documentation for the C++ or Python libraries.  Documen-
+  tation for the C++ and Python libraries (a.k.a., the C++ and Python
+  bindings) can be created from the libgpiod source code.  This file
+  explains how to do that.
+
+===========================================================================
+
+Start by installing these Debian packages on your Raspberry Pi:
+
+    $ package_manifest=(
+        gpiod 
+        libgpiod-dev 
+        libgpiod-doc 
+        libgpiod3
+        python3-libgpiod
+    )
+
+    $ sudo apt update
+    $ sudo apt install -y "${package_manifest[@]}"
+
+These packages provide software development libraries and header files for
+C, C++, and Python programs, as well as some handy command line tools (see
+package gpiod).
+
+===========================================================================
+
+These instrcutions explain how to create your own local documentation for
+the C, C++, and Python bindings for library libgpiod.
+
+Start by installing these Debian packages on your Raspberry Pi:
+
+    $ package_manifest=(
+        autoconf-archive
+        autotools
+        catch2
+        doxygen
+        doxygen-doc 
+        doxygen-latex 
+        graphviz 
+        groff 
+        help2man 
+        libcatch2-dev
+        libkmod-dev
+        libkmod2
+        libtool
+        pandoc
+        pkg-config 
+        shunit2
+        texinfo 
+        texlive 
+        texlive-base 
+        texlive-binaries 
+        texlive-font-utils 
+        texlive-fonts-recommended 
+        texlive-latex-base 
+        texlive-latex-extra
+        texlive-latex-recommended 
+        texlive-pictures 
+        texlive-plain-generic
+    )
+
+    $ sudo apt update
+    $ sudo apt install -y "${package_manifest[@]}"
+
+---------------------------------------------------------------------------
+* Clone the libgpiod Git repository into any convenient folder on your
+  Raspberry Pi, e.g., ~/git/libgpiod/:
+
+    $ [ -d ~/git ] || mkdir -p ~/git
+    $ git clone https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/ ~/git/libgpiod/
+
+---------------------------------------------------------------------------
+* [OPTIONAL] The instructions below describe how to build the libgpiod
+  software from the source code in this Git repository.  You can optionally
+  install the software after you build it. If you intend to install the
+  software after you build it, I recommend you do the followiing:
+
+  (1) Create a folder named /opt/libgpiod/, make user 'pi' the owner of
+  that folder, and ensure user 'pi' read/write permissions on that folder:
+
+        $ sudo mkdir -p /opt/libgpiod
+        $ sudo chown pi:pi /opt/libgpiod
+        $ sudo chmod 0755 /opt/libgpiod
+
+  (2) When performing the software configuration step (see below), add the
+  option '--prefix=/opt/libgpiod' when invoking the 'configure' script.
+
+---------------------------------------------------------------------------
+* Configure and build the libgpiod software
+
+By default, the configure step produces a set of makefiles that create only
+the C library 'libgpiod'.  To see the available configure options that
+build additional libraries that provide bindings for other programming
+languages (e.g., C++ and Python), issue the command
+    ./configure --help
+after performing the 'autoreconf' step.
+
+
+$ cd ~/git/libgpiod/
+
+# Start with a clean slate
+$ test -f Makefile && make maintainer-clean
+
+$ autoreconf -ifv
+
+# List the available options for the 'configure' step
+$ ./configure --help
+
+# Configure the build
+$ ./configure \
+    --prefix=/opt/libgpiod \
+    --enable-tools \
+    --enable-bindings-cxx \
+    --enable-bindings-python \
+    --enable-examples \
+    --enable-tests
+
+# Build the software
+$ make
+
+# [OPTIONAL]  Install the software into /opt/libgpiod/
+$ make install
+
+===========================================================================
+* The libgpiod Git repository provides some examples of C, C++, and Python
+  programs in these folders:
+
+    ./examples                  ; C examples
+    ./bindings/cxx/examples/    ; C++ examples
+    ./bindings/python/examples/ ; Python3 examples
+
+* The C library is named 'libgpiod' and its header file is 'gpiod.h'. 
+  The build produces a static version of this library (libgpiod.a) and a
+  shared object version of this library (libgpiod.so).
+
+* The C++ library is named 'libgpiodcxx' and its main header file is
+  'gpiod.hpp'. The build produces a static version of this library
+  (libgpiodcss.a) and a shared object version of this library
+  (libgpiodcxx.so).
+  [Note 1: The C++ library defines multiple classes, each with its own
+  header file. So, this library has multiple header files. --end note]
+
+* The Python library's main module is named 'gpiod'.
+  [Note 1: The Python library defines multiple classes, each with its own
+  module. So, this library has multiple modules. --end note]
+
+===========================================================================
+* Unfortunately, the libgpiod Git repository does not provide eash-to-use
+  tools for generating useful documentation for the C and C++ libraries. At
+  least, I've never found those tools if they exist.  So if you want some
+  useful documentation, you'll need to create it yourself using Doxygen.
+
+Basically, the workflow to create the documentation for the C library
+'libgpiod' is something like this:
+
+# Create a temporary work directory
+$ mkdir -p ~/tmp/c-api/
+
+# Copy the C library's header file into the temporary directory
+$ cp ~/git/libgpiod/include/gpiod.h ~/tmp/c-api/
+
+# Create a Doxygen configuration file (Doxyfile)
+$ cd ~/tmp/c-api/
+$ doxygen -g
+
+# Define some shell environment variables
+export GPIOD_LIBRARY_NAME='libgpiod'
+export GPIOD_LIBRARY_VERSION='2.2.1'
+
+# Using the C header file 'gpiod.h' as the starting point, create a set of
+# HTML files that document the GPIOD C API in library 'libgpiod'.
+$ ( cat Doxyfile; echo "PROJECT_NAME = ${GPIOD_LIBRARY_NAME}"; echo "PROJECT_NUMBER = ${GPIOD_LIBRARY_VERSION}" ) | doxygen -
+
+# Create a PDF file from header file 'gpiod.h' that provides the documen-
+# tation for the C library 'libgpiod'.
+$ make -C latex
+
+---------------------------------------------------------------------------
+The resulting HTML documentation files reside in a new folder named,
+    ~/tmp/c-api/html/
+and the homepage for the HTML documentation is the file,
+    ~/tmp/c-api/html/index.html
+
+The resulting PDF documentation file is
+    ~/tmp/c-api/latex/refman.pdf
+I recommend renaming that file as 'libgpiod-2.2.1.pdf'.
+
+To make this documentation available for future reference, I recommend that
+it be installed into folder /opt/libgpiod/:
+
+$ mkdir -p /opt/libgpiod/doc/2.2.1/c-api/
+$ rsync -av ~/tmp/c-api/html  /opt/libgpiod/doc/2.2.1/c-api/
+$ rsync -av ~/tmp/c-api/latex/refman.pdf \
+    /opt/libgpiod/doc/2.2.1/c-api/libgpiod-2.2.1.pdf
+
+***************************************************************************
+The workflow to create documentation for the C++ library 'libgpiodcxx'
+is essentially the same as described above for the C library 'libgpiod':
+
+# Create a temporary work directory
+$ mkdir -p ~/tmp/cxx-api/
+
+# Copy the C++ library's header files into the temporary directory
+$ rsync -av ~/git/libgpiod/bindings/cxx/*.hpp  ~/tmp/cxx-api/
+$ rsync -av ~/git/libgpiod/bindings/cxx/gpiodcxx  ~/tmp/cxx-api/
+
+# Create a Doxygen configuration file (Doxyfile)
+$ cd ~/tmp/cxx-api/
+$ doxygen -g
+
+# Define some shell environment variables
+export GPIOD_LIBRARY_NAME='libgpiodcxx'
+export GPIOD_LIBRARY_VERSION='2.2.1'
+
+# Using the C++ header files as the starting point, create a set of HTML
+# files that document the GPIOD C++ API in library 'libgpiodcxx'.
+# the documentation for the C++ library 'libgpiodcxx'.
+$ ( cat Doxyfile; echo "PROJECT_NAME = ${GPIOD_LIBRARY_NAME}"; echo "PROJECT_NUMBER = ${GPIOD_LIBRARY_VERSION}" ) | doxygen -
+
+# Create a PDF file from header file 'gpiod.h' that provides the documen-
+# tation for the C++ library 'libgpiodcxx'.
+$ make -C latex
+
+# Install the documentation for future refrence
+$ mkdir -p /opt/libgpiod/doc/2.2.1/cxx-api/
+$ rsync -av ~/tmp/cxx-api/html  /opt/libgpiod/doc/2.2.1/cxx-api/
+$ rsync -av ~/tmp/cxx-api/latex/refman.pdf \
+    /opt/libgpiod/doc/2.2.1/cxx-api/libgpiodcxx-2.2.1.pdf
+
+===========================================================================
+# vim: ft=txt tw=75 fo+=trcqn ai et
+
