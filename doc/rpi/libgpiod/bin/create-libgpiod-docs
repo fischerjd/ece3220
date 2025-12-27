@@ -1,0 +1,140 @@
+#!/bin/bash
+set -eu
+clear
+
+LIBRARY_NAME='libgpiod'
+SOFTWARE_VERSION='2.2.2'
+
+GIT_REPO_DIR="${HOME}/git/${LIBRARY_NAME}"
+
+TMPDIR="${HOME}/tmp"
+
+INSTALL_PREFIX="/opt/${LIBRARY_NAME}"
+INSTALL_PREFIX_VERSION="${INSTALL_PREFIX}/${SOFTWARE_VERSION}"
+INSTALL_DOCDIR="${INSTALL_PREFIX_VERSION}/doc"
+
+
+#==========================================================================
+#  is_raspberry_pi()
+#==========================================================================
+
+is_raspberry_pi() {
+
+    # Default return value: this is not a Raspberry Pi
+    local result=1
+
+    local hardware
+
+    # Check for the presence and content of /sys/firmware/devicetree/base/model
+    if [ -f /sys/firmware/devicetree/base/model ]; then
+        model=$(cat /sys/firmware/devicetree/base/model)
+        if [[ "$model" == *"Raspberry Pi"* ]]; then
+            result=0  # It is a Raspberry Pi
+        fi
+    elif [ -f /proc/cpuinfo ]; then
+        # Fallback method: Check /proc/cpuinfo for specific hardware details
+        hardware=$(grep "Hardware" /proc/cpuinfo | awk '{print $3}')
+        case $hardware in
+            BCM2708 | BCM2709 | BCM2710 | BCM2711 | BCM2835 | BCM2836 | BCM2837 ) result=0 ;;
+        esac
+    fi
+
+    return $result
+}
+
+
+#==========================================================================
+#  main()
+#==========================================================================
+
+if ! is_raspberry_pi; then
+    >&2 echo "This script must be invoked on the Raspberry Pi. Exiting..."
+    exit 1
+fi
+
+[ -d "${INSTALL_PREFIX_VERSION}" ] || mkdir -p "${INSTALL_PREFIX_VERSION}"
+VERSION_SYMLINK="${INSTALL_PREFIX}/${SOFTWARE_VERSION%.*}"
+if ! [ -L "${VERSION_SYMLINK}" ]; then
+    ln -s -v -T "${SOFTWARE_VERSION}" "${VERSION_SYMLINK}"
+fi
+
+
+###########################################################################
+##  libgpiod Documentation (C Library)
+###########################################################################
+
+API='c-api'
+
+TMPDIR_API="${TMPDIR}/${API}"
+TMPDIR_API_SRC="${TMPDIR_API}/src"
+[ -d "${TMPDIR_API_SRC}" ] || mkdir -p "${TMPDIR_API_SRC}"
+
+# Copy the C source code files into TMPDIR_API_SRC
+rsync -av "${GIT_REPO_DIR}/include"/*.h "${TMPDIR_API_SRC}/include/"
+rsync -av "${GIT_REPO_DIR}/lib"/*.c "${TMPDIR_API_SRC}/lib/"
+rsync -av "${GIT_REPO_DIR}/lib"/*.h "${TMPDIR_API_SRC}/lib/"
+
+# Create a Doxygen configuration file (Doxyfile) in TMPDIR_API_SRC
+cd "${TMPDIR_API}"
+doxygen -g
+
+# Configure Doxygen to build the documentation by recursively scanning the
+# files and folders in TMPDIR_API_SRC
+sed -i -E \
+    -e 's@^(INPUT[[:blank:]]*=[[:blank:]]*).*$@\1 '"${TMPDIR_API_SRC}"'@' \
+    -e 's/^(PROJECT_NAME[[:blank:]]*=[[:blank:]]*).*$/\1 '"${LIBRARY_NAME}"'/' \
+    -e 's/^(PROJECT_NUMBER[[:blank:]]*=[[:blank:]]*).*$/\1 '"${SOFTWARE_VERSION}"'/' \
+    -e 's/^(RECURSIVE[[:blank:]]*=[[:blank:]]*).*$/\1 YES/' \
+    Doxyfile
+
+# Build the HTML and PDF documentation files
+doxygen
+make -C latex
+
+# Install the documentation files
+INSTALL_DOCDIR_API="${INSTALL_DOCDIR}/${API}"
+[ -d "${INSTALL_DOCDIR_API}" ] || mkdir -p "${INSTALL_DOCDIR_API}"
+rsync -av ./html "${INSTALL_DOCDIR_API}"/
+rsync -av ./latex/refman.pdf "${INSTALL_DOCDIR_API}/${LIBRARY_NAME}-${SOFTWARE_VERSION}.pdf"
+
+
+###########################################################################
+##  libgpiodcxx Documentation (C++ Library)
+###########################################################################
+
+API='cxx-api'
+LIBRARY_NAME="${LIBRARY_NAME}cxx"
+
+TMPDIR_API="${HOME}/tmp/${API}"
+TMPDIR_API_SRC="${TMPDIR_API}/src"
+[ -d "${TMPDIR_API_SRC}" ] || mkdir -p "${TMPDIR_API_SRC}"
+
+# Copy the C++ source code files into TMPDIR_API_SRC
+rsync -av "${GIT_REPO_DIR}/bindings/cxx/"*.cpp "${TMPDIR_API_SRC}/"
+rsync -av "${GIT_REPO_DIR}/bindings/cxx/"*.hpp "${TMPDIR_API_SRC}/include/"
+rsync -av "${GIT_REPO_DIR}/bindings/cxx/gpiodcxx/"*.cpp "${TMPDIR_API_SRC}/gpiodcxx/"
+rsync -av "${GIT_REPO_DIR}/bindings/cxx/gpiodcxx/"*.hpp "${TMPDIR_API_SRC}/gpiodcxx/"
+
+# Create a Doxygen configuration file (Doxyfile) in TMPDIR_API_SRC
+cd "${TMPDIR_API}"
+doxygen -g
+
+# Configure Doxygen to build the documentation by recursively scanning the
+# files and folders in TMPDIR_API_SRC
+sed -i -E \
+    -e 's@^(INPUT[[:blank:]]*=[[:blank:]]*).*$@\1 '"${TMPDIR_API_SRC}"'@' \
+    -e 's/^(PROJECT_NAME[[:blank:]]*=[[:blank:]]*).*$/\1 '"${LIBRARY_NAME}"'/' \
+    -e 's/^(PROJECT_NUMBER[[:blank:]]*=[[:blank:]]*).*$/\1 '"${SOFTWARE_VERSION}"'/' \
+    -e 's/^(RECURSIVE[[:blank:]]*=[[:blank:]]*).*$/\1 YES/' \
+    Doxyfile
+
+# Build the HTML and PDF documentation files
+doxygen
+make -C latex
+
+# Install the documentation files
+INSTALL_DOCDIR_API="${INSTALL_DOCDIR}/${API}"
+[ -d "${INSTALL_DOCDIR_API}" ] || mkdir -p "${INSTALL_DOCDIR_API}"
+rsync -av ./html "${INSTALL_DOCDIR_API}"/
+rsync -av ./latex/refman.pdf "${INSTALL_DOCDIR_API}/${LIBRARY_NAME}-${SOFTWARE_VERSION}.pdf"
+
