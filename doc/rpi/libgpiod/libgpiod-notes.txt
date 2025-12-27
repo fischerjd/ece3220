@@ -203,94 +203,35 @@ $ ls -l /opt/libgpiod/
   module. So, this library has multiple modules. --end note]
 
 ===========================================================================
-* Unfortunately, the libgpiod Git repository does not provide easy-to-use
-  tools for generating useful documentation for the C and C++ libraries. At
-  least, I've never found those tools if they exist.  So if you want some
-  useful documentation, you'll need to create it yourself using Doxygen.
+Unfortunately, the libgpiod Git repository does not provide easy-to-use
+tools for generating useful documentation for the C and C++ libraries. At
+least, I've never found those tools if they exist.  So if you want some
+useful documentation, you'll need to create it yourself using Doxygen.
 
-Basically, the workflow to create the documentation for the C library
-'libgpiod' is something like this:
+To simplify this task, I created a Bash script that automates this process
+for you.  To run the script, log on to the Raspberry Pi and run the command
+'create-libgpiod-docs' at the Bash shell's command prompt '$':
 
-# Create a temporary work directory
-$ API='c-api'
-$ mkdir -p ~/tmp/"${API}"
+    [pi@eecspi] ~
+    $ create-libgpiod-docs
 
-# Copy the C library's header file into the temporary directory
-$ cp ~/git/libgpiod/include/gpiod.h ~/tmp/"${API}"
+This script builds the documentation in two formats, HTML and PDF, and it
+installs the documentation into these two folders in the Raspberry Pi's
+file system:
 
-# Create a Doxygen configuration file (Doxyfile)
-$ cd ~/tmp/"${API}"
-$ doxygen -g
+    /opt/libgpiod/2.2.2/doc/
+    |-- c-api/
+    |   |-- html/index.html
+    |   `-- libgpiod-2.2.2.pdf
+    `-- cxx-api/
+        |-- html/index.html
+        `-- libgpiodcxx-2.2.2.pdf
 
-# Define some shell environment variables
-export LIBRARY_NAME='libgpiod'
-export SOFTWARE_VERSION='2.2.2'
-
-# Using the C header file 'gpiod.h' as the starting point, create a set of
-# HTML files that document the GPIOD C API in library 'libgpiod'.
-$ ( cat Doxyfile; echo "PROJECT_NAME = ${LIBRARY_NAME}"; echo "PROJECT_NUMBER = ${SOFTWARE_VERSION}" ) | doxygen -
-
-# Create a PDF file that contains the documentation for the C library
-# 'libgpiod'.
-$ make -C latex
-
----------------------------------------------------------------------------
-The resulting HTML documentation files reside in a new folder named,
-    ~/tmp/c-api/html/
-and the homepage for the HTML documentation is the file,
-    ~/tmp/c-api/html/index.html
-
-The resulting PDF documentation file is
-    ~/tmp/c-api/latex/refman.pdf
-I recommend renaming that file as 'libgpiod-${SOFTWARE_VERSION}.pdf'.
-
-To make this documentation available for future reference, I recommend that
-it be installed into folder a folder named
-    /opt/libgpiod/${SOFTWARE_VERSION}/doc/c-api/
-
-$ API='c-api'
-$ DOCDIR="/opt/libgpiod/${SOFTWARE_VERSION}/doc/${API}"
-$ mkdir -p "${DOCDIR}"
-$ rsync -av ~/tmp/${API}/html "${DOCDIR}"
-$ rsync -av ~/tmp/${API}/latex/refman.pdf \
-    "${DOCDIR}/libgpiod-${SOFTWARE_VERSION}.pdf"
-
-***************************************************************************
-The workflow to create documentation for the C++ library 'libgpiodcxx'
-is essentially the same as described above for the C library 'libgpiod':
-
-# Create a temporary work directory
-$ API='cxx-api'
-$ mkdir -p ~/tmp/"${API}"
-
-# Copy the C++ library's header files into the temporary directory
-$ rsync -av ~/git/libgpiod/bindings/cxx/*.hpp  ~/tmp/"${API}"/
-$ rsync -av ~/git/libgpiod/bindings/cxx/gpiodcxx  ~/tmp/"${API}"/
-
-# Create a Doxygen configuration file (Doxyfile)
-$ cd ~/tmp/"${API}"
-$ doxygen -g
-
-# Define some shell environment variables
-export LIBRARY_NAME='libgpiodcxx'
-export SOFTWARE_VERSION='2.2.2'
-
-# Using the C++ header files as the starting point, create a set of HTML
-# files that document the GPIOD C++ API in library 'libgpiodcxx'.
-# the documentation for the C++ library 'libgpiodcxx'.
-$ ( cat Doxyfile; echo "PROJECT_NAME = ${LIBRARY_NAME}"; echo "PROJECT_NUMBER = ${SOFTWARE_VERSION}" ) | doxygen -
-
-# Create a PDF file that contains the documentation for the C++ library
-# 'libgpiodcxx'.
-$ make -C latex
-
-# Install the documentation for future refrence
-$ API='cxx-api'
-$ DOCDIR="/opt/libgpiod/${SOFTWARE_VERSION}/doc/${API}"
-$ mkdir -p "${DOCDIR}"
-$ rsync -av ~/tmp/${API}/html "${DOCDIR}"
-$ rsync -av ~/tmp/${API}/latex/refman.pdf \
-    "${DOCDIR}/libgpiod-${SOFTWARE_VERSION}.pdf"
+The subdirectory named 'c-api' has the documentation for the C library
+named 'libgpiod'.  The subdirectory named 'cxx-api' has the documentation
+for the C++ library named 'libgpiodcxx'.  For both the C and C++ APIs, the
+homepage for the HTML documentation is a file named 'index.html', which is
+located in the API's html folder.
 
 ===========================================================================
 # vim: ft=txt tw=75 fo+=trcqn ai et
