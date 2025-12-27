@@ -356,10 +356,10 @@ endif
 # same directory as this Makefile. That makefile provides preprocessor
 # (cpp), compiler (gcc/g++), and linker (ld) options that build and link
 # your program with the gpiodcxx library.
-ifneq (,$(wildcard gpiodcxx.mk))
+ifneq ($(wildcard gpiodcxx.mk),)
   include gpiodcxx.mk
-  ifneq (,$(GPIOD__INCLUDEDIR))
-    ifeq ($(wildcard) $(GPIOD__INCLUDEDIR)/gpiod.hpp,)
+  ifneq ($(GPIODCXX__INCLUDEDIR),)
+    ifeq ($(wildcard $(GPIODCXX__INCLUDEDIR)/gpiod.hpp),)
       $(shell mount.rpifs -q || true)
     endif
   endif
@@ -370,10 +370,10 @@ ifneq (,$(wildcard gpiodcxx.mk))
 # directory as this Makefile.  That makefile provides preprocessor (cpp),
 # compiler (gcc/g++), and linker (ld) options to build and link your
 # program with the gpiod library.
-else ifneq (,$(wildcard gpiod.mk))
+else ifneq ($(wildcard gpiod.mk),)
   include gpiod.mk
-  ifneq (,$(GPIOD__INCLUDEDIR))
-    ifeq ($(wildcard) $(GPIOD__INCLUDEDIR)/gpiod.h,)
+  ifneq ($(GPIOD__INCLUDEDIR),)
+    ifeq ($(wildcard $(GPIOD__INCLUDEDIR)/gpiod.h),)
       $(shell mount.rpifs -q || true)
     endif
   endif
@@ -386,10 +386,10 @@ else ifneq (,$(wildcard gpiod.mk))
 # directory as this Makefile.  That makefile provides preprocessor (cpp),
 # compiler (gcc/g++), and linker (ld) options to build and link your
 # program with the pigpio library.
-else ifneq (,$(wildcard pigpio.mk))
+else ifneq ($(wildcard pigpio.mk),)
   include pigpio.mk
-  ifneq (,$(PIGPIO__INCLUDEDIR))
-    ifeq ($(wildcard) $(PIGPIO__INCLUDEDIR)/pigpio.h,)
+  ifneq ($(PIGPIO__INCLUDEDIR),)
+    ifeq ($(wildcard $(PIGPIO__INCLUDEDIR)/pigpio.h),)
       $(shell mount.rpifs -q || true)
     endif
   endif
@@ -402,10 +402,10 @@ else ifneq (,$(wildcard pigpio.mk))
 # same directory as this Makefile. That makefile provides preprocessor
 # (cpp), compiler (gcc/g++), and linker (ld) options to build and link your
 # program with the wiringPi library.
-else ifneq (,$(wildcard wiringPi.mk))
+else ifneq ($(wildcard wiringPi.mk),)
   include wiringPi.mk
-  ifneq (,$(WIRINGPI__INCLUDEDIR))
-    ifeq ($(wildcard) $(WIRINGPI__INCLUDEDIR)/wiringPi.h,)
+  ifneq ($(WIRINGPI__INCLUDEDIR),)
+    ifeq ($(wildcard $(WIRINGPI__INCLUDEDIR)/wiringPi.h),)
       $(shell mount.rpifs -q || true)
     endif
   endif

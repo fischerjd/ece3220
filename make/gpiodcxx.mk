@@ -9,17 +9,22 @@
 # HINT: Use the command `mount.rpifs' to mount the Raspberry Pi's file
 # system onto folder ${HOME}/rpifs/.
 #
-# The header files and library files for the gpiodcxx library are installed
-# on the Raspberry Pi's file system; they are not available on the desktop
-# computer:
-#	gpiodcxx header files  > $(RPIFS)/usr/include/gpiodcxx.{h,hpp}
-#	gpiodcxx library files > $(RPIFS)/usr/lib/aarch64-linux-gnu/
+# The "stock" header files and library files for the libgpiodcxx library
+# are installed on the Raspberry Pi's file system; they are not available
+# on the desktop computer:
+#
+#	libgpiodcxx header files
+#		> $(RPIFS)/usr/include/gpiod.hpp
+#		> $(RPIFS)/usr/include/gpiodcxx/*.hpp
+#
+#	libgpiodcxx library files
+#		> $(RPIFS)/usr/lib/aarch64-linux-gnu/libgpiodcxx.*
 #
 # When cross compiling, your makefile must add these paths to the
 # preprocessor's header file search path, and to the linker's library file
 # search path.
 #
-# 2025-04-12 Jim Fischer <fischerjd@missouri.edu>
+# 2025-Dec-27 Jim Fischer <fischerjd@missouri.edu>
 # Copyright 2025 James D. Fischer
 #
 
@@ -29,16 +34,19 @@ GPIODCXX.MK = 1
 # The C++ compiler dialect must be C++ 17
 CXXFLAGS.dialect := c++17
 
-# To use the gpiodcxx software that's installed in folder /opt/gpiod/x.y.z/, 
-# where `x.y.z` is the software version number, create in this makefile a
+# Instead of using the stock libgpiodcxx library that is installed via apt,
+# you can use a custom built library that resides in this folder path:
+#		/opt/libgpiod/x.y.z/
+# where x.y.z is the version number.  To do so, create in this makefile a
 # variable named GPIODCXX__VERSION whose value is the gpiodcxx version 
 # number you want to use, e.g.,
 #
 #		GPIODCXX__VERSION := 1.2.3
 # 
 #GPIODCXX__VERSION := x.y.z
-GPIODCXX__VERSION := 1.6.3
+#GPIODCXX__VERSION := 1.6.3
 #GPIODCXX__VERSION := 2.2.1
+GPIODCXX__VERSION := 2.2.2
 
 # Cross toolchain configuration
 GPIODCXX__BUILD_CPU_ARCH := $(shell lscpu | grep 'Architecture:' | sed 's/Architecture:[[:blank:]]*//')
@@ -57,7 +65,7 @@ GPIODCXX__LIBDIR := $(GPIODCXX__RPIFS_BASEDIR)/usr/lib/aarch64-linux-gnu
 
 # Version-specific paths
 ifdef GPIODCXX__VERSION
-GPIODCXX__VERSION_DIR := $(GPIODCXX__RPIFS_BASEDIR)/opt/gpiod/$(GPIODCXX__VERSION)
+GPIODCXX__VERSION_DIR := $(GPIODCXX__RPIFS_BASEDIR)/opt/libgpiod/$(GPIODCXX__VERSION)
 ifneq ($(wildcard $(GPIODCXX__VERSION_DIR)/.),)
 GPIODCXX__INCLUDEDIR := $(GPIODCXX__VERSION_DIR)/include
 GPIODCXX__LIBDIR := $(GPIODCXX__VERSION_DIR)/lib
