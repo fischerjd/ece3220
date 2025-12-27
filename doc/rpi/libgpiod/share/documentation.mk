@@ -16,10 +16,8 @@
 # Copyright 2025 James D. Fischer
 #
 
-# Makefile 'library_version.mk' defines these two variables:
-#	GPIOD_LIBRARY_NAME			; e.g., libgpiodcxx
-#	GPIOD_LIBRARY_VERSION		; e.g., 2.2.1
-include library_version.mk
+include library_name.mk
+include ../library_version.mk
 
 # The file name for the PDF user guide
 PDF_USER_GUIDE := $(GPIOD_LIBRARY_NAME)-$(GPIOD_LIBRARY_VERSION).pdf

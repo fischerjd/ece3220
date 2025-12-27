@@ -1,2 +1,2 @@
+# library_name.mk
 GPIOD_LIBRARY_NAME := libgpiodcxx
-GPIOD_LIBRARY_VERSION := 1.6.3
