@@ -70,9 +70,9 @@ TMPDIR_API_SRC="${TMPDIR_API}/src"
 [ -d "${TMPDIR_API_SRC}" ] || mkdir -p "${TMPDIR_API_SRC}"
 
 # Copy the C source code files into TMPDIR_API_SRC
-rsync -av "${GIT_REPO_DIR}/include"/*.h "${TMPDIR_API_SRC}/include/"
-rsync -av "${GIT_REPO_DIR}/lib"/*.c "${TMPDIR_API_SRC}/lib/"
-rsync -av "${GIT_REPO_DIR}/lib"/*.h "${TMPDIR_API_SRC}/lib/"
+rsync -av "${GIT_REPO_DIR}/include"/*.h "${TMPDIR_API_SRC}/include/" || true
+rsync -av "${GIT_REPO_DIR}/lib"/*.c "${TMPDIR_API_SRC}/lib/" || true
+rsync -av "${GIT_REPO_DIR}/lib"/*.h "${TMPDIR_API_SRC}/lib/" || true
 
 # Create a Doxygen configuration file (Doxyfile) in TMPDIR_API_SRC
 cd "${TMPDIR_API}"
@@ -94,8 +94,8 @@ make -C latex
 # Install the documentation files
 INSTALL_DOCDIR_API="${INSTALL_DOCDIR}/${API}"
 [ -d "${INSTALL_DOCDIR_API}" ] || mkdir -p "${INSTALL_DOCDIR_API}"
-rsync -av ./html "${INSTALL_DOCDIR_API}"/
-rsync -av ./latex/refman.pdf "${INSTALL_DOCDIR_API}/${LIBRARY_NAME}-${SOFTWARE_VERSION}.pdf"
+rsync -av ./html "${INSTALL_DOCDIR_API}"/ || true
+rsync -av ./latex/refman.pdf "${INSTALL_DOCDIR_API}/${LIBRARY_NAME}-${SOFTWARE_VERSION}.pdf" || true
 
 
 ###########################################################################
@@ -110,10 +110,10 @@ TMPDIR_API_SRC="${TMPDIR_API}/src"
 [ -d "${TMPDIR_API_SRC}" ] || mkdir -p "${TMPDIR_API_SRC}"
 
 # Copy the C++ source code files into TMPDIR_API_SRC
-rsync -av "${GIT_REPO_DIR}/bindings/cxx/"*.cpp "${TMPDIR_API_SRC}/"
-rsync -av "${GIT_REPO_DIR}/bindings/cxx/"*.hpp "${TMPDIR_API_SRC}/include/"
-rsync -av "${GIT_REPO_DIR}/bindings/cxx/gpiodcxx/"*.cpp "${TMPDIR_API_SRC}/gpiodcxx/"
-rsync -av "${GIT_REPO_DIR}/bindings/cxx/gpiodcxx/"*.hpp "${TMPDIR_API_SRC}/gpiodcxx/"
+rsync -av "${GIT_REPO_DIR}/bindings/cxx/"*.cpp "${TMPDIR_API_SRC}/" || true
+rsync -av "${GIT_REPO_DIR}/bindings/cxx/"*.hpp "${TMPDIR_API_SRC}/include/" || true
+rsync -av "${GIT_REPO_DIR}/bindings/cxx/gpiodcxx/"*.cpp "${TMPDIR_API_SRC}/gpiodcxx/" || true
+rsync -av "${GIT_REPO_DIR}/bindings/cxx/gpiodcxx/"*.hpp "${TMPDIR_API_SRC}/gpiodcxx/" || true
 
 # Create a Doxygen configuration file (Doxyfile) in TMPDIR_API_SRC
 cd "${TMPDIR_API}"
@@ -135,6 +135,6 @@ make -C latex
 # Install the documentation files
 INSTALL_DOCDIR_API="${INSTALL_DOCDIR}/${API}"
 [ -d "${INSTALL_DOCDIR_API}" ] || mkdir -p "${INSTALL_DOCDIR_API}"
-rsync -av ./html "${INSTALL_DOCDIR_API}"/
-rsync -av ./latex/refman.pdf "${INSTALL_DOCDIR_API}/${LIBRARY_NAME}-${SOFTWARE_VERSION}.pdf"
+rsync -av ./html "${INSTALL_DOCDIR_API}"/ || true
+rsync -av ./latex/refman.pdf "${INSTALL_DOCDIR_API}/${LIBRARY_NAME}-${SOFTWARE_VERSION}.pdf" || true
 
