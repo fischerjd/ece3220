@@ -25,7 +25,7 @@
 # search path.
 #
 # 2025-Dec-27 Jim Fischer <fischerjd@missouri.edu>
-# Copyright 2025 James D. Fischer
+# © 2025 James D. Fischer
 #
 
 ifndef GPIODCXX.MK

@@ -1,16 +1,19 @@
 {
 	// PURPOSE: Configurations for user-defined tasks (e.g., build).
 	// AFFECTS: Tasks
-	// MENU: Terminal
-	//       |-- Configure Tasks...
-	//       |-- Configure Default Build Task...
-	//       |-- Run Task...
-	//       `-- Run Build Task (Ctrl+Shift+B)
+	// VSCODE MENU: 
+	// 		Terminal
+	//      |-- Run Task...        (Ctrl+Shift+M)
+	//      |-- Run Build Task     (Ctrl+Shift+B)
+	//      |-- Configure Tasks...
+	//      `-- Configure Default Build Task...
+	//
+	// © 2026 James D. Fischer
 	//
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "shell",
+			"type": "cppbuild",
 			"label": "[ECE3220] Build C File (gcc)",
 			"command": "/usr/bin/gcc",
 			"args": [
@@ -27,12 +30,14 @@
 			"options": {
 				"cwd": "${fileDirname}"
 			},
+			"problemMatcher": [
+				"$gcc"
+			],
 			"group": "build",
-			"detail": "compiler: /usr/bin/gcc",
-			"problemMatcher": []
+			"detail": "compiler: /usr/bin/gcc"
 		},
 		{
-			"type": "shell",
+			"type": "cppbuild",
 			"label": "[ECE3220] Build C++ File (g++)",
 			"command": "/usr/bin/g++",
 			"args": [
@@ -49,9 +54,11 @@
 			"options": {
 				"cwd": "${fileDirname}"
 			},
+			"problemMatcher": [
+				"$gcc"
+			],
 			"group": "build",
-			"detail": "compiler: /usr/bin/g++",
-			"problemMatcher": []
+			"detail": "compiler: /usr/bin/g++"
 		},
 		{
 			"label": "[ECE3220] make",
@@ -74,7 +81,9 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"problemMatcher": []
+			"problemMatcher": [
+				"$gcc"
+			]
 		},
 		{
 			"label": "[ECE3220] make debug",
@@ -98,7 +107,9 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"problemMatcher": []
+			"problemMatcher": [
+				"$gcc"
+			]
 		},
 		{
 			"label": "[ECE3220] make release",
@@ -120,7 +131,9 @@
 				"showReuseMessage": true,
 				"clear": true
 			},
-			"problemMatcher": []
+			"problemMatcher": [
+				"$gcc"
+			]
 		},
 		{
 			"label": "[ECE3220] make clean",

@@ -1,12 +1,21 @@
 # File: ~/ece3220/.gitignore
 
-## Tarball files
+## File archives
+*.tar
+*.tar.bz2
+*.tbz2
 *.tar.gz
 *.tgz
+*.tar.xz
+*.txz
+*.tar.zst
+*.tzst
+*.zip
 
 ## C/C++ intermediate files
 # Dependency files
 *.d
+*.Td
 # preprocessor files
 *.i
 # object files
@@ -20,7 +29,16 @@ pch.h
 ## Executable programs
 a.out
 demo
+hello
+world
 
 ## Text editor swap files
 # vim / gvim swap files
 .*.swp
+
+## Miscellaneous Files and Folders
+build/
+deleteme
+deleteme/
+student_work/
+tmp/

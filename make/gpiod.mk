@@ -19,8 +19,8 @@
 # preprocessor's header file search path, and to the linker's library file
 # search path.
 #
-# 2025-04-12 Jim Fischer <fischerjd@missouri.edu>
-# Copyright 2025 James D. Fischer
+# 2026-01-04 Jim Fischer <fischerjd@missouri.edu>
+# © 2025 James D. Fischer
 #
 
 ifndef GPIOD.MK
@@ -37,7 +37,8 @@ CFLAGS.dialect := c17
 #		GPIOD__VERSION := x.y.z
 # 
 #GPIOD__VERSION := x.y.z
-GPIOD__VERSION := 1.6.3
+#GPIOD__VERSION := 1.6.3
+GPIOD__VERSION := 2.2.2
 
 
 # Cross toolchain configuration
