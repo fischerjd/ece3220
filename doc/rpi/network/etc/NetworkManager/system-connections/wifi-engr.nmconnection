@@ -1,0 +1,32 @@
+# /etc/NetworkManager/system-connections/wifi-engr.nmconnection
+# See also: 
+# * man nm-settings-keyfile
+# * man nmcli   # HINT: --offline
+# * https://networkmanager.dev/docs/api/latest/
+# 2026-Jan-06 Jim Fischer <fischerjd@missouri.edu>
+
+[connection]
+id=ENGR
+uuid=968f1b3e-e8a6-4ff7-859d-319657f2e388
+type=wifi
+interface-name=wlan0
+autoconnect-priority=5
+
+# powersave: Values are 0 (use default), 1 (ignore/don't touch), 2 (disable) or 3 (enable)
+[wifi]
+mode=infrastructure
+powersave=2
+ssid=ENGR
+
+[wifi-security]
+key-mgmt=wpa-psk
+psk=82cb28f73ef55a725e7601f4586885725fc880df95bc0edaa476666f0277b939
+
+[ipv4]
+method=auto
+
+[ipv6]
+addr-gen-mode=default
+method=auto
+
+[proxy]

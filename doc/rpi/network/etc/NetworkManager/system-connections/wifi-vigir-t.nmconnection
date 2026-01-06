@@ -1,0 +1,32 @@
+# /etc/NetworkManager/system-connections/wifi-vigir-t.nmconnection
+# See also: 
+# * man nm-settings-keyfile
+# * man nmcli   # HINT: --offline
+# * https://networkmanager.dev/docs/api/latest/
+# 2026-Jan-06 Jim Fischer <fischerjd@missouri.edu>
+
+[connection]
+id=ViGIR-T
+uuid=8af4fa7f-8ce3-4da6-ab01-1859ae18529c
+type=wifi
+interface-name=wlan0
+autoconnect-priority=10
+
+# powersave: Values are 0 (use default), 1 (ignore/don't touch), 2 (disable) or 3 (enable)
+[wifi]
+mode=infrastructure
+powersave=2
+ssid=ViGIR-T
+
+[wifi-security]
+key-mgmt=wpa-psk
+psk=9f4974176dca772cc151cdbad1f3a1e58808d67d82cda83d75c49697b2b9416e
+
+[ipv4]
+method=auto
+
+[ipv6]
+addr-gen-mode=default
+method=auto
+
+[proxy]

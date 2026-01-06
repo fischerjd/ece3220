@@ -1,4 +1,7 @@
-## Wi-Fi ##
+File: README.txt
+Date: 2026-Jan-06
+© 2026 James D. Fischer
+---------------------------------------------------------------------------
 
 :: PROBLEM ::
 
@@ -30,15 +33,17 @@ $ sudo rfkill list
 
 $ sudo lshw -class network
 [...]
-68.1.3 link=yes maxpower=2mA multicast=yes port=MII speed=100Mbit/s
-  *-network
+  *-interface:0
        description: Wireless interface
-       physical id: 2
+       product: 43430
+       vendor: Broadcom
+       physical id: 1
+       bus info: mmc@1:0001:1
+       logical name: mmc1:0001:1
        logical name: wlan0
-       serial: b8:27:eb:ab:f1:e2
+       serial: b8:27:eb:c1:3f:4e
        capabilities: ethernet physical wireless
-       configuration: broadcast=yes driver=brcmfmac driverversion=7.45.98.94 firmware=01-3b33decd multicast=yes wireless=IEEE 802.11
-
+       configuration: broadcast=yes driver=brcmfmac driverversion=7.45.98 firmware=01-8e14b897 multicast=yes wireless=IEEE 802.11
 
 :: REFERENCES ::
 
