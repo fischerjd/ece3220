@@ -4,8 +4,7 @@
 #	File permissions: 0600
 #
 
-# This is the ssh client configuration file.  See ssh_config(5) for more
-# details.
+# This is the ssh client configuration file.  See ssh_config(5) for more details.
 #
 # :: IMPORTANT ::
 # As stated in 'man 5 ssh_config': "Since the first obtained value for each
@@ -21,7 +20,6 @@
 #   $ ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' pi@EECSpi
 # Alternatively, use this config file to automatically supply those
 # arguments to the SSH command line.
-#
 
 # Linux desktop PCs in Naka Hall 144
 # NB: Do not pass the local system's locale to the remote host [2].
@@ -46,6 +44,8 @@ Host naka144-pi-?? 128.206.22.101 128.206.22.102 128.206.22.103 128.206.22.104 1
     ServerAliveInterval 180
     ConnectTimeout 3
 
+# Lafferre Hall
+# College of Engineering's 'RemoteApps' Linux Server
 Host remoteapps-li.engineering.missouri.edu remoteapps-li remoteapps
     Hostname remoteapps-li.engineering.missouri.edu
     User __your_pawprint__
@@ -65,7 +65,8 @@ Host *
 # [1]  T. Sang. "Method 2: offer the RSA algorithm to the server", ssh
 #      handshake is rejected with 'no mutual signature algorithm' error.
 #      Tran Sang Dev Blog. Jan. 6, 2022. Accessed: Oct. 5, 2022. [Online].
-#      Available: https://transang.me/ssh-handshake-is-rejected-with-no-mutual-signature-algorithm-error/
+#      Available:
+#      https://transang.me/ssh-handshake-is-rejected-with-no-mutual-signature-algorithm-error/
 # [2]  T. Frenech, "How not to pass the locale through an ssh connection
 #      command," StackOverflow.com, Nov. 23, 2016. Accessed: Aug. 28, 2024.
 #      [Online]. Available: https://stackoverflow.com/a/63935109/5051940
