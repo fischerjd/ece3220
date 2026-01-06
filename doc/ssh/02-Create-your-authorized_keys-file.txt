@@ -1,39 +1,40 @@
 Create Your `authorized_keys' File
 
-These instructions perform the tasks listed below, and in the same order as
-shown here:
+These instructions perform the tasks listed below in order:
     
-    * Creates a file named `~/.ssh/authorized_keys' if it doesn't yet exist.
-    * Sets the file access permission on file `authorized_keys' to the
-      required value of 0600 (i.e., -rw-------).
-    * Stores the contents of your public SSH key file `id_ed25519.pub'
-      in your `authorized_keys' file.
+    * Creates file `~/.ssh/authorized_keys' if it doesn't yet exist.
+	* Sets the access permission on file `authorized_keys' to the required
+	  value of 0600 (i.e., -rw-------).
+	* Stores a copy of your public SSH key `id_ed25519.pub' within your
+	  `authorized_keys' file.
 
-[Note 1.  The commands shown below must be executed on the Linux computer
+[Note 1:  The commands shown below must be executed on the Linux computer
 that has your SSH key files.  If you have not yet created your SSH key
 files, follow the instructions in the file named
     01-Create-your-SSH-key-files.txt
 before you perform the instructions in this file. --end note]
 
-[Note 2.  The dollar sign '$' at the beginning of each command line is the
+[Note 2:  The dollar sign '$' at the beginning of each command line is the
 Bash shell's command prompt.  The command line text appears to the right of
 the dollar sign--i.e., to the right of the command prompt '$'. Do not type
 the dollar sign when entering a command. --end note]
 
-[Note 3.  In the examples below, wherever you see the word `pawprint', this
+[Note 3:  In the examples below, wherever you see the word `pawprint', this
 should be your Mizzou single sign-on (SSO) pawprint; it is not the word
 `pawprint'.  --end note]
 
-[Note 4.  The file access permissions on file `~/.ssh/authorized_keys' must
+[Note 4:  The file access permissions on file `~/.ssh/authorized_keys' must
 be 0600 (i.e. `-rw-------').  See the instructions below. --end note]
 
 ---------------------------------------------------------------------------
+
 $ cd ~/.ssh/
 
 # Create file `authorized_keys' if it doesn't yet exist.
 $ touch authorized_keys
 
-# Set the required file access permission on file `authorized_keys'.
+# Set the required access permission on file `authorized_keys'.  These
+# permissions must be: 0600 (-rw-------).
 $ chmod 0600 authorized_keys.
 $ ls -l authorized_keys 
 -rw------- 1 pawprint pawprint 130 Feb  7 00:14 authorized_keys
@@ -46,5 +47,5 @@ $ grep -q "$fingerprint" authorized_keys 2>/dev/null || cat id_ed25519.pub >> au
 $ unset fingerprint
 
 ===========================================================================
-Copyright 2025 James D. Fischer
+© 2025 James D. Fischer
 

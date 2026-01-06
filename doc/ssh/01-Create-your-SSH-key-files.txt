@@ -1,31 +1,32 @@
 Create Your Secure Shell (SSH) Key Files
 
-[Note 1.  The commands shown below must be executed on a Linux computer.
+[Note 1:  The commands shown below must be executed on a Linux computer.
 --end note]
 
-[Note 2.  The dollar sign '$' at the beginning of each command line is the
+[Note 2:  The dollar sign '$' at the beginning of each command line is the
 Bash shell's command prompt.  The command line text appears to the right of
 the dollar sign--i.e., to the right of the command prompt '$'. Do not type
 the dollar sign when entering a command. --end note]
 
-[Note 3.  In the examples below, wherever you see the word `pawprint', this
+[Note 3:  In the examples below, wherever you see the word `pawprint', this
 should be your Mizzou single sign-on (SSO) pawprint; it is not the word
 `pawprint'. --end note]
 
-[Note 4.  On the `ssh-keygen' command line, the option '-C' must be an
-uppercase C, not a lowercase 'c'. --end note]
+[Note 4:  When invoking the program `ssh-keygen', the option '-C' must be
+an uppercase C, not a lowercase 'c'. --end note]
 
-[Note 5.  When the `ssh-keygen' program prompts you to "Enter [the name of
+[Note 5:  When the `ssh-keygen' program prompts you to "Enter [the name of
 the] file in which to save the key," press the keyboard's ENTER key to use
 the default file name and file path, i.e., ~/.ssh/id_ed25519. --end note]
 
-[Note 6.  When the `ssh-keygen' program prompts you to "Enter [a]
+[Note 6:  When the `ssh-keygen' program prompts you to "Enter [a]
 passphrase for [your private key] '/home/pawprint/.ssh/id_ed25519'," enter
 an easy-to-remember passphrase for the private key, and then press the
-ENTER key. --end note]
+ENTER key. Do not forget this passphrase. --end note]
 
 ---------------------------------------------------------------------------
-# PAWPRINT
+
+# BASH SHELL ENVIRONMENT VARIABLE: PAWPRINT
 # The command line shown below creates a Bash shell environment variable
 # named `PAWPRINT'.  When you define the variable's value, enter your own
 # pawprint as the variable's value; do not use the example pawprint value
@@ -64,11 +65,12 @@ The key's randomart image is:
 ===========================================================================
 Verify the access permissions on folder ~/.ssh/:
 ---------------------------------------------------------------------------
+
 $ ls -l -d ~/.ssh/
 drwx------ 4 pawprint pawprint 4096 Feb  5 13:08 /home/pawprint/.ssh/
 
 
-[Note 1.  The access permissions on folder `~/.ssh/' must be `drwx------'
+[Note 1:  The access permissions on folder `~/.ssh/' must be `drwx------'
 (0700) as shown above. If the access permissions on your `~/.ssh/' folder
 are different from this, use the `chmod' program to change that folder's
 access permissions as shown below:
@@ -81,12 +83,13 @@ $ chmod 0700 ~/.ssh/
 ===========================================================================
 Verify the access permissions on your SSH key files
 ---------------------------------------------------------------------------
+
 $ ls -l ~/.ssh/id_ed25519*
 -rw------- 1 pawprint pawprint 509 Feb  5 13:08 /home/pawprint/.ssh/id_ed25519
 -rw-r--r-- 1 pawprint pawprint 130 Feb  5 13:08 /home/pawprint/.ssh/id_ed25519.pub
 
 
-[Note 1.  Your PRIVATE key file is `~/.ssh/id_ed25519'.  DO NOT SHARE YOUR
+[Note 1:  Your PRIVATE key file is `~/.ssh/id_ed25519'.  DO NOT SHARE YOUR
 PRIVATE KEY FILE WITH OTHERS.  The file access permissions on your PRIVATE
 key file must be `-rw-------' (0600) as shown above.  If the access
 permissions are different from this, use the `chmod' program to change that
@@ -96,7 +99,7 @@ $ chmod 0600 ~/.ssh/id_ed25519
 
 --end note]
 
-[Note 2.  Your PUBLIC key file is `~/.ssh/id_ed25519.pub'.  The file access
+[Note 2:  Your PUBLIC key file is `~/.ssh/id_ed25519.pub'.  The file access
 permissions on your PUBLIC key file should be `-rw-r--r--' (0644) as shown
 above.  If the access permissions are different from this, use the `chmod'
 program to change that file's access permissions as shown below:
@@ -106,5 +109,5 @@ $ chmod 0644 ~/.ssh/id_ed25519.pub
 --end note]
 
 ===========================================================================
-Copyright 2025 James D. Fischer
+© 2026 James D. Fischer
 
