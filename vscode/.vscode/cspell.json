@@ -1,0 +1,26 @@
+{
+    // Version of the setting file.
+    "version": "0.2",
+    
+    // language - current active spelling language.
+    "language": "en",
+
+    // words - list of words to be always considered correct.
+    "words": [],
+
+    // ignoreWords - often used words that should not be shown in the
+    // pop-up list of suggested words.
+    "ignoreWords": [
+        "eceugl",
+        "getopt",
+        "keygen",
+        "libexec",
+        "lopts",
+        "sopts"
+    ],
+
+    // flagWords - list of words to be always considered incorrect.
+    // This is useful for offensive words and common spelling errors.
+    // For example "hte" should be "the"
+    "flagWords": []
+}
