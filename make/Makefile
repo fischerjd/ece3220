@@ -1,6 +1,6 @@
 # Makefile
-# 2026-01-04
-# © 2019-2026 James D. Fischer
+# 2026-Jan-12 Jim Fischer <fischerjd@missouri.edu>
+# © 2019 James D. Fischer
 #
 # SYNOPSYS
 #   make {all|debug}
@@ -21,6 +21,9 @@
 #   compile and link with '-g', so that executable programs have debugging
 #   symbols." (NB: This Makefile compiles and links with '-ggdb'.)
 #   https://www.gnu.org/software/make/manual/html_node/Standard-Targets.html
+#
+#   By default, this Makefile uses the c17 and c++17 dialects when building
+#   C and C++ source files, respectively.
 #
 
 # The default C/C++ compilers.
