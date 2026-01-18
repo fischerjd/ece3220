@@ -1,0 +1,95 @@
+File: How-to-unblock-wireless-devices-with-rfkill.txt
+Date: 2026-Jan-06
+© 2026 James D. Fischer
+==========================================================================
+The commands shown in this file must be invoked on the Raspberry Pi.
+==========================================================================
+According to Google Gemini:
+
+In Linux, the program rfkill(8) manages the block/unblock settings for
+wireless devices like Wi-Fi and Bluetooth. When you run the command,
+    $ sudo rfkill list
+you see two types of blocks: Soft and Hard.
+
+The fundamental difference between soft and hard blocks is whether the
+device is disabled by a software process that is executing within the
+operating system's runtime environment, or by a physical component such as
+a hardware jumper on a circuit board or a BIOS setting that enables or
+disables a hardware device with the system boots up. A wireless device can
+be blocked (made inoperative) or unblocked (made operational) via software
+or hardware.
+
+Google. Response to “rfkill soft vs hard block” Gemini 3.0.
+Accessed: Jan. 17, 2026. [Online].
+Available: https://gemini.google.com/app/45437c43399da811
+Edited for style and accuracy.
+==========================================================================
+
+:: PROBLEM ::
+
+The Wi-Fi radio is blocked (inoperative) and therefore the Wi-Fi connection
+is in the DOWN state (inoperative). Commands like 'ifconfig' cannot change
+the Wi-Fi connection state from DOWN to UP to make it operational.
+
+$ sudo ifconfig wlan0 up
+SIOCSIFFLAGS: Operation not possible due to RF-kill
+
+$ sudo rfkill list
+0: phy0: Wireless LAN
+        Soft blocked: yes   ; <- note
+        Hard blocked: no
+1: hci0: Bluetooth
+        Soft blocked: no
+        Hard blocked: no
+
+---------------------------------------------------------------------------
+:: SOLUTION ::
+
+$ sudo rfkill unblock wifi
+$ sudo reboot
+
+
+$ sudo rfkill list
+0: phy0: Wireless LAN
+        Soft blocked: no    ; <- note
+        Hard blocked: no
+1: hci0: Bluetooth
+        Soft blocked: no
+        Hard blocked: no
+
+# As a double-check, use the "list hardware" app lshw(1) to verify that the
+# Wi-Fi radio is now unblocked and available for use:
+
+$ sudo lshw -class network
+[...]
+  *-interface:0
+       description: Wireless interface
+       product: 43430
+       vendor: Broadcom
+       physical id: 1
+       bus info: mmc@1:0001:1
+       logical name: mmc1:0001:1
+       logical name: wlan0
+       serial: b8:27:eb:c1:3f:4e
+       capabilities: ethernet physical wireless
+       configuration: broadcast=yes driver=brcmfmac driverversion=7.45.98 firmware=01-8e14b897 multicast=yes wireless=IEEE 802.11
+
+==========================================================================
+:: NOTE ::
+
+Using rfkill to remote the soft block might not be a permanent solution.
+For example, the NetworkManager daemon might periodically turn off the
+Wi-Fi radio to save power.
+
+To ensure the NetworkManager daemon DOES NOT periodically put the Wi-Fi
+radio into powersave mode, see these files within this subdirectory:
+    ./NetworkManager/
+    |-- /conf.d/default-wifi-powersave-off.conf
+    `-- system-connections/README.txt
+==========================================================================
+:: REFERENCES ::
+
+[1]  https://askubuntu.com/a/62167/657351
+
+==========================================================================
+

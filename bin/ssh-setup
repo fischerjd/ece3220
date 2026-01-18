@@ -283,7 +283,7 @@ function configure_the_ssh_config_file()
 {
     local -r pawprint="${1}"
     local -r user_ssh_config_file_path="$HOME/.ssh/config"
-    local -r git_repo_ssh_config_file_path="${SCRIPT_PATH}/../ssh/config"
+    local -r git_repo_ssh_config_file_path="${SCRIPT_PATH}/../share/ssh/config"
 
     print_configure_task_banner "Configuing Your SSH Configuration File '~/.ssh/config'"
 

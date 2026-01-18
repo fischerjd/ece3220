@@ -5,7 +5,8 @@
     // language - current active spelling language.
     "language": "en",
 
-    // words - list of words to be always considered correct.
+    // words - list of words to be always considered correct and 
+    // should be shown in the pop-up list of suggested words.
     "words": [],
 
     // ignoreWords - often used words that should not be shown in the
@@ -16,7 +17,10 @@
         "keygen",
         "libexec",
         "lopts",
-        "sopts"
+        "sopts",
+        "tracel",
+        "tracelv",
+        "tracev"
     ],
 
     // flagWords - list of words to be always considered incorrect.

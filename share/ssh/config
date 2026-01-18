@@ -1,10 +1,13 @@
-#	$OpenBSD: ssh_config,v 1.30 2016/02/20 23:06:23 sobrado Exp $
-#	
-#	File path:  $HOME/.ssh/config
-#	File permissions: 0600
+#   $OpenBSD: ssh_config,v 1.30 2016/02/20 23:06:23 sobrado Exp $
+#
+#   This is the ssh client configuration file.  See ssh_config(5) for more details.
+#
+#   File path:  $HOME/.ssh/config
+#   File permissions: 0600
+#   SSH configuration file for ECE 3220
+#   2026-Jan-17 Jim Fischer <fischerjd@missouri.edu>
 #
 
-# This is the ssh client configuration file.  See ssh_config(5) for more details.
 #
 # :: IMPORTANT ::
 # As stated in 'man 5 ssh_config': "Since the first obtained value for each
@@ -17,29 +20,51 @@
 # Raspbian OS, modify the SSH command line as described in Sang's blog
 # post, "ssh handshake is rejected with 'no mutual signature algorithm'
 # error" [1]:
-#   $ ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' pi@EECSpi
+#   $ ssh -o 'PubkeyAcceptedKeyTypes +ssh-rsa' pi@naka144-pi-14
 # Alternatively, use this config file to automatically supply those
-# arguments to the SSH command line.
+# arguments to the SSH command line, e.g.,:
+#    Host naka144-pi-??
+#        HostName %h.missouri.edu
+#        User pi
+#        PreferredAuthentications publickey,password
+#        PubkeyAcceptedKeyTypes +ssh-rsa
+#        IdentityFile ~/.ssh/id_rsa     # <- note the RSA identity
+#        ServerAliveInterval 180
+#        ConnectTimeout 3
+#
 
 # Linux desktop PCs in Naka Hall 144
 # NB: Do not pass the local system's locale to the remote host [2].
 Host naka144-li-??
     HostName %h.engineering.missouri.edu
-Host naka144-li-?? 128.206.23.101 128.206.23.102 128.206.23.103 128.206.23.104 128.206.23.105 128.206.23.106 128.206.23.107 128.206.23.108 128.206.23.109 128.206.23.110 128.206.23.111 128.206.23.112 128.206.23.113 128.206.23.114 128.206.23.115 128.206.23.116 128.206.23.117 128.206.23.118
-    User __your_pawprint__
+    User fischerjd
     PreferredAuthentications publickey,password
-    IdentityFile ~/.ssh/id_ed25519
+    IdentityFile ~/.ssh/mizzou/engr/naka144-li/id_ed25519
+    SendEnv -LC_* -LANG*
+
+Host naka144-li-??.engineering.missouri.edu 128.206.23.101 128.206.23.102 128.206.23.103 128.206.23.104 128.206.23.105 128.206.23.106 128.206.23.107 128.206.23.108 128.206.23.109 128.206.23.110 128.206.23.111 128.206.23.112 128.206.23.113 128.206.23.114 128.206.23.115 128.206.23.116 128.206.23.117 128.206.23.118
+    User fischerjd
+    PreferredAuthentications publickey,password
+    IdentityFile ~/.ssh/mizzou/engr/naka144-li/id_ed25519
     SendEnv -LC_* -LANG*
 
 # Raspberry Pis in Naka Hall 144
 # NB: Do not pass the local system's locale to the remote host [2].
 Host naka144-pi-??
     HostName %h.missouri.edu
-Host naka144-pi-?? 128.206.22.101 128.206.22.102 128.206.22.103 128.206.22.104 128.206.22.105 128.206.22.106 128.206.22.107 128.206.22.108 128.206.22.109 128.206.22.110 128.206.22.111 128.206.22.112 128.206.22.113 128.206.22.114 128.206.22.115 128.206.22.116 128.206.22.117 128.206.22.118
     User pi
     PreferredAuthentications publickey,password
     # PubkeyAcceptedKeyTypes +ssh-rsa
-    IdentityFile ~/.ssh/id_ed25519
+    IdentityFile ~/.ssh/mizzou/engr/naka144-pi/id_ed25519
+    #SendEnv -LC_* -LANG*
+    ServerAliveInterval 180
+    ConnectTimeout 3
+
+Host naka144-pi-??.missouri.edu 128.206.22.101 128.206.22.102 128.206.22.103 128.206.22.104 128.206.22.105 128.206.22.106 128.206.22.107 128.206.22.108 128.206.22.109 128.206.22.110 128.206.22.111 128.206.22.112 128.206.22.113 128.206.22.114 128.206.22.115 128.206.22.116 128.206.22.117 128.206.22.118
+    User pi
+    PreferredAuthentications publickey,password
+    # PubkeyAcceptedKeyTypes +ssh-rsa
+    IdentityFile ~/.ssh/mizzou/engr/naka144-pi/id_ed25519
     #SendEnv -LC_* -LANG*
     ServerAliveInterval 180
     ConnectTimeout 3
@@ -65,8 +90,7 @@ Host *
 # [1]  T. Sang. "Method 2: offer the RSA algorithm to the server", ssh
 #      handshake is rejected with 'no mutual signature algorithm' error.
 #      Tran Sang Dev Blog. Jan. 6, 2022. Accessed: Oct. 5, 2022. [Online].
-#      Available:
-#      https://transang.me/ssh-handshake-is-rejected-with-no-mutual-signature-algorithm-error/
+#      Available: https://transang.me/ssh-handshake-is-rejected-with-no-mutual-signature-algorithm-error/
 # [2]  T. Frenech, "How not to pass the locale through an ssh connection
 #      command," StackOverflow.com, Nov. 23, 2016. Accessed: Aug. 28, 2024.
 #      [Online]. Available: https://stackoverflow.com/a/63935109/5051940

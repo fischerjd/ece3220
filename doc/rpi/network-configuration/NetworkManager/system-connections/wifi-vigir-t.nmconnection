@@ -1,9 +1,9 @@
 # /etc/NetworkManager/system-connections/wifi-vigir-t.nmconnection
 # See also: 
 # * man nm-settings-keyfile
-# * man nmcli   # HINT: --offline
+# * man nmcli
 # * https://networkmanager.dev/docs/api/latest/
-# 2026-Jan-06 Jim Fischer <fischerjd@missouri.edu>
+# 2026-Jan-17 Jim Fischer <fischerjd@missouri.edu>
 
 [connection]
 id=ViGIR-T
