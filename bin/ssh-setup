@@ -29,24 +29,26 @@
 #   elements.  This script does, however, set the file access permissions
 #   on those elements to the permissions recommended in ssh(1) and sshd(8).
 #
-#   If the user does not provide their pawprint on the command line, the script
-#   prompts them to enter their pawprint.  This script performs verification
-#   checks on the user's pawprint value before accepting the pawprint value.
+#   If the user does not provide their pawprint on the command line, the
+#   script prompts them to enter their pawprint.  This script performs
+#   verification checks on the user's pawprint value before accepting the
+#   pawprint value.
 #   [Note 1: The user must enter their pawprint, not their email address.
 #   --end note]  
 #
 # OPTIONS
 #   -e, --employee
 #       When this option is used, ssh-setup validates pawprint strings in
-#       accordance with the syntax rules for employees.  Note that the syntax
-#       rules for students' pawprints are different from the syntax rules for
-#       employees' pawprints.  By default, ssh-setup validates pawprint strings
-#       in accordance with the syntax rules for students' pawprints.  
+#       accordance with the syntax rules for employees.  Note that the
+#       syntax rules for students' pawprints are different from the syntax
+#       rules for employees' pawprints.  By default, ssh-setup validates
+#       pawprint strings in accordance with the syntax rules for students'
+#       pawprints.  
 #
 #   -i identity_file
-#       Specifies the path to a file from which the identity (private key) for
-#       public key authentication is read.  See the description of option '-i'
-#       in the ssh(1) manual.
+#       Specifies the path to a file from which the identity (private key)
+#       for public key authentication is read.  See the description of
+#       option '-i' in the ssh(1) manual.
 #
 # <help_end>
 #
@@ -285,7 +287,7 @@ function configure_the_ssh_config_file()
     local -r user_ssh_config_file_path="$HOME/.ssh/config"
     local -r git_repo_ssh_config_file_path="${SCRIPT_PATH}/../share/ssh/config"
 
-    print_configure_task_banner "Configuing Your SSH Configuration File '~/.ssh/config'"
+    print_configure_task_banner "Configuring Your SSH Configuration File '~/.ssh/config'"
 
     # If this user does not yet have an SSH config file, install the 
     # template SSH config file that's provided with this Git repository.
