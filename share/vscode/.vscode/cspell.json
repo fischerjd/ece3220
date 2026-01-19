@@ -17,6 +17,8 @@
         "keygen",
         "libexec",
         "lopts",
+        "rpifs",
+        "sshfs",
         "sopts",
         "tracel",
         "tracelv",
