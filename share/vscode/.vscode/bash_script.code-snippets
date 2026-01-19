@@ -1,0 +1,66 @@
+{
+	// Place your global snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and 
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope 
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is 
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are: 
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
+	// Placeholders with the same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"scope": "javascript,typescript",
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+	"banner.function": {
+		"scope": "shellscript",
+		"prefix": "FUNCTION_BANNER",
+		"body": [
+			"#==========================================================================",
+			"# FUNCTION:  ${1:function_name_goes_here}",
+			"#--------------------------------------------------------------------------",
+			"# DESCRIPTION",
+			"#   ",
+			"#",
+			"# PARAMETERS",
+			"#   \\$1 ${2:local_variable_name (value_type, required): parameter description}",
+			"#   \\$2 local_variable_name (value_type, optional): parameter description (default: default_value)",
+			"#",
+			"# GLOBAL VARIABLES",
+			"#   * global_variable_name: description",
+			"#",
+			"# FILES",
+			"#    ",
+			"#",
+			"# PRINTS",
+			"#   (required): Description of required output message.",
+			"#   (optional): Description of optional output message.",
+			"#",
+			"# RETURNS: None.",
+			"#   or,",
+			"# RETURNS",
+			"#   0: Success",
+			"#   1: Failure - Failure description.",
+			"#==========================================================================",
+            "",
+			"$0"
+		],
+		"description": "Banner template for user-defined functions in a Bash script."
+	},
+	"banner.section": {
+		"scope": "shellscript",
+		"prefix": "SECTION_BANNER",
+		"body": [
+			"#--------------------------------------------------------------------------",
+			"#  ${1:section description goes here}",
+			"#--------------------------------------------------------------------------",
+            "",
+			"$0"
+		],
+		"description": "Lightweight banner to demark the beginning of a logical section of code."
+	}
+}
+
