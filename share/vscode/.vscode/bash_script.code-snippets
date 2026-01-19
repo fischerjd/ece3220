@@ -15,7 +15,7 @@
 	// 	],
 	// 	"description": "Log output to console"
 	// }
-	"banner.function": {
+	"bash.script.function.banner": {
 		"scope": "shellscript",
 		"prefix": "FUNCTION_BANNER",
 		"body": [
@@ -23,10 +23,10 @@
 			"# FUNCTION:  ${1:function_name_goes_here}",
 			"#--------------------------------------------------------------------------",
 			"# DESCRIPTION",
-			"#   ",
+			"#   ${2:function description}",
 			"#",
 			"# PARAMETERS",
-			"#   \\$1 ${2:local_variable_name (value_type, required): parameter description}",
+			"#   \\$1 ${3:local_variable_name (value_type, required): parameter description}",
 			"#   \\$2 local_variable_name (value_type, optional): parameter description (default: default_value)",
 			"#",
 			"# GLOBAL VARIABLES",
@@ -50,7 +50,7 @@
 		],
 		"description": "Banner template for user-defined functions in a Bash script."
 	},
-	"banner.section": {
+	"bash.script.section.banner": {
 		"scope": "shellscript",
 		"prefix": "SECTION_BANNER",
 		"body": [
