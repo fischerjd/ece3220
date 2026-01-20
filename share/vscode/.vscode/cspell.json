@@ -1,3 +1,4 @@
+// See also: https://cspell.org/docs/Configuration
 {
     // Version of the setting file.
     "version": "0.2",
@@ -5,25 +6,25 @@
     // language - current active spelling language.
     "language": "en",
 
+    // dictionaries
+    "dictionaries": ["global-words"],
+
+    // Dictionary definitions
+    "dictionaryDefinitions": [
+        { 
+            "name": "global-words", 
+            "path": "~/.config/cspell/global-words.txt",
+            "addWords": true
+        }
+    ],
+
     // words - list of words to be always considered correct and 
     // should be shown in the pop-up list of suggested words.
     "words": [],
 
     // ignoreWords - often used words that should not be shown in the
     // pop-up list of suggested words.
-    "ignoreWords": [
-        "eceugl",
-        "getopt",
-        "keygen",
-        "libexec",
-        "lopts",
-        "rpifs",
-        "sshfs",
-        "sopts",
-        "tracel",
-        "tracelv",
-        "tracev"
-    ],
+    "ignoreWords": [],
 
     // flagWords - list of words to be always considered incorrect.
     // This is useful for offensive words and common spelling errors.
