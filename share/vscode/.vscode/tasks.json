@@ -70,7 +70,7 @@
 				"isDefault": true
 			},
 			"options": {
-				"cwd": "${workspaceFolder}",
+				"cwd": "${fileDirname}",
 				"env": {}
 			},
 			"presentation": {
@@ -96,7 +96,7 @@
 				"kind": "build"
 			},
 			"options": {
-				"cwd": "${workspaceFolder}",
+				"cwd": "${fileDirname}",
 				"env": {}
 			},
 			"presentation": {
@@ -120,7 +120,7 @@
 			],
 			"group": "build",
 			"options": {
-				"cwd": "${workspaceFolder}",
+				"cwd": "${fileDirname}",
 				"env": {}
 			},
 			"presentation": {
@@ -144,7 +144,7 @@
 			],
 			"group": "build",
 			"options": {
-				"cwd": "${workspaceFolder}",
+				"cwd": "${fileDirname}",
 				"env": {}
 			},
 			"presentation": {
@@ -166,7 +166,7 @@
 			],
 			"group": "build",
 			"options": {
-				"cwd": "${workspaceFolder}",
+				"cwd": "${fileDirname}",
 				"env": {}
 			},
 			"presentation": {
@@ -188,7 +188,7 @@
 			],
 			"group": "build",
 			"options": {
-				"cwd": "${workspaceFolder}",
+				"cwd": "${fileDirname}",
 				"env": {}
 			},
 			"presentation": {

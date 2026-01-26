@@ -3,9 +3,6 @@
 // editor.wordwrap:
 // * https://code.visualstudio.com/updates/v1_10#_word-wrap-settings-redesign
 // * https://stackoverflow.com/a/66434593/5051940
-//
-// © 2026 James D. Fischer
-//
 {
     "C_Cpp.clang_format_style": "file",
     "cmake.useCMakePresets": "always",
