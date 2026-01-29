@@ -10,21 +10,22 @@
 #   make-vars --help
 #
 # DESCRIPTION
-#   By default, make-vars invokes `make --print-data-base --dry-run', which
-#   produces a listing that provides
+#   By default, make-vars invokes `make --print-data-base --dry-run' to
+#   produce a listing that provides
 #   * The rules, variable names, and variable values provided by the make
 #     program itself, and
 #   * The rules, variable names, and variable values that are defined via
 #     the local makefile.
 #
 #   The patterns are regular expression patterns.  If one or more patterns
-#   are specified, the patterns filter the output. 
+#   are specified, the patterns filter the output.
 #
 # OPTIONS
 #   -d, --defaults
 #       The printed listing shows the default values for make's built-in
-#       variables and rules, ignoring any environment variables that might
-#       affect make's output, and ignoring any user-defined makefile(s).
+#       variables and rules. The output does not show any environment
+#       variables that might affect make's output, and it does not show any
+#       make variables or rules found in user-defined makefile(s).
 #
 #   -f file, --file=file, --makefile=file
 #       Use `file' as the makefile.
@@ -54,8 +55,8 @@ declare -r SCRIPT_NAME
 
 
 ## Program paths
-# [Note 1: Use Bash's builtin `cd' and not /usr/bin/cd. --end note]
-# [Note 2: Use Bash's builtin `echo' and not /usr/bin/echo. --end note]
+# [Note 1: Use Bash's builtin `echo' and `printf', and not their coreutils
+# counterparts /usr/bin/echo and /usr/bin/printf.  --end note]
 declare -r CAT=/usr/bin/cat
 declare -r ENV=/usr/bin/env
 declare -r GETOPT=/usr/bin/getopt
@@ -130,8 +131,13 @@ set -e
             -h|--help) cloHelpRequested=true ;;
             --Wundefined-variables) cloWarnUndefinedVariables=true ;;
             --Wno-undefined-variables) cloNoWarnUndefinedVariables=true ;;
-            --) ;;
-            *) cloPatterns+=("$1") ;;
+            --) # Process the positional parameters
+                while [[ $# -gt 1 ]]
+                do
+                    shift
+                    cloSearchPatterns+=("$1")
+                done
+                ;;
         esac
         shift
     done
@@ -199,13 +205,12 @@ function print_horizontal_rule()
 
 cloHelpRequested=false
 cloMakefile=
-cloPatterns=()
+cloSearchPatterns=()
 cloNoWarnUndefinedVariables=false
 cloDefaults=false
 cloWarnUndefinedVariables=false
 
 ParseTheCommandLine "$@"
-
 
 #--------------------------------------------------------------------------
 #  If the user requested help, display the help information and exit.
@@ -236,6 +241,7 @@ trap '"${RM}" -f -- "${TMPFILE}"' EXIT
 
 make_flags=(
     --dry-run
+    --keep-going
     --print-data-base
     --warn-undefined-variables
     )
@@ -253,7 +259,6 @@ else
 fi
 set -e
 
-
 #--------------------------------------------------------------------------
 # Remove ANSI escape codes (e.g., color codes) from the text in TMPFILE
 # References:
@@ -269,13 +274,13 @@ set -e
 #--------------------------------------------------------------------------
 
 if ! $cloWarnUndefinedVariables; then
-    if [ ${#cloPatterns[@]} -eq 0 ]; then
+    if [ ${#cloSearchPatterns[@]} -eq 0 ]; then
         # Print everything
         "${CAT}" "${TMPFILE}"
     else
-        for pattern in "${cloPatterns[@]}"; do
-            print_banner "PATTERN: |${pattern}|"
-            "${GREP}" --color "$pattern" "${TMPFILE}" || true
+        for search_pattern in "${cloSearchPatterns[@]}"; do
+            print_banner "PATTERN: |${search_pattern}|"
+            "${GREP}" --color "$search_pattern" "${TMPFILE}" || true
         done
     fi
 fi
