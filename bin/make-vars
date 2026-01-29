@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2025 James D. Fischer
+# © 2025 James D. Fischer
 #
 # <help_begin>
 # NAME
@@ -62,7 +62,6 @@ declare -r GETOPT=/usr/bin/getopt
 declare -r GREP=/usr/bin/grep
 declare -r PAGER=/usr/bin/less
 declare -r MAKE=/usr/bin/make
-declare -r PRINTF=/usr/bin/printf
 declare -r RM=/usr/bin/rm
 declare -r SED=/usr/bin/sed
 
@@ -83,12 +82,12 @@ set +e
     __2="$(
       { __1="$("${@:3}")"; } 2>&1;
       ret=$?;
-      "${PRINTF}" '%q=%q\n' "$1" "$__1" >&2;
+      printf '%q=%q\n' "$1" "$__1" >&2;
       exit $ret
       )"
     ret=$?;
-    "${PRINTF}" '%s=%q\n' "$2" "$__2" >&2;
-    "${PRINTF}" 'return %q\n' "$ret" >&2;
+    printf '%s=%q\n' "$2" "$__2" >&2;
+    printf 'return %q\n' "$ret" >&2;
     } 2>&1 )";
 set -e
 }
@@ -106,6 +105,7 @@ function ParseTheCommandLine()
     # X:: optional operand--e.g., -X  =OR=  -X value
     local lopts="defaults file: help makefile: Wundefined-variables Wno-undefined-variables"
     local sopts="d f: h"
+    local getopt_exit_code
     local getopt_stdout
     local getopt_stderr
 
