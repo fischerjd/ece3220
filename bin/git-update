@@ -1,5 +1,5 @@
 #!/bin/bash
-# 2026-Jan-24 Jim Fischer <fischerjd@missouri.edu>
+# 2026-Feb-05 Jim Fischer <fischerjd@missouri.edu>
 # © 2024 James D. Fischer
 #
 # <help_begin>
@@ -213,25 +213,26 @@ function git_update()
     # tilde with the canonical path to the user's HOME directory.
     # See also:  https://stackoverflow.com/a/27485157/5051940
     git_repo_directory="${git_repo_directory/#\~/${HOME}}"
-    git_repo_directory_realpath="$("${REALPATH}" "${git_repo_directory}")"
+    git_repo_directory_realpath="$("${REALPATH}" "${git_repo_directory}" 2>/dev/null)" || true
 
     echo
     echo "==============================================================="
     echo "  Processing: ${git_repo_directory}"
-    if [[ "${git_repo_directory}" != "${git_repo_directory_realpath}" ]]; then
+    if [[ -n "${git_repo_directory_realpath}" ]] \
+    && [[ "${git_repo_directory}" != "${git_repo_directory_realpath}" ]]
+    then
         echo "  Realpath  : ${git_repo_directory_realpath}"
     fi
     echo "==============================================================="
-
 
     #----------------------------------------------------------------------
     #  VALIDATION: Ensure folder git_repo_directory exists.
     #----------------------------------------------------------------------
 
-    if [[ ! -d "${git_repo_directory_realpath}" ]]; then
-        error_exit 1 "Folder '${git_repo_directory_realpath}' does not exist."
+    if [[ -z "${git_repo_directory_realpath}" ]]; then
+        error_exit 1 "Folder '${git_repo_directory}' does not exist."
     fi
-    
+
     cd "${git_repo_directory_realpath}"
 
 
@@ -308,11 +309,10 @@ function git_update()
         
         if [ "${local_hash}" != "${remote_hash}" ]; then
 
-            # CHECK: Is the local branch behind the remote branch?
             if "${GIT}" merge-base --is-ancestor "${local_hash}" "${remote_hash}"; then
 
-                # The local branch is behind the remote. Use git-pull to
-                # pull the remote commits to the local branch.
+                # The local branch is behind the remote branch. Use 
+                # git-pull to pull the remote commits to the local branch.
 
                 current_branch_files_were_stashed=false
                 if [[ $("${GIT}" status --porcelain) ]]; then
@@ -327,9 +327,24 @@ function git_update()
                 fi
 
             elif "${GIT}" merge-base --is-ancestor "${remote_hash}" "${local_hash}"; then
-                _error_exit 1 "The local branch is ahead of the remote branch."
+
+                # The local branch is ahead of the remote branch. Use 
+                # git-push to push the local commits to the remote branch.
+
+                current_branch_files_were_stashed=false
+                if [[ $("${GIT}" status --porcelain) ]]; then
+                    "${GIT}" stash --include-untracked
+                    current_branch_files_were_stashed=true
+                fi
+
+                "${GIT}" push
+
+                if $current_branch_files_were_stashed; then
+                    "${GIT}" stash pop
+                fi
+
             else
-                _error_exit 1 "The local branch has diverged from the remote branch."
+                error_exit 1 "The local branch has diverged from the remote branch."
             fi
 
         fi
