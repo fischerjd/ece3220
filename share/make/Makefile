@@ -1,5 +1,5 @@
 # Makefile
-# 2026-Jan-12 Jim Fischer <fischerjd@missouri.edu>
+# 2026-Feb-10 Jim Fischer <fischerjd@missouri.edu>
 # © 2019 James D. Fischer
 #
 # SYNOPSYS
@@ -329,7 +329,14 @@ POSTCOMPILE.cxx = @mv -f $(DEPDIR)$*.cxx.Td $(DEPDIR)$*.cxx.d && touch $@
 # [Optional]  Variable customizations for this build should be defined in a
 # makefile named `variables.mk' located in the current working directory.
 # Any variables defined thus far in this Makefile can be overridden or
-# appended by (re)defining those variables within 'variables.mk'.
+# appended by (re)defining those variables within 'variables.mk'. See also 
+# these variables within this Makefile:
+#	CPPFLAGS.custom
+#	CFLAGS.custom
+#	CXXFLAGS.custom
+#   LDFLAGS.custom
+#	LDLIBS.custom
+#
 ifneq ($(wildcard variables.mk),)
 include variables.mk
 endif
@@ -711,7 +718,7 @@ $(HEADERS): ;
 
 
 # Include the automatically-generated dependency rules from folder DEPDIR.
-include $(wildcard $(DEPDIR)/*.d)
+include $(wildcard $(DEPDIR)*.d)
 
 
 # doxygen documentation
