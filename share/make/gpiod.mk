@@ -24,7 +24,7 @@
 #
 
 ifndef GPIOD.MK
-GPIOD.MK = 1
+GPIOD.MK := 1
 
 # The C compiler dialect must be C 17
 CFLAGS.dialect := c17

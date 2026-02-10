@@ -50,7 +50,7 @@
 #
 
 ifndef WIRINGPI.MK
-WIRINGPI.MK = 1
+WIRINGPI.MK := 1
 
 WIRINGPI__BUILD_CPU_ARCH := $(shell lscpu | grep 'Architecture:' | sed 's/Architecture:[[:blank:]]*//')
 ifneq ($(WIRINGPI__BUILD_CPU_ARCH),armv7l)

@@ -29,7 +29,7 @@
 #
 
 ifndef GPIODCXX.MK
-GPIODCXX.MK = 1
+GPIODCXX.MK := 1
 
 # The C++ compiler dialect must be C++ 17
 CXXFLAGS.dialect := c++17

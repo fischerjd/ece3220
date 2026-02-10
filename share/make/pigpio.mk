@@ -23,7 +23,7 @@
 #
 
 ifndef PIGPIO.MK
-PIGPIO.MK = 1
+PIGPIO.MK := 1
 
 PIGPIO__BUILD_CPU_ARCH := $(shell lscpu | grep 'Architecture:' | sed 's/Architecture:[[:blank:]]*//')
 ifeq (,$(filter $(PIGPIO__BUILD_CPU_ARCH), armv7l aarch64))
