@@ -20,6 +20,9 @@
 *.i
 # object files
 *.o
+# assembly files
+*.s
+*.S
 
 # Precompiled headers
 *.gch
@@ -42,3 +45,4 @@ deleteme
 deleteme/
 student_work/
 tmp/
+
