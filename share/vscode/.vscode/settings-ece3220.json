@@ -5,11 +5,12 @@
 // * https://stackoverflow.com/a/66434593/5051940
 {
     "C_Cpp.clang_format_style": "file",
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
     "cmake.useCMakePresets": "always",
     "cSpell.customDictionaries": {
         "custom-dictionary-user": {
             "name": "custom-dictionary-user",
-            "path": "~/.local/share/cspell/custom-dictionary-user.txt",
+            "path": "${env:HOME}/.local/share/cspell/dictionary.txt",
             "addWords": true,
             "scope": "user"
         }
@@ -33,7 +34,9 @@
     "doxdocgen.generic.authorName": "James D. Fischer",
     "doxdocgen.generic.splitCasingSmartText": false,
     "editor.acceptSuggestionOnEnter": "on",
+    "editor.fontSize": 14,
     "editor.hover.above": false,
+    "editor.indentSize": "tabSize",
     "editor.mouseWheelZoom": true,
     "editor.quickSuggestions": {
         "other": "off",
@@ -41,6 +44,7 @@
         "strings": "off"
     },
     "editor.rulers": [ 75 ],
+    "editor.tabSize": 4,
     "editor.wordWrap": "on",
     "editor.wordWrapColumn": 75,
     "files.associations": {
@@ -238,6 +242,7 @@
         "iomanip",
         "IWYU",
         "libgpiodcxx",
+        "Mizzou",
         "lopts",
         "Noexcept",
         "pawprint",
