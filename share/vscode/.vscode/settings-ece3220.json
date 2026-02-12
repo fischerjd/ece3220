@@ -107,7 +107,6 @@
         "map": "cpp",
         "memory": "cpp",
         "memory_resource": "cpp",
-        "memory": "cpp",
         "mutex": "cpp",
         "new": "cpp",
         "numbers": "cpp",
@@ -155,7 +154,7 @@
     "rewrap.autoWrap.enabled": false,
     "rewrap.wholeComment": false,
     "terminal.integrated.cwd": "${fileDirname}",
-    "terminal.integrated.fontSize": 21,
+    "terminal.integrated.fontSize": 14,
     "terminal.integrated.mouseWheelZoom": true,
     "terminal.integrated.profiles.linux": {
         "bash": {

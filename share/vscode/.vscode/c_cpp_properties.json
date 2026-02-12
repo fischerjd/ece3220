@@ -2,7 +2,7 @@
     "version": 4,
     "env": {
         "myIncludePath": [
-            "${userHome}/git/github/CLI11/include/**"
+            "${userHome}/git/github/CLI11/include/CLI/**"
 	],
         "RpiIncludePath": [
             "${userHome}/rpifs/usr/include"
