@@ -1,17 +1,54 @@
 {
+    "version": 4,
+    "env": {
+        "myIncludePath": [
+            "${userHome}/git/github/CLI11/include/**"
+	],
+        "RpiIncludePath": [
+            "${userHome}/rpifs/usr/include"
+        ],
+        "myDefines": [
+            "DEBUG",
+            "DEBUG_BUILD=1",
+            "DEBUG_TRACE_LEVEL=5",
+            "PROGRAM_NAME=demo"
+        ]
+    },
     "configurations": [
         {
             "name": "Linux",
-            "includePath": [
-                "${workspaceFolder}/**",
-                "${userHome}/git/github/CLI11/include/CLI/**"
-            ],
-            "defines": [],
             "compilerPath": "/usr/bin/g++",
+            "compilerArgs": [
+                "-O0",
+                "-ggdb"
+            ],
+            "intelliSenseMode": "linux-gcc-x64",
+            "includePath": [
+                "${myIncludePath}",
+                "/usr/include/**"
+            ],
+            "defines": [
+                "${myDefines}"
+            ],
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "configurationProvider": "ms-vscode.cmake-tools",
+            "forcedInclude": [],
+            "mergeConfigurations": true,
+            "customConfigurationVariables": {
+                "myVar": "myvalue"
+            },
+            "browse": {
+                "path": [
+                    "${myIncludePath}",
+                    "/usr/include",
+                    "${RpiIncludePath}",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db"
+            }
         }
     ],
-    "version": 4
+    "enableConfigurationSquiggles": true
 }
