@@ -155,7 +155,7 @@
     "rewrap.autoWrap.enabled": false,
     "rewrap.wholeComment": false,
     "terminal.integrated.cwd": "${fileDirname}",
-    "terminal.integrated.fontSize": 14,
+    "terminal.integrated.fontSize": 21,
     "terminal.integrated.mouseWheelZoom": true,
     "terminal.integrated.profiles.linux": {
         "bash": {
