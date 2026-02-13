@@ -8,9 +8,9 @@
     "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
     "cmake.useCMakePresets": "always",
     "cSpell.customDictionaries": {
-        "custom-dictionary-user": {
-            "name": "custom-dictionary-user",
-            "path": "${env:HOME}/.local/share/cspell/dictionary.txt",
+        "global-words": {
+            "name": "global-words",
+            "path": "${env:HOME}/.local/share/cspell/global-words.txt",
             "addWords": true,
             "scope": "user"
         }
