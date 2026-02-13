@@ -3,7 +3,7 @@
     "env": {
         "myIncludePath": [
             "${userHome}/git/github/CLI11/include/CLI/**"
-	],
+	    ],
         "RpiIncludePath": [
             "${userHome}/rpifs/usr/include"
         ],
