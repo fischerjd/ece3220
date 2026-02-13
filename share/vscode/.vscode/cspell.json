@@ -13,7 +13,7 @@
     "dictionaryDefinitions": [
         { 
             "name": "global-words", 
-            "path": "~/.config/cspell/global-words.txt",
+            "path": "~/.local/share/cspell/global-words.txt",
             "addWords": true
         }
     ],
