@@ -22,8 +22,8 @@
     ],
     "doxdocgen.file.fileOrder": [
         "file",
-        "author", 
         "brief",
+        "author", 
         "version",
         "date",
         "empty",
