@@ -65,6 +65,8 @@ declare -r PAGER=/usr/bin/less
 declare -r MAKE=/usr/bin/make
 declare -r RM=/usr/bin/rm
 declare -r SED=/usr/bin/sed
+declare -r SORT=/usr/bin/sort
+declare -r UNIQ=/usr/bin/uniq
 
 
 #==========================================================================
@@ -232,6 +234,7 @@ fi
 TMPFILE="$(/usr/bin/mktemp)"
 declare -r TMPFILE
 
+# Automatically delete TMPFILE when this script exits.
 trap '"${RM}" -f -- "${TMPFILE}"' EXIT
 
 
@@ -259,9 +262,10 @@ else
 fi
 set -e
 
+
 #--------------------------------------------------------------------------
-# Remove ANSI escape codes (e.g., color codes) from the text in TMPFILE
-# References:
+# Remove any ANSI escape codes (e.g., color codes) from the text in file 
+# TMPFILE.  See also:
 # [1] https://unix.stackexchange.com/a/55547/121145
 # [2] https://stackoverflow.com/q/17998978/5051940
 #--------------------------------------------------------------------------
@@ -280,7 +284,12 @@ if ! $cloWarnUndefinedVariables; then
     else
         for search_pattern in "${cloSearchPatterns[@]}"; do
             print_banner "PATTERN: |${search_pattern}|"
-            "${GREP}" --color "$search_pattern" "${TMPFILE}" || true
+            # List variable definitions first.
+            "${GREP}" --color=always "^${search_pattern}" "${TMPFILE}" | "${SORT}"
+            # List other occurrences of PATTERN that aren't variable
+            # definitions.
+            "${GREP}" -v "^${search_pattern}" "${TMPFILE}" | \
+                "${GREP}" --color=always "${search_pattern}" || true
         done
     fi
 fi
@@ -292,9 +301,11 @@ fi
 
 if ! $cloNoWarnUndefinedVariables; then
     print_banner "UNDEFINED VARIABLES"
-    if ! "${GREP}" --color ' warning: undefined variable ' "${TMPFILE}"
+    set -o pipefail
+    if ! "${GREP}" ' warning: undefined variable ' "${TMPFILE}" | "${SORT}" | "${UNIQ}"
     then
         echo "There are no undefined variables."
     fi
+    set +o pipefail
 fi
 
