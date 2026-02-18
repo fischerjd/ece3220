@@ -114,7 +114,7 @@ BreakAdjacentStringLiterals: true
 BreakAfterAttributes: Always
 BreakAfterJavaFieldAnnotations: false
 #BreakAfterReturnType: TopLevelDefinitions
-BreakAfterReturnType: Automatic
+BreakAfterReturnType: AllDefinitions
 BreakArrays:     true
 BreakBeforeBinaryOperators: None
 #BreakBeforeBraces: Linux
@@ -240,7 +240,7 @@ SpaceAfterTemplateKeyword: true
 SpaceAroundPointerQualifiers: Default
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeCaseColon: false
-SpaceBeforeCpp11BracedList: false
+SpaceBeforeCpp11BracedList: true
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeJsonColon: false
