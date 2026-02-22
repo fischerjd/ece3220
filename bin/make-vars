@@ -21,11 +21,18 @@
 #   are specified, the patterns filter the output.
 #
 # OPTIONS
+#   --color[=WHEN], --colour[=WHEN]
+#       Controls whether the search results are colorized or not. If this
+#       option is not used or if WHEN is not specified, the search results
+#       are colorized by default. WHEN is either 'always' or 'never'.
+#
 #   -d, --defaults
 #       The printed listing shows the default values for make's built-in
 #       variables and rules. The output does not show any environment
 #       variables that might affect make's output, and it does not show any
 #       make variables or rules found in user-defined makefile(s).
+#       (NOTE: This option overrides option -e.  If options -d and -e are
+#       both used, the -e option is ignored.)
 #
 #   -f file, --file=file, --makefile=file
 #       Use `file' as the makefile.
@@ -33,9 +40,19 @@
 #   -h, --help
 #       Prints this help message.
 #
-#   --Wundefined-variables
-#       Prints a listing of warnings about undefined variables, if any.
-#       No other output is produced.  This option is useful if you want to
+#   -e, --empty-environment
+#       Invokes make in an empty environment.  This is useful if you want
+#       the search results to include variables that are defined within a
+#       Makefile, and exclude variables that are defined by the host's
+#       environment.
+#
+#   -v, --only-variables
+#       If a search pattern is provided, the output is filtered to show
+#       only variable values. Otherwise, this option is ignored.
+#
+#    --Wundefined-variables
+#       Prints a listing of warnings about undefined variables, if any. No
+#       other output is produced.  This option is useful if you want to
 #       produce a listing of undefined variables and nothing else.
 #
 #   --Wno-undefined-variables
@@ -48,7 +65,7 @@ set -eu
 clear
 
 # shellcheck disable=SC1091
-#source /usr/local/libexec/eceugl-utils/trace
+source /usr/local/libexec/eceugl-utils/trace
 
 SCRIPT_NAME="$(/usr/bin/basename "${BASH_SOURCE[0]}")"
 declare -r SCRIPT_NAME
@@ -106,8 +123,8 @@ function ParseTheCommandLine()
     # X   no operand
     # X:  required operand--e.g., -X required_value, --ex=required_value
     # X:: optional operand--e.g., -X  =OR=  -X value
-    local lopts="defaults file: help makefile: Wundefined-variables Wno-undefined-variables"
-    local sopts="d f: h"
+    local lopts="color:: colour:: defaults file: help empty-environment makefile: only-variables Wundefined-variables Wno-undefined-variables"
+    local sopts="d f: h i v"
     local getopt_exit_code
     local getopt_stdout
     local getopt_stderr
@@ -128,9 +145,25 @@ set -e
     while [[ $# -gt 0 ]]
     do
         case "$1" in
+            --color|--colour) 
+                if [[ -z "$2" || "$2" =~ ^- ]]; then
+                    # --color
+                    cloColorOutput='always'  # the default
+                else
+                    # --color=WHEN
+                    if [[ "$2" == "always" ]]; then
+                        cloColorOutput='always'
+                    else
+                        cloColorOutput='never'
+                    fi
+                    shift
+                fi
+                ;;
             -d|--defaults) cloDefaults=true ;;
             -f|--file|--makefile) cloMakefile="${2}"; shift ;;
             -h|--help) cloHelpRequested=true ;;
+            -e|--empty-environment) cloIgnoreEnvironment=true ;;
+            -v|--only-variables) cloOnlyVariables=true ;;
             --Wundefined-variables) cloWarnUndefinedVariables=true ;;
             --Wno-undefined-variables) cloNoWarnUndefinedVariables=true ;;
             --) # Process the positional parameters
@@ -155,6 +188,8 @@ set -e
 #
 # Parameters:
 #   $1 banner_title (string, required): The banner's title string
+#   $2 hr_char (string, optional): The character to be used to draw the
+#   banner's horizontal rules/lines.
 #
 # Modifies Global Variables: None.
 #
@@ -165,9 +200,10 @@ set -e
 function print_banner()
 {
     local -r banner_title="$1"
-    print_horizontal_rule '='
+    local -r hr_char="${2:-=}"
+    print_horizontal_rule "${hr_char}"
     echo " ${banner_title}"
-    print_horizontal_rule '-'
+    print_horizontal_rule "${hr_char}"
 }
 
 
@@ -205,11 +241,14 @@ function print_horizontal_rule()
 #  main
 #==========================================================================
 
-cloHelpRequested=false
-cloMakefile=
-cloSearchPatterns=()
-cloNoWarnUndefinedVariables=false
+cloColorOutput='always'
 cloDefaults=false
+cloHelpRequested=false
+cloIgnoreEnvironment=false
+cloMakefile=
+cloNoWarnUndefinedVariables=false
+cloOnlyVariables=false
+cloSearchPatterns=()
 cloWarnUndefinedVariables=false
 
 ParseTheCommandLine "$@"
@@ -239,11 +278,12 @@ trap '"${RM}" -f -- "${TMPFILE}"' EXIT
 
 
 #--------------------------------------------------------------------------
-# Perform a "dry run" make and redirect make's output into the TMPFILE.
+# Perform a reconnaissance make (a.k.a., a "dry run" make) and redirect
+# make's output into the TMPFILE.
 #--------------------------------------------------------------------------
 
 make_flags=(
-    --dry-run
+    --recon
     --keep-going
     --print-data-base
     --warn-undefined-variables
@@ -251,14 +291,32 @@ make_flags=(
 if [ -n "$cloMakefile" ]; then
     make_flags+=( --file="$cloMakefile" )
 fi
+
 set +e
 if $cloDefaults; then
-#   Constrain the output to make's built-in variables and rules, ignoring
-#   any environment variables that might affect make's output, and ignoring
-#   any user-defined makefile(s).
+
+    # Make's reconnaissance output is filtered as follows:
+    #   * Include make's built-in variables and rules
+    #   * Exclude the Makefile's variables and rules, and
+    #   * Exclude variables defined by the user's environment
     "${ENV}" -i "${MAKE}" --makefile=/dev/null "${make_flags[@]}" >& "${TMPFILE}"
+
+elif $cloIgnoreEnvironment; then
+
+    # Make's reconnaissance output is filtered as follows:
+    #   * Include make's built-in variables and rules
+    #   * Include the Makefile's variables and rules, and
+    #   * Exclude variables defined by the user's environment
+    "${ENV}" -i "${MAKE}" "${make_flags[@]}" >& "${TMPFILE}"
 else
+
+    # This is the default case.
+    # Make's reconnaissance output is filtered as follows:
+    #   * Include make's built-in variables and rules
+    #   * Include the Makefile's variables and rules, and
+    #   * Include variables defined by the user's environment
     "${MAKE}" "${make_flags[@]}" >& "${TMPFILE}"
+
 fi
 set -e
 
@@ -274,22 +332,48 @@ set -e
 
 
 #--------------------------------------------------------------------------
+# Print the search results.
 # If option --Wundefined-variables was used, ignore this section.
 #--------------------------------------------------------------------------
 
 if ! $cloWarnUndefinedVariables; then
+    # If make-vars was invoked without a search pattern, print everything.
     if [ ${#cloSearchPatterns[@]} -eq 0 ]; then
         # Print everything
         "${CAT}" "${TMPFILE}"
     else
+        # The user specified one or more search patterns when they invoked
+        # make-vars. For each search pattern, print the lines in TMPFILE
+        # that match that search pattern.
         for search_pattern in "${cloSearchPatterns[@]}"; do
+
             print_banner "PATTERN: |${search_pattern}|"
-            # List variable definitions first.
-            "${GREP}" --color=always "^${search_pattern}" "${TMPFILE}" | "${SORT}"
-            # List other occurrences of PATTERN that aren't variable
-            # definitions.
-            "${GREP}" -v "^${search_pattern}" "${TMPFILE}" | \
-                "${GREP}" --color=always "${search_pattern}" || true
+
+            # If the search pattern contains '#', ':', or '=', use the
+            # search pattern "as is".  Otherwise, assume the user is
+            # searching for a variable name and modify the search pattern
+            # to find variable names.
+            case $search_pattern in
+                *\#*|*:*|*=*) variable_search_pattern="$search_pattern";;
+                *) variable_search_pattern="^[^#:=]*${search_pattern}[^#:=]*:\?=" ;;
+            esac
+
+            # List the variable definitions first, and sorted by name.
+            echo "VARIABLES"
+            print_horizontal_rule '-'
+            "${GREP}" --color=never "${variable_search_pattern}" "${TMPFILE}" \
+                | "${GREP}" --color="${cloColorOutput}" "${search_pattern}" \
+                | "${SORT}"
+
+            if ! $cloOnlyVariables; then
+                echo
+                print_banner "OTHER MATCHES" '-'
+                # List other occurrences of PATTERN that aren't variable
+                # definitions (e.g., rules and recipes).
+                "${GREP}" -v --color=never "${variable_search_pattern}" "${TMPFILE}" \
+                    | "${GREP}" --color="${cloColorOutput}" "${search_pattern}" || true
+            fi
+
         done
     fi
 fi
@@ -308,4 +392,3 @@ if ! $cloNoWarnUndefinedVariables; then
     fi
     set +o pipefail
 fi
-
