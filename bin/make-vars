@@ -65,7 +65,7 @@ set -eu
 clear
 
 # shellcheck disable=SC1091
-source /usr/local/libexec/eceugl-utils/trace
+#source /usr/local/libexec/eceugl-utils/trace
 
 SCRIPT_NAME="$(/usr/bin/basename "${BASH_SOURCE[0]}")"
 declare -r SCRIPT_NAME
