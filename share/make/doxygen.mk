@@ -8,7 +8,7 @@
 # FILES
 # 	.Doxyfile.template
 # 		If this file is present, it will be used as the Doxyfile template
-# 		file.  Otherwise, a Doxyfile template file is created.
+# 		file.  Otherwise, a default Doxyfile template file is created.
 #
 
 ifndef DOXYGEN_MK
@@ -21,27 +21,26 @@ DOXYGEN_MK := 1
 ifdef SPECS__DOXYFILE_PROJECT_NAME
 DOXYGEN__DOXYFILE_PROJECT_NAME := $(SPECS__DOXYFILE_PROJECT_NAME)
 else
-DOXYGEN__DOXYFILE_PROJECT_NAME ?= "demo"
+DOXYGEN__DOXYFILE_PROJECT_NAME := "demo"
 endif
 
 ifdef SPECS__DOXYFILE_PROJECT_BRIEF
 DOXYGEN__DOXYFILE_PROJECT_BRIEF := $(SPECS__DOXYFILE_PROJECT_BRIEF)
 else
-DOXYGEN__DOXYFILE_PROJECT_BRIEF ?= "ECE 3220 COURSEWORK"
+DOXYGEN__DOXYFILE_PROJECT_BRIEF := ECE 3220 COURSEWORK
 endif
 
 ifdef SPECS__DOXYFILE__PROJECT_NUMBER
-DOXYGEN__DOXYFILE_PROJECT_NUMBER ?= $(SPECS__DOXYFILE__PROJECT_NUMBER)
+DOXYGEN__DOXYFILE_PROJECT_NUMBER := $(SPECS__DOXYFILE__PROJECT_NUMBER)
 else
-YEAR := $(shell date +%Y)
-MONTH := $(shell date +%m)
-DOXYGEN__DOXYFILE_PROJECT_NUMBER ?= R$(YEAR).$(MONTH)
+YEAR_MONTH := $(shell date +"%Y.%m")
+DOXYGEN__DOXYFILE_PROJECT_NUMBER := R$(YEAR_MONTH)
 endif
 
 ifdef SPECS__DOXYFILE__OUTPUT_DIRECTORY
-DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY ?= $(SPECS__DOXYFILE__OUTPUT_DIRECTORY)
+DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY := $(SPECS__DOXYFILE__OUTPUT_DIRECTORY)
 else
-DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY ?= ./doxygen/
+DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY := ./doxygen/
 endif
 
 # If DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY is defined, ensure that path string
@@ -50,40 +49,63 @@ ifdef DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY
 DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY := $(DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY:/=)/
 endif
 
+# The path to file Doxyfile
+ifdef SPECS__DOXYFILE
+DOXYGEN__DOXYFILE := $(SPECS__DOXYFILE)
+else
+DOXYGEN__DOXYFILE := Doxyfile
+endif
+
+
 #==========================================================================
 #  Makefile stuff
 #==========================================================================
 
-DOXYGEN__DOXYFILE_PREREQ := $(DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY).doxyfile-prereq
+DOXYGEN__BUILD_PREREQS := $(sort \
+	$(DOXYGEN__DOXYFILE) \
+	$(SOURCES) \
+	$(HEADERS) \
+	)
 
 DOXYGEN__HTML_BUILD_DIR := $(DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY)html
+DOXYGEN__HTML_BUILD_PREREQS := $(DOXYGEN__BUILD_PREREQS)
 DOXYGEN__HTML_BUILD_TARGET := $(DOXYGEN__HTML_BUILD_DIR)/index.html
 
 DOXYGEN__PDF_BUILD_DIR := $(DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY)latex
+DOXYGEN__PDF_BUILD_PREREQS := $(sort \
+	$(DOXYGEN__BUILD_PREREQS) \
+	$(DOXYGEN__HTML_BUILD_TARGET) \
+	)
 DOXYGEN__PDF_BUILD_TARGET := $(DOXYGEN__PDF_BUILD_DIR)/refman.pdf
 
 DOXYGEN__DOXYFILE_TEMPLATE := .Doxyfile.template
 
-# Create the documentation
+
+#==========================================================================
+#  Make Targets
+#==========================================================================
+
+# Create the documentation in all output formats (html and pdf)
 .PHONY: doc-all
 doc-all: doc-html doc-pdf
 
+# Create the documentation in HTML format
 .PHONY: doc doc-html
 doc doc-html: $(DOXYGEN__HTML_BUILD_TARGET)
 
-.PHONY: doc-pdf
-doc-pdf: $(DOXYGEN__PDF_BUILD_TARGET)
-
-$(DOXYGEN__HTML_BUILD_TARGET): $(DOXYGEN__DOXYFILE_PREREQ)
-
-$(DOXYGEN__PDF_BUILD_TARGET): $(DOXYGEN__DOXYFILE_PREREQ)
-	$(MAKE) -C "$(DOXYGEN__PDF_BUILD_DIR)" pdf
-
-$(DOXYGEN__DOXYFILE_PREREQ): Doxyfile
+$(DOXYGEN__HTML_BUILD_TARGET): $(DOXYGEN__HTML_BUILD_PREREQS)
 	doxygen
 	touch "$@"
 
-Doxyfile: $(DOXYGEN__DOXYFILE_TEMPLATE)
+# Create the documentation in PDF format
+.PHONY: doc-pdf
+doc-pdf: $(DOXYGEN__PDF_BUILD_TARGET)
+
+$(DOXYGEN__PDF_BUILD_TARGET): $(DOXYGEN__PDF_BUILD_PREREQS)
+	$(MAKE) -C "$(DOXYGEN__PDF_BUILD_DIR)" pdf
+
+# Create file 'Doxyfile'
+$(DOXYGEN__DOXYFILE): $(DOXYGEN__DOXYFILE_TEMPLATE)
 	/usr/bin/cp -fv "$<" "$@"
 	doxygen -u "$@"
 	-@rm -f $@.bak
@@ -111,7 +133,6 @@ $(DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY):
 .PHONY: doc-clean
 doc-clean::
 	@rm -f Doxyfile.bak
-	@rm -f $(DOXYGEN__DOXYFILE_PREREQ)
 	@$(call remove_folder,$(DOXYGEN__HTML_BUILD_DIR))
 	@$(call remove_folder,$(DOXYGEN__PDF_BUILD_DIR))
 	@if [ -d "$(DOXYGEN__DOXYFILE_OUTPUT_DIRECTORY)" ]; then \

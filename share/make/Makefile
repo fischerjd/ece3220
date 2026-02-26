@@ -1,5 +1,5 @@
 # Makefile
-# 2026-Feb-10 Jim Fischer <fischerjd@missouri.edu>
+# 2026-Feb-26 Jim Fischer <fischerjd@missouri.edu>
 # © 2019 James D. Fischer
 #
 # SYNOPSYS
@@ -175,8 +175,7 @@ SOURCES   := $(SOURCES.c) $(SOURCES.c_plus_plus)
 OBJS      := $(OBJS.c) $(OBJS.cc) $(OBJS.cpp) $(OBJS.cxx)
 DEPS      := $(DEPS.c) $(DEPS.cc) $(DEPS.cpp) $(DEPS.cxx) $(DEPS.vscode)
 
-# Use make's wildcard function to retrieve the name of every header file in
-# the current working directory.
+# Manifest of the C/C++ header files in this folder.
 HEADERS := \
 	$(wildcard *.h) \
 	$(wildcard *.hh) \
