@@ -478,7 +478,8 @@ endif
 all: $(BUILD_TYPE)
 
 
-# Builds a 'release' version of the program without debugging support.
+# Builds a 'release' version of the program without debugging support and
+# without assertions. See also: NDEBUG in assert(3).
 #
 # NOTE: As stated in the gcc manual, "If you use multiple -O options, with
 # or without level numbers, the last such option is the one that is
@@ -495,13 +496,15 @@ release: BUILD_MODE := release
 release: DEBUG :=
 release: DEBUG_TRACE_LEVEL :=
 release: CPPFLAGS += -DRELEASE_BUILD=1
+release: CPPFLAGS += -DNDEBUG=1
 release: CPPFLAGS += $(CPPFLAGS.release_build)
 release: CFLAGS += $(CFLAGS.release_build)
 release: CXXFLAGS += $(CXXFLAGS.release_build)
 release: build_program
 
 
-# Builds a 'debug' version of the program with debugging support.
+# Builds a 'debug' version of the program with debugging support and with
+# assertions (if they are present).  See also: NDEBUG in assert(3).
 #
 # NOTE: As stated in the gcc manual, "If you use multiple -O options, with
 # or without level numbers, the last such option is the one that is
@@ -518,6 +521,7 @@ debug: DEBUG := 1
 debug: DEBUG_TRACE_LEVEL ?= 5
 debug: CPPFLAGS += -DDEBUG=1 -DDEBUG_BUILD=1
 debug: CPPFLAGS += -DDEBUG_TRACE_LEVEL=$(DEBUG_TRACE_LEVEL)
+debug: CPPFLAGS += -UNDEBUG
 debug: CPPFLAGS += $(CPPFLAGS.debug_build)
 debug: CFLAGS += $(CFLAGS.debug_build)
 debug: CXXFLAGS += $(CXXFLAGS.debug_build)
