@@ -37,13 +37,13 @@
 # NB: Do not pass the local system's locale to the remote host [2].
 Host naka144-li-??
     HostName %h.engineering.missouri.edu
-    User fischerjd
+    User __your_pawprint__
     PreferredAuthentications publickey,password
     IdentityFile ~/.ssh/id_ed25519
     SendEnv -LC_* -LANG*
 
 Host naka144-li-??.engineering.missouri.edu 128.206.23.101 128.206.23.102 128.206.23.103 128.206.23.104 128.206.23.105 128.206.23.106 128.206.23.107 128.206.23.108 128.206.23.109 128.206.23.110 128.206.23.111 128.206.23.112 128.206.23.113 128.206.23.114 128.206.23.115 128.206.23.116 128.206.23.117 128.206.23.118
-    User fischerjd
+    User __your_pawprint__
     PreferredAuthentications publickey,password
     IdentityFile ~/.ssh/id_ed25519
     SendEnv -LC_* -LANG*
