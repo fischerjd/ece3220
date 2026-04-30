@@ -1,0 +1,5 @@
+<map id="gpiod::info_event::impl" name="gpiod::info_event::impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,93,177,119"/>
+<area shape="rect" id="Node000002" href="$classgpiod_1_1line__info.html" title="Contains an immutable snapshot of the line&#39;s state at the time when the object of this class was inst..." alt="" coords="30,5,153,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,45,94,93,89,93,89,45"/>
+</map>

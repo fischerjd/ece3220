@@ -264,7 +264,7 @@ SpaceBeforeRangeBasedForLoopColon: true
 SpaceBeforeSquareBrackets: false
 SpaceInEmptyBlock: true
 SpacesBeforeTrailingComments: 1
-SpacesInAngles:  true
+SpacesInAngles:  false
 SpacesInContainerLiterals: true
 SpacesInLineCommentPrefix:
   Minimum:         1
