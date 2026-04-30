@@ -1,15 +1,13 @@
 File: libgpiod-notes.txt
-Date: 2025-Dec-26
+Date: 2026-Apr-30
 Author: Jim Fischer <fischerjd@missouri.edu>
-Copyright 2025 James D. Fischer
-
+© 2025 James D Fischer
 
 Some notes for obtaining, building, and installing library 'libgpiod' and
 its documentation.
 
 * The information in these notes pertains to these programming languages: 
   C, C++, and Python.
-
 
 * This website provides the official documentation for library 'libgpiod':
 
@@ -110,19 +108,18 @@ Start by installing these Debian packages on your Raspberry Pi:
         $ cd ~/git/libgpiod/
         $ git checkout master
         $ git tag | tail -n1
-        v2.2.2
+        v2.2.4
 
-        $ export SOFTWARE_VERSION='2.2.2'
+        $ export SOFTWARE_VERSION="$(git tag | tail -n1 | grep -oP '\d+(\.\d+)+')"
 
   (3) Within folder /opt/libgpiod/, create a separate folder for this
   software version:
 
         $ mkdir "/opt/libgpiod/${SOFTWARE_VERSION}"
 
-  (4) When performing the software configuration step (see below), add the
-  option
+  (4) When performing the software configuration step (see below), add this
+  option to the 'configure' script's command line:
         --prefix=/opt/libgpiod/${SOFTWARE_VERSION}
-  to the 'configure' script's command line.
 
 ---------------------------------------------------------------------------
 * Configure and build the libgpiod software
@@ -138,7 +135,7 @@ after performing the 'autoreconf' step.
 $ cd ~/git/libgpiod/
 
 # Define the software version
-$ export SOFTWARE_VERSION='2.2.2'
+$ export export SOFTWARE_VERSION="$(git tag | tail -n1 | grep -oP '\d+(\.\d+)+')"
 
 # Start the build with a clean slate
 $ test -f Makefile && make maintainer-clean
@@ -217,15 +214,15 @@ for you.  To run the script, log on to the Raspberry Pi and run the command
 
 This script builds the documentation in two formats, HTML and PDF, and it
 installs the documentation into these two folders in the Raspberry Pi's
-file system:
+file system, where '<version>' is the SOFTWARE_VERSION number:
 
-    /opt/libgpiod/2.2.2/doc/
+    /opt/libgpiod/<version>/doc/
     |-- c-api/
     |   |-- html/index.html
-    |   `-- libgpiod-2.2.2.pdf
+    |   `-- libgpiod-<version>.pdf
     `-- cxx-api/
         |-- html/index.html
-        `-- libgpiodcxx-2.2.2.pdf
+        `-- libgpiodcxx-<version>.pdf
 
 The subdirectory named 'c-api' has the documentation for the C library
 named 'libgpiod'.  The subdirectory named 'cxx-api' has the documentation
