@@ -3,15 +3,12 @@ set -eu
 clear
 
 LIBRARY_NAME='libgpiod'
-SOFTWARE_VERSION='2.2.4'
 
 GIT_REPO_DIR="${HOME}/git/${LIBRARY_NAME}"
 
 TMPDIR="${HOME}/tmp"
 
 INSTALL_PREFIX="/opt/${LIBRARY_NAME}"
-INSTALL_PREFIX_VERSION="${INSTALL_PREFIX}/${SOFTWARE_VERSION}"
-INSTALL_DOCDIR="${INSTALL_PREFIX_VERSION}/doc"
 
 
 #==========================================================================
@@ -51,6 +48,16 @@ if ! is_raspberry_pi; then
     >&2 echo "This script must be invoked on the Raspberry Pi. Exiting..."
     exit 1
 fi
+
+if [ ! -d "${GIT_REPO_DIR}" ]; then
+    >&2 echo ":: ERROR :: Folder '${GIT_REPO_DIR}' does not exist. Aborting..."
+fi
+
+cd "${GIT_REPO_DIR}"
+
+SOFTWARE_VERSION="$(git tag | tail -n1 | grep -oP '\d+(\.\d+)+')"
+INSTALL_PREFIX_VERSION="${INSTALL_PREFIX}/${SOFTWARE_VERSION}"
+INSTALL_DOCDIR="${INSTALL_PREFIX_VERSION}/doc"
 
 [ -d "${INSTALL_PREFIX_VERSION}" ] || mkdir -p "${INSTALL_PREFIX_VERSION}"
 VERSION_SYMLINK="${INSTALL_PREFIX}/${SOFTWARE_VERSION%.*}"
@@ -97,6 +104,10 @@ INSTALL_DOCDIR_API="${INSTALL_DOCDIR}/${API}"
 rsync -av ./html "${INSTALL_DOCDIR_API}"/ || true
 rsync -av ./latex/refman.pdf "${INSTALL_DOCDIR_API}/${LIBRARY_NAME}-${SOFTWARE_VERSION}.pdf" || true
 
+# Install the C example files
+INSTALL_DOCDIR_API_EXAMPLES="${INSTALL_DOCDIR_API}/examples"
+[ -d "${INSTALL_DOCDIR_API_EXAMPLES}" ] || mkdir -p "${INSTALL_DOCDIR_API_EXAMPLES}"
+rsync -av "${GIT_REPO_DIR}/examples/"*.c "${INSTALL_DOCDIR_API_EXAMPLES}/"
 
 ###########################################################################
 ##  libgpiodcxx Documentation (C++ Library)
@@ -137,4 +148,9 @@ INSTALL_DOCDIR_API="${INSTALL_DOCDIR}/${API}"
 [ -d "${INSTALL_DOCDIR_API}" ] || mkdir -p "${INSTALL_DOCDIR_API}"
 rsync -av ./html "${INSTALL_DOCDIR_API}"/ || true
 rsync -av ./latex/refman.pdf "${INSTALL_DOCDIR_API}/${LIBRARY_NAME}-${SOFTWARE_VERSION}.pdf" || true
+
+# Install the C++ example files
+INSTALL_DOCDIR_API_EXAMPLES="${INSTALL_DOCDIR_API}/examples"
+[ -d "${INSTALL_DOCDIR_API_EXAMPLES}" ] || mkdir -p "${INSTALL_DOCDIR_API_EXAMPLES}"
+rsync -av "${GIT_REPO_DIR}/bindings/cxx/examples/"*.cpp "${INSTALL_DOCDIR_API_EXAMPLES}/"
 
