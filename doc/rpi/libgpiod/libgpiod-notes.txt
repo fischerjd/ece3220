@@ -1,7 +1,7 @@
 File: libgpiod-notes.txt
-Date: 2026-Apr-30
+Date: 2026-May-05
 Author: Jim Fischer <fischerjd@missouri.edu>
-© 2025 James D Fischer
+© 2026 James D Fischer
 
 Some notes for obtaining, building, and installing library 'libgpiod' and
 its documentation.
@@ -90,114 +90,139 @@ Start by installing these Debian packages on your Raspberry Pi:
     $ git clone https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/ ~/git/libgpiod/
 
 ---------------------------------------------------------------------------
-* [OPTIONAL] The instructions below describe how to build the libgpiod
-  software from the source code in this Git repository.  You can optionally
-  install the software after you build it. If you intend to install the
-  software after you build it, I recommend you do the followiing:
+* Create the installation folder, /opt/libgpiod/<version>/, where <version>
+  is libgpiod's version number.
 
   (1) Create a folder named /opt/libgpiod/, make user 'pi' the owner of
-  that folder, and ensure user 'pi' read/write permissions on that folder:
+      that folder, and ensure user 'pi' read/write permissions on that
+      folder:
 
         $ sudo mkdir -p /opt/libgpiod
         $ sudo chown pi:pi /opt/libgpiod
         $ sudo chmod 0755 /opt/libgpiod
 
-  (2) Determine the Git repo's version. The preferred way to do this is to
-  query the master branch's tags, e.g.,
+  (2) Determine libgpiod's version number. The preferred way to do this is
+      to go to the folder that contains the libgpiod Git repository and
+      query the master branch's tags, e.g.,
 
         $ cd ~/git/libgpiod/
         $ git checkout master
         $ git tag | tail -n1
         v2.2.4
 
+        # Create an environment variable named 'SOFTWARE_VERSION' whose
+        # value is libgpiod's software version number.
+
         $ export SOFTWARE_VERSION="$(git tag | tail -n1 | grep -oP '\d+(\.\d+)+')"
+        $ echo $SOFTWARE_VERSION
+        2.2.4
 
   (3) Within folder /opt/libgpiod/, create a separate folder for this
-  software version:
+      software version:
 
         $ mkdir "/opt/libgpiod/${SOFTWARE_VERSION}"
 
-  (4) When performing the software configuration step (see below), add this
-  option to the 'configure' script's command line:
-        --prefix=/opt/libgpiod/${SOFTWARE_VERSION}
+---------------------------------------------------------------------------
+* Configure and build the libgpiod software from the source code in this
+  Git repository.  You can optionally install the software after you build
+  it. 
+
+    $ cd ~/git/libgpiod/
+
+    # Define the software version
+    $ export export SOFTWARE_VERSION="$(git tag | tail -n1 | grep -oP '\d+(\.\d+)+')"
+
+    # Start the build with a clean slate
+    $ [ -d build ] && rm -fr build
+
+    # Use 'meson' to configure the build products. This step generates a
+    # bunch of files and folders that are stored in a new subdirectory
+    # named 'build'.
+    # (HINT:  $ meson setup --help )
+
+    $ meson setup build \
+        --prefix="/opt/libgpiod/${SOFTWARE_VERSION}" \
+        -Dtools=enabled \
+        -Dbindings-cxx=enabled \
+        -Dbindings-python=enabled \
+        -Dexamples=enabled \
+        -Dtests=enabled
+
+    # Build the software.
+    # (NB: This Git repository uses a build automation tool named 'ninja'
+    # (i.e., instead of GNU Make) to build the software products you
+    # specified in the 'meson setup' step above.
+    # (NB: This build takes a few minutes to finish.)
+
+    $ cd build
+    $ ninja
+
+    # [OPTIONAL] Install the software into the folder
+    #       /opt/libgpiod/${SOFTWARE_VERSION}/
+
+    $ ninja install
 
 ---------------------------------------------------------------------------
-* Configure and build the libgpiod software
-
-By default, the configure step produces a set of makefiles that create only
-the C library 'libgpiod'.  To see the available configure options that
-build additional libraries that provide bindings for other programming
-languages (e.g., C++ and Python), issue the command
-    ./configure --help
-after performing the 'autoreconf' step.
-
-
-$ cd ~/git/libgpiod/
-
-# Define the software version
-$ export export SOFTWARE_VERSION="$(git tag | tail -n1 | grep -oP '\d+(\.\d+)+')"
-
-# Start the build with a clean slate
-$ test -f Makefile && make maintainer-clean
-
-# Invoke autoreconf. (NB: This step takes a few minutes to finish.)
-$ autoreconf -ifv
-
-# List the available options for the 'configure' script.
-$ ./configure --help
-
-# Configure the build
-$ ./configure \
-    --prefix="/opt/libgpiod/${SOFTWARE_VERSION}" \
-    --enable-tools \
-    --enable-bindings-cxx \
-    --enable-bindings-python \
-    --enable-examples \
-    --enable-tests
-
-# Build the software. (NB: This build takes a few minutes to finish.)
-$ make
-
----------------------------------------------------------------------------
-# [OPTIONAL]  Install the software into the folder
-#       /opt/libgpiod/${SOFTWARE_VERSION}/
-$ make install
-
 # The folder /opt/libgpiod/ now has a subdirectory whose name is the
 # version number for the installed software, e.g.,
 #       /opt/libgpiod/1.2.3/
-# For software development purposes, it's a good idea to create a symbolic 
-# link within folder /opt/libgpiod/ that references the installed software
-# folder using only its major and minor version numbers:
-#       /opt/libgpiod/1.2/ --> /opt/libgpiod/1.2.3/
+# where the three version numbers repsent the software's major version
+# number, minor version number, and patch level:
+#   major version # := 1
+#   minor version # := 2
+#   patch level #   := 3
 #
+# I recommend you create a symbolic link within /opt/libgpiod/ whose name
+# is the software's major and minor version numbers (e.g., 1.2), and whose
+# target is the newly created installation folder (e.g., 1.2.3).
 
 $ ln -v -s -T "${SOFTWARE_VERSION}" "/opt/libgpiod/${SOFTWARE_VERSION%.*}"
 
 $ ls -l /opt/libgpiod/
+total 11844
+lrwxrwxrwx 1 pi pi       5 2026-04-28 12:58 2.2 -> 2.2.4
+...
+
+---------------------------------------------------------------------------
+* The C/C++ header files are located in this folder:
+
+    /opt/libgpiod/${SOFTWARE_VERSION}/include/
+
+HINT: Use the 'tree' program to list this folder's contents:
+
+    $ tree /opt/libgpiod/${SOFTWARE_VERSION}/include/
+
+* The C, C++, and Python3 library files are located in this folder:
+
+    /opt/libgpiod/${SOFTWARE_VERSION}/lib/
+
+HINT: Use the 'tree' program to list this folder's contents:
+
+    $ tree /opt/libgpiod/${SOFTWARE_VERSION}/lib/
+
+* The C library is named 'libgpiod' and its header file is 'gpiod.h'. 
+  The build produces a static version of the library (libgpiod.a) and a
+  shared object version of this library (libgpiod.so).
+
+* The C++ library is named 'libgpiodcxx' and its main header file is
+  'gpiod.hpp'. The build produces a static version of the library
+  (libgpiodcss.a) and a shared object version of the library
+  (libgpiodcxx.so).
+  [Note 1: The C++ library defines multiple classes, and each class has its
+  own header file. So, this library has multiple header files. --end note]
+
+* The Python library's main module is named 'gpiod'.
+  [Note 1: The Python library defines multiple classes, and each class has
+  its own module. So, this library has multiple modules. --end note]
 
 ===========================================================================
 * The libgpiod Git repository provides some examples of C, C++, and Python
   programs in these folders:
 
-    ./examples                  ; C examples
-    ./bindings/cxx/examples/    ; C++ examples
-    ./bindings/python/examples/ ; Python3 examples
-
-* The C library is named 'libgpiod' and its header file is 'gpiod.h'. 
-  The build produces a static version of this library (libgpiod.a) and a
-  shared object version of this library (libgpiod.so).
-
-* The C++ library is named 'libgpiodcxx' and its main header file is
-  'gpiod.hpp'. The build produces a static version of this library
-  (libgpiodcss.a) and a shared object version of this library
-  (libgpiodcxx.so).
-  [Note 1: The C++ library defines multiple classes, each with its own
-  header file. So, this library has multiple header files. --end note]
-
-* The Python library's main module is named 'gpiod'.
-  [Note 1: The Python library defines multiple classes, each with its own
-  module. So, this library has multiple modules. --end note]
+    ~/git/libgpiod/
+    |-- ./examples/                 ; C examples
+    |-- ./bindings/cxx/examples/    ; C++ examples
+    `-- ./bindings/python/examples/ ; Python3 examples
 
 ===========================================================================
 Unfortunately, the libgpiod Git repository does not provide easy-to-use
@@ -210,25 +235,25 @@ for you.  To run the script, log on to the Raspberry Pi and run the command
 'create-libgpiod-docs' at the Bash shell's command prompt '$':
 
     [pi@eecspi] ~
-    $ create-libgpiod-docs
+    $ ~/git/ece3220/rpi/libgpiod/bin/create-libgpiod-docs
 
 This script builds the documentation in two formats, HTML and PDF, and it
-installs the documentation into these two folders in the Raspberry Pi's
-file system, where '<version>' is the SOFTWARE_VERSION number:
+installs the documentation into a folder named 'doc' within the libgpiod
+installation folder:
 
-    /opt/libgpiod/<version>/doc/
+    /opt/libgpiod/${SOFTWARE_VERSION}/doc/
     |-- c-api/
     |   |-- html/index.html
-    |   `-- libgpiod-<version>.pdf
+    |   `-- libgpiod-${SOFTWARE_VERSION}.pdf
     `-- cxx-api/
         |-- html/index.html
-        `-- libgpiodcxx-<version>.pdf
+        `-- libgpiodcxx-${SOFTWARE_VERSION}.pdf
 
-The subdirectory named 'c-api' has the documentation for the C library
-named 'libgpiod'.  The subdirectory named 'cxx-api' has the documentation
-for the C++ library named 'libgpiodcxx'.  For both the C and C++ APIs, the
-homepage for the HTML documentation is a file named 'index.html', which is
-located in the API's html folder.
+Within the 'doc' folder, the subdirectory named 'c-api' has the documenta-
+tion for the C library named 'libgpiod'.  The subdirectory named 'cxx-api'
+has the documentation for the C++ library named 'libgpiodcxx'.  For both
+the C and C++ APIs, the homepage for the HTML documentation is a file named
+'index.html' within in that API's 'html' folder.
 
 ===========================================================================
 # vim: ft=txt tw=75 fo+=trcqn ai et
