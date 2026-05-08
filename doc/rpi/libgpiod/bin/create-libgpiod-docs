@@ -109,6 +109,10 @@ INSTALL_DOCDIR_API_EXAMPLES="${INSTALL_DOCDIR_API}/examples"
 [ -d "${INSTALL_DOCDIR_API_EXAMPLES}" ] || mkdir -p "${INSTALL_DOCDIR_API_EXAMPLES}"
 rsync -av "${GIT_REPO_DIR}/examples/"*.c "${INSTALL_DOCDIR_API_EXAMPLES}/"
 
+# Clean-up
+cd
+rm -fr "${TMPDIR_API}"
+
 ###########################################################################
 ##  libgpiodcxx Documentation (C++ Library)
 ###########################################################################
@@ -116,7 +120,7 @@ rsync -av "${GIT_REPO_DIR}/examples/"*.c "${INSTALL_DOCDIR_API_EXAMPLES}/"
 API='cxx-api'
 LIBRARY_NAME="${LIBRARY_NAME}cxx"
 
-TMPDIR_API="${HOME}/tmp/${API}"
+TMPDIR_API="${TMPDIR}/${API}"
 TMPDIR_API_SRC="${TMPDIR_API}/src"
 [ -d "${TMPDIR_API_SRC}" ] || mkdir -p "${TMPDIR_API_SRC}"
 
@@ -153,4 +157,8 @@ rsync -av ./latex/refman.pdf "${INSTALL_DOCDIR_API}/${LIBRARY_NAME}-${SOFTWARE_V
 INSTALL_DOCDIR_API_EXAMPLES="${INSTALL_DOCDIR_API}/examples"
 [ -d "${INSTALL_DOCDIR_API_EXAMPLES}" ] || mkdir -p "${INSTALL_DOCDIR_API_EXAMPLES}"
 rsync -av "${GIT_REPO_DIR}/bindings/cxx/examples/"*.cpp "${INSTALL_DOCDIR_API_EXAMPLES}/"
+
+# Clean-up
+cd
+rm -fr "${TMPDIR_API}"
 
