@@ -4,6 +4,7 @@
         "myIncludePath": [
 	    ],
         "RpiIncludePath": [
+            "${userHome}/rpifs/opt/libgpiod/2.2/include",
             "${userHome}/rpifs/usr/include"
         ],
         "myDefines": [
@@ -40,8 +41,8 @@
             "browse": {
                 "path": [
                     "${myIncludePath}",
-                    "/usr/include",
                     "${RpiIncludePath}",
+                    "/usr/include",
                     "${workspaceFolder}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
