@@ -76,6 +76,8 @@ Host remoteapps-li.engineering.missouri.edu remoteapps-li remoteapps
     User __your_pawprint__
     PreferredAuthentications publickey,password
     IdentityFile ~/.ssh/id_ed25519
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
 
 # General defaults (<- put at the very end of this file)
 Host *
