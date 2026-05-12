@@ -11,7 +11,7 @@ its documentation.
 
 * This website provides the official documentation for library 'libgpiod':
 
-        https://libgpiod.readthedocs.io/en/latest/
+        https://libgpiod.readthedocs.io/en/
 
   According to this ^^^ website, "The libgpiod project provides a low-level
   C library, bindings to high-level languages and tools for interacting
