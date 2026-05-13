@@ -1,5 +1,5 @@
-#
-# gpiod.mk
+# $ECE3220_INSTRUCTOR/share/gpiod.mk
+# © 2025 James D. Fischer
 #
 # This makefile assumes Makefile variable RPIFS expands to a canonical path
 # string that identifies a folder on your Linux desktop onto which the
@@ -19,12 +19,9 @@
 # preprocessor's header file search path, and to the linker's library file
 # search path.
 #
-# 2026-01-04 Jim Fischer <fischerjd@missouri.edu>
-# © 2025 James D. Fischer
-#
 
-ifndef GPIOD.MK
-GPIOD.MK := 1
+ifndef MAKEFILE__GPIOD.MK
+MAKEFILE__GPIOD.MK = 1
 
 # The C compiler dialect must be C 17
 CFLAGS.dialect := c17
@@ -85,5 +82,5 @@ endif
 #
 LDLIBS.custom += -lgpiod
 
-endif # GPIOD.MK
+endif # MAKEFILE__GPIOD.MK
 

@@ -1,5 +1,5 @@
 # Makefile
-# 2026-Feb-26 Jim Fischer <fischerjd@missouri.edu>
+# 2026-May-10 Jim Fischer <fischerjd@missouri.edu>
 # © 2019 James D. Fischer
 #
 # SYNOPSYS
@@ -25,6 +25,32 @@
 #   By default, this Makefile uses the c17 and c++17 dialects when building
 #   C and C++ source files, respectively.
 #
+# FILES
+# 	Optional make variables and make targets may be made available via
+# 	these instructor-defined makefiles:
+#		* asan.mk
+# 		* canvas.mk
+#		* dist.mk
+#		* doxygen.mk
+#		* fmt.mk
+#		* gpiodcxx.mk
+#		* gpiod.mk
+#		* pigpio.mk		;; depricated
+#		* pthread.mk
+#		* save-gcc-temps.mk
+#		* specs.mk
+#		* variables.mk
+#		* vtable.mk
+#		* wiringPi.mk	;; depricated
+#
+#	Users may create makefiles with these names to customize the build
+#	process.  Instructions for creating these makefiles is provided within
+#	this Makefile.
+#		* clean.mk
+#		* override.mk
+#		* rules.mk
+#		* toolchain.mk
+#		
 
 # The default C/C++ compilers.
 # NB: This makefile assumes the build is performed using (a) the GNU
@@ -91,8 +117,8 @@ endif
 #   $ make
 #
 # Note that if the variable RELEASE is defined and set in the command shell
-# environment, invoking any make goals other than 'release' or the various
-# "clean" goals yields undefined behavior.
+# environment (see options 2 and 3 above), invoking any make goals other
+# than 'release' or the various "clean" goals yields undefined behavior.
 #
 ifeq ($(origin RELEASE),environment)
 # See options 2 and 3 above
@@ -145,10 +171,10 @@ endif
 
 # Use make's `$(wildcard ...)' function to find all C source files (%.c) in
 # the current working directory.  Next, use a substitution reference to
-# generate the list of C object files (%.o) to be created from the list of
-# C source code files, as well as the list of dependency files (%.d). Ditto
-# for C++ source code files: %.cc, %.cpp, %.cxx, etc.. (See also make's
-# `patsubst' function.)
+# generate the list of C object files (%.c.o) to be created from the list
+# of C source code files, as well as the list of dependency files (%.c.d).
+# Ditto for C++ source code files: %.cc, %.cpp, %.cxx, etc.. (See also
+# make's `patsubst' function.)
 #
 SOURCES.c := $(wildcard *.c)
 OBJS.c    := $(SOURCES.c:%=$(BUILDDIR)%.o)
@@ -220,12 +246,13 @@ HEADERS := \
 # See also: man 1 cpp
 # --end note]
 #
-# [Note 2:  Each variable 'CPPFLAGS.X.d' must be a recursively expanded
-# variable because it contains references to other variables `$@' and `$*'
-# whose values are unknown at this point in the makefile.  These variables
-# must be evaluated later in this makefile, at the point where each vari-
-# able CPPFLAGS.X.d is expanded.  So use `=' here (deferred evaluation) and
-# not `:=' (immediate evaluation). --end note]
+# [Note 2:  Each variable 'CPPFLAGS.X.d' contains references to other
+# variables `$@' and `$*' whose values are undefined at this point in the
+# makefile.  Therefore, these 'CPPFLAGS.X.d' variables' values must be
+# evaluated later in this makefile, at the point where each variable is
+# expanded.  So, use deferred evaluation assignment `=' when defining these
+# variables' values, not immediate evaluation assignment `:='.
+# --end note]
 #
 CPPFLAGS.c.d += -MT $@ -MMD -MF $(DEPDIR)$*.c.Td
 CPPFLAGS.cc.d += -MT $@ -MMD -MF $(DEPDIR)$*.cc.Td
@@ -236,7 +263,7 @@ CPPFLAGS.cxx.d += -MT $@ -MMD -MF $(DEPDIR)$*.cxx.Td
 # NOTES
 # * DO NOT add CPPFLAGS.d to this variable.
 # * See also 'variables.mk' in this Makefile (e.g., for CPPFLAGS.custom)
-CPPFLAGS += $(CPPFLAGS.custom) -DPROGRAM_NAME=$(PROGRAM_NAME)
+CPPFLAGS += -DPROGRAM_NAME=$(PROGRAM_NAME) $(CPPFLAGS.custom)
 
 
 # C compiler command line options (a.k.a., command line "flags")
@@ -256,7 +283,7 @@ CFLAGS.default ?= -Wall -Wextra
 CFLAGS.release_build ?= -O3
 CFLAGS.debug_build ?= -O0 -ggdb -fvar-tracking-assignments -fvar-tracking
 #CFLAGS.debug_build ?= -Og -ggdb
-CFLAGS = -std=$(CFLAGS.dialect) $(CFLAGS.default) $(CFLAGS.custom)
+CFLAGS += -std=$(CFLAGS.dialect) $(CFLAGS.default) $(CFLAGS.custom)
 
 
 # C++ compiler command line options (a.k.a., command line "flags")
@@ -279,7 +306,7 @@ CXXFLAGS.dialect ?= c++17
 CXXFLAGS.default ?= -Wall -Wextra
 CXXFLAGS.release_build ?= -O3
 CXXFLAGS.debug_build   ?= -O0 -ggdb -fvar-tracking-assignments -fvar-tracking
-CXXFLAGS = -std=$(CXXFLAGS.dialect) $(CXXFLAGS.default) $(CXXFLAGS.custom)
+CXXFLAGS += -std=$(CXXFLAGS.dialect) $(CXXFLAGS.default) $(CXXFLAGS.custom)
 
 
 # Linker flags and libraries
@@ -287,8 +314,8 @@ CXXFLAGS = -std=$(CXXFLAGS.dialect) $(CXXFLAGS.default) $(CXXFLAGS.custom)
 # * See also 'variables.mk' in this Makefile (e.g., for LDFLAGS.custom and
 # LDLIBS.custom)
 #
-LDFLAGS = $(LDFLAGS.custom)
-LDLIBS  = $(LDLIBS.custom)
+LDFLAGS += $(LDFLAGS.custom)
+LDLIBS  += $(LDLIBS.custom)
 
 
 # If this project has one or more C++ source code files, use the C++
@@ -312,6 +339,9 @@ endif
 
 # If the user's environment defines variable `STATIC_LINK' with a non-null
 # value, use static linking; otherwise, use dynamic linking by default.
+# EXAMPLE:
+# 	$ STATIC_LINK=1 make
+# 	$ make STATIC_LINK=1
 STATIC_LINK ?=
 ifneq ($(STATIC_LINK),)
 LINK.o += -static
@@ -612,6 +642,12 @@ endif
 #
 ifneq ($(wildcard vtable.mk),)
 include vtable.mk
+endif
+
+
+# [Optional] Build targets
+ifneq ($(wildcard canvas.mk),)
+include canvas.mk
 endif
 
 

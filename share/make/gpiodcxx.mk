@@ -1,5 +1,5 @@
-#
-# gpiodcxx.mk
+# $ECE3220_INSTRUCTOR/share/gpiodcxx.mk
+# © 2025 James D. Fischer
 #
 # This makefile assumes Makefile variable RPIFS expands to a canonical path
 # string that identifies a folder on your Linux desktop onto which the
@@ -24,12 +24,9 @@
 # preprocessor's header file search path, and to the linker's library file
 # search path.
 #
-# 2025-Dec-27 Jim Fischer <fischerjd@missouri.edu>
-# © 2025 James D. Fischer
-#
 
-ifndef GPIODCXX.MK
-GPIODCXX.MK := 1
+ifndef MAKEFILE__GPIODCXX.MK
+MAKEFILE__GPIODCXX.MK = 1
 
 # The C++ compiler dialect must be C++ 17
 CXXFLAGS.dialect := c++17
@@ -68,7 +65,7 @@ ifdef GPIODCXX__VERSION
 GPIODCXX__VERSION_DIR := $(GPIODCXX__RPIFS_BASEDIR)/opt/libgpiod/$(GPIODCXX__VERSION)
 ifneq ($(wildcard $(GPIODCXX__VERSION_DIR)/.),)
 GPIODCXX__INCLUDEDIR := $(GPIODCXX__VERSION_DIR)/include
-GPIODCXX__LIBDIR := $(GPIODCXX__VERSION_DIR)/lib/aarch64-linux-gnu
+GPIODCXX__LIBDIR := $(GPIODCXX__VERSION_DIR)/lib
 GPIODCXX__DEFINE_PATH_FLAGS := true
 endif
 endif
@@ -92,5 +89,5 @@ endif
 #
 LDLIBS.custom += -lgpiodcxx
 
-endif # GPIODCXX.MK
+endif # MAKEFILE__GPIODCXX.MK
 

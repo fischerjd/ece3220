@@ -11,8 +11,8 @@
 # 		file.  Otherwise, a default Doxyfile template file is created.
 #
 
-ifndef DOXYGEN_MK
-DOXYGEN_MK := 1
+ifndef MAKEFILE__DOXYGEN.MK
+MAKEFILE__DOXYGEN.MK := 1
 
 #==========================================================================
 #  Doxyfile configurations
@@ -149,5 +149,5 @@ distclean:: clean
 .PHONY: maintainer-clean
 maintainer-clean:: distclean
 
-endif # DOXYGEN_MK
+endif # MAKEFILE__DOXYGEN.MK
 

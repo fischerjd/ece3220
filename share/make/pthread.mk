@@ -1,12 +1,8 @@
-#
-#  pthread.mk
-#
-#  2025-03-29 Jim Fischer <fischerjd@missouri.edu>
-#  Copyright 2019,2025 James D. Fischer
-#
+# $ECE3220_INSTRUCTOR/share/pthread.mk
+# © 2025 James D. Fischer
 
-ifndef PTHREAD.MK
-PTHREAD.MK := 1
+ifndef MAKEFILE__PTHREAD.MK
+MAKEFILE__PTHREAD.MK := 1
 
 # GNU C/C++'s `-pthread' option.  If compiling and linking are performed in
 # separate steps, the `-pthread' option needs to be supplied via make's
@@ -15,5 +11,5 @@ CFLAGS   += -pthread
 CXXFLAGS += -pthread
 LDFLAGS  += -pthread
 
-endif # PTHREAD.MK
+endif # MAKEFILE__PTHREAD.MK
 
