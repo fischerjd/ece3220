@@ -46,6 +46,9 @@
 #       Makefile, and exclude variables that are defined by the host's
 #       environment.
 #
+#   -t TARGET, --target=TARGET
+#       Specifies the make target, e.g., all, clean, debug, release, etc.
+#
 #   -v, --only-variables
 #       If a search pattern is provided, the output is filtered to show
 #       only variable values. Otherwise, this option is ignored.
@@ -123,8 +126,8 @@ function ParseTheCommandLine()
     # X   no operand
     # X:  required operand--e.g., -X required_value, --ex=required_value
     # X:: optional operand--e.g., -X  =OR=  -X value
-    local lopts="color:: colour:: defaults file: help empty-environment makefile: only-variables Wundefined-variables Wno-undefined-variables"
-    local sopts="d f: h i v"
+    local lopts="color:: colour:: defaults file: help empty-environment makefile: only-variables target: Wundefined-variables Wno-undefined-variables"
+    local sopts="d f: h i t: v"
     local getopt_exit_code
     local getopt_stdout
     local getopt_stderr
@@ -163,6 +166,7 @@ set -e
             -f|--file|--makefile) cloMakefile="${2}"; shift ;;
             -h|--help) cloHelpRequested=true ;;
             -e|--empty-environment) cloIgnoreEnvironment=true ;;
+            -t|--target) cloMakeTarget="${2}"; shift ;;
             -v|--only-variables) cloOnlyVariables=true ;;
             --Wundefined-variables) cloWarnUndefinedVariables=true ;;
             --Wno-undefined-variables) cloNoWarnUndefinedVariables=true ;;
@@ -246,6 +250,7 @@ cloDefaults=false
 cloHelpRequested=false
 cloIgnoreEnvironment=false
 cloMakefile=
+cloMakeTarget=
 cloNoWarnUndefinedVariables=false
 cloOnlyVariables=false
 cloSearchPatterns=()
@@ -299,7 +304,7 @@ if $cloDefaults; then
     #   * Include make's built-in variables and rules
     #   * Exclude the Makefile's variables and rules, and
     #   * Exclude variables defined by the user's environment
-    "${ENV}" -i "${MAKE}" --makefile=/dev/null "${make_flags[@]}" >& "${TMPFILE}"
+    "${ENV}" -i "${MAKE}" --makefile=/dev/null "${make_flags[@]}" "${cloMakeTarget}" &> "${TMPFILE}"
 
 elif $cloIgnoreEnvironment; then
 
@@ -307,7 +312,7 @@ elif $cloIgnoreEnvironment; then
     #   * Include make's built-in variables and rules
     #   * Include the Makefile's variables and rules, and
     #   * Exclude variables defined by the user's environment
-    "${ENV}" -i "${MAKE}" "${make_flags[@]}" >& "${TMPFILE}"
+    "${ENV}" -i "${MAKE}" "${make_flags[@]}" "${cloMakeTarget}" &> "${TMPFILE}"
 else
 
     # This is the default case.
@@ -315,7 +320,7 @@ else
     #   * Include make's built-in variables and rules
     #   * Include the Makefile's variables and rules, and
     #   * Include variables defined by the user's environment
-    "${MAKE}" "${make_flags[@]}" >& "${TMPFILE}"
+    "${MAKE}" "${make_flags[@]}" "${cloMakeTarget}" &> "${TMPFILE}"
 
 fi
 set -e
