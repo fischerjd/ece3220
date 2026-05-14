@@ -128,6 +128,26 @@ BUILD_TYPE := debug
 endif
 
 
+# [Optional]  Variable customizations for this build should be defined in a
+# makefile named `variables.mk' located in the current working directory.
+# Any variables defined thus far in this Makefile can be overridden or
+# appended by (re)defining those variables within 'variables.mk'.
+#
+# :: IMPORTANT ::
+# DO NOT DEFINE RULES IN MAKEFILE 'VARIABLES.MK'.
+#
+# See also these variables within this Makefile:
+#	CPPFLAGS.custom
+#	CFLAGS.custom
+#	CXXFLAGS.custom
+#   LDFLAGS.custom
+#	LDLIBS.custom
+#
+ifneq ($(wildcard variables.mk),)
+include variables.mk
+endif
+
+
 # [Optional]  Create a makefile named 'override.mk' that provides
 # alternate definitions for the variables in this makefile that are defined
 # via deferred conditional assignment, e.g.,
@@ -353,22 +373,6 @@ POSTCOMPILE.c = @mv -f $(DEPDIR)$*.c.Td $(DEPDIR)$*.c.d && touch $@
 POSTCOMPILE.cc = @mv -f $(DEPDIR)$*.cc.Td $(DEPDIR)$*.cc.d && touch $@
 POSTCOMPILE.cpp = @mv -f $(DEPDIR)$*.cpp.Td $(DEPDIR)$*.cpp.d && touch $@
 POSTCOMPILE.cxx = @mv -f $(DEPDIR)$*.cxx.Td $(DEPDIR)$*.cxx.d && touch $@
-
-
-# [Optional]  Variable customizations for this build should be defined in a
-# makefile named `variables.mk' located in the current working directory.
-# Any variables defined thus far in this Makefile can be overridden or
-# appended by (re)defining those variables within 'variables.mk'. See also 
-# these variables within this Makefile:
-#	CPPFLAGS.custom
-#	CFLAGS.custom
-#	CXXFLAGS.custom
-#   LDFLAGS.custom
-#	LDLIBS.custom
-#
-ifneq ($(wildcard variables.mk),)
-include variables.mk
-endif
 
 
 ## Raspberry Pi Libraries
@@ -756,8 +760,20 @@ $(SOURCES): ;
 $(HEADERS): ;
 
 
-# Include the automatically-generated dependency rules from folder DEPDIR.
-include $(wildcard $(DEPDIR)*.d)
+# When not cleaning, include the automatically-generated dependency files
+NODEPS_TARGETS := \
+	_basic_clean \
+	clean \
+	distclean \
+	doc-clean \
+	maintainer-clean \
+	mostly-clean
+
+DELETEME := $(filter $(MAKECMDGOALS),$(NODEPS_TARGETS))
+
+ifeq ($(filter $(MAKECMDGOALS),$(NODEPS_TARGETS)),)
+-include $(wildcard $(DEPS))
+endif
 
 
 # doxygen documentation
