@@ -164,19 +164,16 @@ set -e
                 ;;
             -d|--defaults) cloDefaults=true ;;
             -f|--file|--makefile) cloMakefile="${2}"; shift ;;
-            -h|--help) cloHelpRequested=true ;;
+            -h|--help) cloHelpRequested=true; break ;;
             -e|--empty-environment) cloIgnoreEnvironment=true ;;
             -t|--target) cloMakeTargets+=("${2}"); shift ;;
             -v|--only-variables) cloOnlyVariables=true ;;
             --Wundefined-variables) cloWarnUndefinedVariables=true ;;
             --Wno-undefined-variables) cloNoWarnUndefinedVariables=true ;;
-            --) # Process the positional parameters
-                while [[ $# -gt 1 ]]
-                do
-                    shift
-                    cloSearchPatterns+=("$1")
-                done
-                ;;
+            --) : ;;
+            *) # Process the positional parameters
+               cloSearchPatterns+=("$1")
+               ;;
         esac
         shift
     done
@@ -245,6 +242,7 @@ function print_horizontal_rule()
 #  main
 #==========================================================================
 
+# Assign default values to the command line options
 cloColorOutput='always'
 cloDefaults=false
 cloHelpRequested=false
@@ -272,7 +270,7 @@ fi
 
 #--------------------------------------------------------------------------
 # Create a temporary file and configure this script to automatically delete
-# that file when the script exits.
+# that file when this script exits.
 #--------------------------------------------------------------------------
 
 TMPFILE="$(/usr/bin/mktemp)"
@@ -347,9 +345,8 @@ if ! $cloWarnUndefinedVariables; then
         # Print everything
         "${CAT}" "${TMPFILE}"
     else
-        # The user specified one or more search patterns when they invoked
-        # make-vars. For each search pattern, print the lines in TMPFILE
-        # that match that search pattern.
+        # The user specified one or more search patterns.  For each search
+        # pattern, print the lines in TMPFILE that match the pattern.
         for search_pattern in "${cloSearchPatterns[@]}"; do
 
             print_banner "PATTERN: |${search_pattern}|"
