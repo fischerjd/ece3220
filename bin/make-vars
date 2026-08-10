@@ -48,6 +48,8 @@
 #
 #   -t TARGET, --target=TARGET
 #       Specifies the make target, e.g., all, clean, debug, release, etc.
+#       This option may be used multiple times to specify multiple make
+#       targets.
 #
 #   -v, --only-variables
 #       If a search pattern is provided, the output is filtered to show
@@ -345,8 +347,9 @@ if ! $cloWarnUndefinedVariables; then
         # Print everything
         "${CAT}" "${TMPFILE}"
     else
-        # The user specified one or more search patterns.  For each search
-        # pattern, print the lines in TMPFILE that match the pattern.
+        # The user specified one or more search patterns when they invoked
+        # make-vars. For each search pattern, print the lines in TMPFILE
+        # that match that search pattern.
         for search_pattern in "${cloSearchPatterns[@]}"; do
 
             print_banner "PATTERN: |${search_pattern}|"
