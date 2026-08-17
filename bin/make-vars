@@ -66,7 +66,7 @@
 #
 # <help_end>
 #
-set -eu
+set -euo pipefail
 clear
 
 # shellcheck disable=SC1091
@@ -89,6 +89,20 @@ declare -r RM=/usr/bin/rm
 declare -r SED=/usr/bin/sed
 declare -r SORT=/usr/bin/sort
 declare -r UNIQ=/usr/bin/uniq
+
+
+#==========================================================================
+# CleanUp()
+# Trap handler function for EXIT, INT, and TERM
+#==========================================================================
+
+function CleanUp()
+{
+    set +e
+    local exit_code=$?
+    "${RM}" -f -- "${TMPFILE}"
+    exit "$exit_code"
+}
 
 
 #==========================================================================
@@ -279,7 +293,7 @@ TMPFILE="$(/usr/bin/mktemp)"
 declare -r TMPFILE
 
 # Automatically delete TMPFILE when this script exits.
-trap '"${RM}" -f -- "${TMPFILE}"' EXIT
+trap CleanUp EXIT INT TERM
 
 
 #--------------------------------------------------------------------------
@@ -338,7 +352,7 @@ set -e
 
 #--------------------------------------------------------------------------
 # Print the search results.
-# If option --Wundefined-variables was used, ignore this section.
+# If option --Wundefined-variables was specified, ignore this section.
 #--------------------------------------------------------------------------
 
 if ! $cloWarnUndefinedVariables; then
@@ -359,16 +373,19 @@ if ! $cloWarnUndefinedVariables; then
             # searching for a variable name and modify the search pattern
             # to find variable names.
             case $search_pattern in
-                *\#*|*:*|*=*) variable_search_pattern="$search_pattern";;
+                *\#*|*:*|*=*) variable_search_pattern="$search_pattern" ;;
                 *) variable_search_pattern="^[^#:=]*${search_pattern}[^#:=]*:\?=" ;;
             esac
 
-            # List the variable definitions first, and sorted by name.
+            # List the variable definitions first, sorted by name.
             echo "VARIABLES"
             print_horizontal_rule '-'
+            set +e
             "${GREP}" --color=never "${variable_search_pattern}" "${TMPFILE}" \
                 | "${GREP}" --color="${cloColorOutput}" "${search_pattern}" \
-                | "${SORT}"
+                | "${SORT}" \
+                | "${UNIQ}"
+            set -e
 
             if ! $cloOnlyVariables; then
                 echo
