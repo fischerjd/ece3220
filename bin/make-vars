@@ -1,7 +1,7 @@
 #!/bin/bash
 # © 2025 James D. Fischer
 #
-# <help_begin>
+# <HELP>
 # NAME
 #   make-vars - displays information about makefile variables
 #
@@ -64,13 +64,17 @@
 #       By default, make-vars prints warnings about undefined variables in
 #       the makefile. This option silences those warnings.
 #
-# <help_end>
+# <HELP>
 #
 set -euo pipefail
 clear
 
 # shellcheck disable=SC1091
-#source /usr/local/libexec/eceugl-utils/trace
+# eceugl-utils library
+ECEUGL_UTILS_LIBEXECDIR=${ECEUGL_UTILS_LIBEXECDIR:-/opt/eceugl-utils/libexec}
+. "${ECEUGL_UTILS_LIBEXECDIR}"/catch_stdout_stderr
+. "${ECEUGL_UTILS_LIBEXECDIR}"/show_help
+#. "${ECEUGL_UTILS_LIBEXECDIR}"/trace
 
 SCRIPT_NAME="$(/usr/bin/basename "${BASH_SOURCE[0]}")"
 declare -r SCRIPT_NAME
@@ -83,7 +87,6 @@ declare -r CAT=/usr/bin/cat
 declare -r ENV=/usr/bin/env
 declare -r GETOPT=/usr/bin/getopt
 declare -r GREP=/usr/bin/grep
-declare -r PAGER=/usr/bin/less
 declare -r MAKE=/usr/bin/make
 declare -r RM=/usr/bin/rm
 declare -r SED=/usr/bin/sed
@@ -103,33 +106,7 @@ function CleanUp()
     "${RM}" -f -- "${TMPFILE}"
     exit "$exit_code"
 }
-
-
-#==========================================================================
-# catch STDOUT STDERR cmd [args...]
-# Captures simultaneously into variables STDOUT and STDERR the output sent
-# to stdout and stderr, respectively, by the command `cmd'.
-#
-# I'm assuming the copyright holder for this code is the author of this
-# post on StackOverflow.com: https://stackoverflow.com/a/41069638/5051940
-#==========================================================================
-
-function catch()
-{
-set +e
-    eval "$({
-    __2="$(
-      { __1="$("${@:3}")"; } 2>&1;
-      ret=$?;
-      printf '%q=%q\n' "$1" "$__1" >&2;
-      exit $ret
-      )"
-    ret=$?;
-    printf '%s=%q\n' "$2" "$__2" >&2;
-    printf 'return %q\n' "$ret" >&2;
-    } 2>&1 )";
-set -e
-}
+declare -fr CleanUp
 
 
 #==========================================================================
@@ -149,7 +126,7 @@ function ParseTheCommandLine()
     local getopt_stderr
 
 set +e
-    catch getopt_stdout getopt_stderr \
+    catch_stdout_stderr getopt_stdout getopt_stderr \
         "${GETOPT}" -o "${sopts}" -l "${lopts}" -a -n$-1 -s bash -- "$@"
     getopt_exit_code=$?
 set -e
@@ -180,13 +157,14 @@ set -e
                 ;;
             -d|--defaults) cloDefaults=true ;;
             -f|--file|--makefile) cloMakefile="${2}"; shift ;;
-            -h|--help) cloHelpRequested=true; break ;;
+            -h|--help) ShowHelp; exit 0 ;;
             -e|--empty-environment) cloIgnoreEnvironment=true ;;
             -t|--target) cloMakeTargets+=("${2}"); shift ;;
             -v|--only-variables) cloOnlyVariables=true ;;
             --Wundefined-variables) cloWarnUndefinedVariables=true ;;
             --Wno-undefined-variables) cloNoWarnUndefinedVariables=true ;;
             --) : ;;
+            '') : ;;
             *) # Process the positional parameters
                cloSearchPatterns+=("$1")
                ;;
@@ -194,6 +172,7 @@ set -e
         shift
     done
 }
+declare -fr ParseTheCommandLine
 
 
 #==========================================================================
@@ -222,6 +201,7 @@ function print_banner()
     echo " ${banner_title}"
     print_horizontal_rule "${hr_char}"
 }
+declare -fr print_banner
 
 
 #==========================================================================
@@ -252,6 +232,7 @@ function print_horizontal_rule()
         echo "$horizontal_rule"
     fi
 }
+declare -fr print_horizontal_rule
 
 
 #==========================================================================
@@ -261,7 +242,6 @@ function print_horizontal_rule()
 # Assign default values to the command line options
 cloColorOutput='always'
 cloDefaults=false
-cloHelpRequested=false
 cloIgnoreEnvironment=false
 cloMakefile=
 cloMakeTargets=()
@@ -271,18 +251,6 @@ cloSearchPatterns=()
 cloWarnUndefinedVariables=false
 
 ParseTheCommandLine "$@"
-
-#--------------------------------------------------------------------------
-#  If the user requested help, display the help information and exit.
-#--------------------------------------------------------------------------
-
-if $cloHelpRequested; then
-    export LESS="--quit-if-one-screen --prompt=\ Help for ${SCRIPT_NAME}\: ?ltline %lt?L/%L.:byte %bB?s/%s..?e (END):?pB %pB\%.. (press h for help or q to quit)\ "
-    "${SED}" -n -e '/help_begin/,/help_end/{ /help_begin/d; /help_end/q; s/#\( \)\?//; p }' "$0" \
-        | "${PAGER}"
-    exit 0
-fi
-
 
 #--------------------------------------------------------------------------
 # Create a temporary file and configure this script to automatically delete
