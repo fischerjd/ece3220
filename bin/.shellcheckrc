@@ -1,1 +1,3 @@
 external-sources=true
+source-path=/opt/eceugl-utils/libexec
+source-path=/usr/local/libexec/eceugl-utils

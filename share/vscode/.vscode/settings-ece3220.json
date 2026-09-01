@@ -180,14 +180,13 @@
     "vim.disableExtension": true,
     "vim.textwidth": 75,
     "workbench.colorCustomizations": {
-        "[Dark+][Default Dark+][VS Code Dark]": {
-            "editor.lineHighlightBackground": "#312b1e",
-            "editor.lineHighlightBorder": "#666666"
-        },
-        "[Light+][Default Light+][VS Code Light]": {
-            "editor.lineHighlightBackground": "#fff4e2",
-            "editor.lineHighlightBorder": "#eeeeee"
-        }
+        // For darker color themes:
+        // "editor.lineHighlightBackground": "#312b1e",
+        // "editor.lineHighlightBorder": "#666666"
+
+        // For lighter color themes:
+        "editor.lineHighlightBackground": "#fff4e2",
+        "editor.lineHighlightBorder": "#eeeeee"
     },
     "workbench.colorTheme": "Light+",
     "workbench.preferredHighContrastColorTheme": "Default High Contrast Light",

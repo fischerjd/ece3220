@@ -7,13 +7,15 @@
     "language": "en",
 
     // dictionaries
-    "dictionaries": ["global-words"],
+    "dictionaries": [
+        "global-words"
+    ],
 
     // Dictionary definitions
     "dictionaryDefinitions": [
         { 
             "name": "global-words", 
-            "path": "~/.local/share/cspell/global-words.txt",
+            "path": "${env:HOME}/.local/share/cspell/global-words.txt",
             "addWords": true
         }
     ],
@@ -24,7 +26,16 @@
 
     // ignoreWords - often used words that should not be shown in the
     // pop-up list of suggested words.
-    "ignoreWords": [],
+    "ignoreWords": [
+        "colour",
+        "eceugl",
+        "libexec",
+        "libexecdir",
+        "tracel",
+        "tracelv",
+        "tracev",
+        "Wundefined"
+    ],
 
     // flagWords - list of words to be always considered incorrect.
     // This is useful for offensive words and common spelling errors.
