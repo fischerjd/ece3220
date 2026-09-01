@@ -1,6 +1,4 @@
 #!/bin/bash
-# © 2025 James D. Fischer
-#
 # <HELP>
 # NAME
 #   make-vars - displays information about makefile variables
@@ -25,6 +23,10 @@
 #       Controls whether the search results are colorized or not. If this
 #       option is not used or if WHEN is not specified, the search results
 #       are colorized by default. WHEN is either 'always' or 'never'.
+#
+#   -C, --directory=DIR
+#       Change to directory DIR before reading the makefile or doing
+#       anything else.
 #
 #   -d, --defaults
 #       The printed listing shows the default values for make's built-in
@@ -65,16 +67,14 @@
 #       the makefile. This option silences those warnings.
 #
 # <HELP>
-#
+# © 2025 James D. Fischer
 set -euo pipefail
 clear
 
 # shellcheck disable=SC1091
 # eceugl-utils library
-ECEUGL_UTILS_LIBEXECDIR=${ECEUGL_UTILS_LIBEXECDIR:-/opt/eceugl-utils/libexec}
-. "${ECEUGL_UTILS_LIBEXECDIR}"/catch_stdout_stderr
-. "${ECEUGL_UTILS_LIBEXECDIR}"/show_help
-#. "${ECEUGL_UTILS_LIBEXECDIR}"/trace
+. "${ECEUGL_UTILS_LIBEXECDIR}"/cli.bash
+. "${ECEUGL_UTILS_LIBEXECDIR}"/trace.bash
 
 SCRIPT_NAME="$(/usr/bin/basename "${BASH_SOURCE[0]}")"
 declare -r SCRIPT_NAME
@@ -119,21 +119,33 @@ function ParseTheCommandLine()
     # X   no operand
     # X:  required operand--e.g., -X required_value, --ex=required_value
     # X:: optional operand--e.g., -X  =OR=  -X value
-    local lopts="color:: colour:: defaults file: help empty-environment makefile: only-variables target: Wundefined-variables Wno-undefined-variables"
-    local sopts="d f: h i t: v"
+    local -a lopts=(
+        'color::'
+        'colour::'
+        'defaults'
+        'directory:'
+        'empty-environment'
+        'file:'
+        'help'
+        'makefile:'
+        'only-variables'
+        'target:'
+        'Wno-undefined-variables'
+        'Wundefined-variables'
+    )
+    local -a sopts=( C: d f: h i t: v )
     local getopt_exit_code
     local getopt_stdout
     local getopt_stderr
 
 set +e
     catch_stdout_stderr getopt_stdout getopt_stderr \
-        "${GETOPT}" -o "${sopts}" -l "${lopts}" -a -n$-1 -s bash -- "$@"
+        "${GETOPT}" -o "${sopts[*]}" -l "${lopts[*]}" -a -n$-1 -s bash -- "$@"
     getopt_exit_code=$?
 set -e
 
     if [[ "${getopt_exit_code}" -ne 0 ]]; then
-        >&2 echo "${getopt_stderr[@]}"
-        exit "${getopt_exit_code}"
+        ErrorExit ${getopt_exit_code} 'getopt error' "${getopt_stderr}"
     fi
 
     eval set -- "${getopt_stdout}"
@@ -155,6 +167,7 @@ set -e
                     shift
                 fi
                 ;;
+            -C|--directory) cloDirectory="${2}"; shift ;;
             -d|--defaults) cloDefaults=true ;;
             -f|--file|--makefile) cloMakefile="${2}"; shift ;;
             -h|--help) ShowHelp; exit 0 ;;
@@ -242,6 +255,7 @@ declare -fr print_horizontal_rule
 # Assign default values to the command line options
 cloColorOutput='always'
 cloDefaults=false
+cloDirectory=
 cloIgnoreEnvironment=false
 cloMakefile=
 cloMakeTargets=()
@@ -278,6 +292,10 @@ make_flags=(
 if [ -n "$cloMakefile" ]; then
     make_flags+=( --file="$cloMakefile" )
 fi
+if [ -n "$cloDirectory" ]; then
+    make_flags+=( --directory="$cloDirectory" );
+fi
+tracev make_flags
 
 set +e
 if $cloDefaults; then
