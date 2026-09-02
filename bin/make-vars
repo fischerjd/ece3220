@@ -295,7 +295,6 @@ fi
 if [ -n "$cloDirectory" ]; then
     make_flags+=( --directory="$cloDirectory" );
 fi
-tracev make_flags
 
 set +e
 if $cloDefaults; then
