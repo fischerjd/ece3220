@@ -102,9 +102,14 @@ declare -r UNIQ=/usr/bin/uniq
 function CleanUp()
 {
     set +e
-    local exit_code=$?
-    "${RM}" -f -- "${STDOUT_TMPFILE}" "${STDERR_TMPFILE}"
-    exit "$exit_code"
+    local -i exit_status=$?
+
+    "${RM}" -f -- \
+        "${TMPFILE_STDOUT}" \
+        "${TMPFILE_STDERR}" \
+        "${TMPFILE_UNDEFINED_VARIABLES}"
+
+    exit "${exit_status}"
 }
 declare -fr CleanUp
 
@@ -199,6 +204,12 @@ declare -fr ParseTheCommandLine
 #   $1 banner_title (string, required): The banner's title string
 #   $2 hr_char (string, optional): The character to be used to draw the
 #   banner's horizontal rules/lines.
+#   $3 color_format (string, optional): A string that provides an ANSI
+#   escape sequence that will be used to format the banner text. For
+#   example, to print the banner with bolded red foreground text, use 
+#   '\033[1;38;5;196m'. (NB: use \033, not \e for the 'escape' character.)
+#
+# Reads Global Variables: cloColorOutput
 #
 # Modifies Global Variables: None.
 #
@@ -210,10 +221,18 @@ function print_banner()
 {
     local -r banner_title="$1"
     local -r hr_char="${2:-=}"
+    local color_format=${3:-}
+    local color_reset=${COLOR_RESET}
+
+    if [[ "${cloColorOutput}" == "never" ]]; then
+        color_format=''
+        color_reset=''
+    fi
+
     echo ''
-    print_horizontal_rule "${hr_char}"
-    echo " ${banner_title}"
-    print_horizontal_rule "${hr_char}"
+    print_horizontal_rule "${hr_char}" '' "${color_format}"
+    printf "%s%s%s\n" "${color_format}" "${banner_title}" "${color_reset}"
+    print_horizontal_rule "${hr_char}" '' "${color_format}"
 }
 declare -fr print_banner
 
@@ -226,6 +245,16 @@ declare -fr print_banner
 # Parameters:
 #   $1 rule_character (character, optional):
 #   $2 rule_length (integer, optional): (default: 75)
+#   $3 color_format (string, optional): A string that provides an ANSI
+#   escape sequence that will be used to format the banner text.  For
+#   example, to print the banner with bolded red foreground text, use 
+#   '\033[1;38;5;196m'. (NB: use \033, not \e for the 'escape' character.)
+#
+# Reads Global Variables: cloColorOutput
+#
+# Modifies Global Variables: None.
+#
+# Creates/Modifies Files: None.
 #
 # Returns:
 #   None.
@@ -235,16 +264,22 @@ function print_horizontal_rule()
 {
     local -r rule_character="${1:-'-'}"
     local -r -i rule_length=${2:-75}
+    local color_format=${3:-}
+    local color_reset=${COLOR_RESET}
     local -i i
     local horizontal_rule
+
+    if [[ "${cloColorOutput}" == "never" ]]; then
+        color_format=''
+        color_reset=''
+    fi
 
     horizontal_rule=
     for (( i=0; i<rule_length; ++i )); do
         horizontal_rule+="$rule_character"
     done
-    if [ -n "$horizontal_rule" ]; then
-        echo "$horizontal_rule"
-    fi
+
+    printf "%s%s%s\n" "${color_format}" "${horizontal_rule}" "${color_reset}"
 }
 declare -fr print_horizontal_rule
 
@@ -252,6 +287,42 @@ declare -fr print_horizontal_rule
 #==========================================================================
 #  main
 #==========================================================================
+
+#--------------------------------------------------------------------------
+#  Trap Handler
+#--------------------------------------------------------------------------
+
+# Automatically delete TMPFILE_STDOUT when this script exits.
+trap CleanUp EXIT INT TERM
+
+
+#--------------------------------------------------------------------------
+#  Exit Status
+#--------------------------------------------------------------------------
+
+declare -i exit_status=0
+
+
+#--------------------------------------------------------------------------
+#  ANSI Color Codes
+#--------------------------------------------------------------------------
+
+printf -v COLOR_BLUE_BOLD   '\033[1;38;5;33m'
+declare -r COLOR_BLUE_BOLD
+
+printf -v COLOR_RED_BOLD    '\033[1;38;5;196m'
+declare -r COLOR_RED_BOLD
+
+printf -v COLOR_ORANGE_BOLD '\033[1;38;5;209m'
+declare -r COLOR_ORANGE_BOLD
+
+printf -v COLOR_RESET       '\033[0m'
+declare -r COLOR_RESET
+
+
+#--------------------------------------------------------------------------
+#  Initialize the command line option variables
+#--------------------------------------------------------------------------
 
 # Assign default values to the command line options
 cloColorOutput='always'
@@ -272,19 +343,19 @@ ParseTheCommandLine "$@"
 # that file when this script exits.
 #--------------------------------------------------------------------------
 
-STDOUT_TMPFILE="$(/usr/bin/mktemp)"
-declare -r STDOUT_TMPFILE
+TMPFILE_STDOUT="$(/usr/bin/mktemp)"
+declare -r TMPFILE_STDOUT
 
-STDERR_TMPFILE="$(/usr/bin/mktemp)"
-declare -r STDERR_TMPFILE
+TMPFILE_STDERR="$(/usr/bin/mktemp)"
+declare -r TMPFILE_STDERR
 
-# Automatically delete STDOUT_TMPFILE when this script exits.
-trap CleanUp EXIT INT TERM
+TMPFILE_UNDEFINED_VARIABLES="$(/usr/bin/mktemp)"
+declare -r TMPFILE_UNDEFINED_VARIABLES
 
 
 #--------------------------------------------------------------------------
 # Perform a reconnaissance make (a.k.a., a "dry run" make) and redirect
-# make's output into STDOUT_TMPFILE and STDERR_TMPFILE.
+# make's output into TMPFILE_STDOUT and TMPFILE_STDERR.
 #--------------------------------------------------------------------------
 
 make_flags=(
@@ -307,7 +378,7 @@ if $cloDefaults; then
     #   * Include make's built-in variables and rules
     #   * Exclude the Makefile's variables and rules, and
     #   * Exclude variables defined by the user's environment
-    "${ENV}" -i "${MAKE}" --makefile=/dev/null "${make_flags[@]}" "${cloMakeTargets[@]}" > "${STDOUT_TMPFILE}" 2> "${STDERR_TMPFILE}"
+    "${ENV}" -i "${MAKE}" --makefile=/dev/null "${make_flags[@]}" "${cloMakeTargets[@]}" > "${TMPFILE_STDOUT}" 2> "${TMPFILE_STDERR}"
 
 elif $cloIgnoreEnvironment; then
 
@@ -315,7 +386,7 @@ elif $cloIgnoreEnvironment; then
     #   * Include make's built-in variables and rules
     #   * Include the Makefile's variables and rules, and
     #   * Exclude variables defined by the user's environment
-    "${ENV}" -i "${MAKE}" "${make_flags[@]}" "${cloMakeTargets[@]}" > "${STDOUT_TMPFILE}" 2> "${STDERR_TMPFILE}"
+    "${ENV}" -i "${MAKE}" "${make_flags[@]}" "${cloMakeTargets[@]}" > "${TMPFILE_STDOUT}" 2> "${TMPFILE_STDERR}"
 else
 
     # This is the default case.
@@ -323,7 +394,7 @@ else
     #   * Include make's built-in variables and rules
     #   * Include the Makefile's variables and rules, and
     #   * Include variables defined by the user's environment
-    "${MAKE}" "${make_flags[@]}" "${cloMakeTargets[@]}" > "${STDOUT_TMPFILE}" 2> "${STDERR_TMPFILE}"
+    "${MAKE}" "${make_flags[@]}" "${cloMakeTargets[@]}" > "${TMPFILE_STDOUT}" 2> "${TMPFILE_STDERR}"
 
 fi
 set -e
@@ -331,12 +402,12 @@ set -e
 
 #--------------------------------------------------------------------------
 # Remove any ANSI escape codes (e.g., color codes) from the text in file 
-# STDOUT_TMPFILE and STDERR_TMPFILE.  See also:
+# TMPFILE_STDOUT and TMPFILE_STDERR.  See also:
 # [1] https://unix.stackexchange.com/a/55547/121145
 # [2] https://stackoverflow.com/q/17998978/5051940
 #--------------------------------------------------------------------------
 
-for tmpfile in "${STDOUT_TMPFILE}" "${STDERR_TMPFILE}"; do
+for tmpfile in "${TMPFILE_STDOUT}" "${TMPFILE_STDERR}"; do
     "${SED}" -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "${tmpfile}"
 done
 
@@ -350,14 +421,14 @@ if ! $cloWarnUndefinedVariables; then
     # If make-vars was invoked without a search pattern, print everything.
     if [ ${#cloSearchPatterns[@]} -eq 0 ]; then
         # Print everything
-        "${CAT}" "${STDOUT_TMPFILE}"
+        "${CAT}" "${TMPFILE_STDOUT}"
     else
         # The user specified one or more search patterns when they invoked
-        # make-vars. For each search pattern, print the lines in STDOUT_TMPFILE
+        # make-vars. For each search pattern, print the lines in TMPFILE_STDOUT
         # that match that search pattern.
         for search_pattern in "${cloSearchPatterns[@]}"; do
 
-            print_banner "PATTERN: |${search_pattern}|"
+            print_banner "PATTERN: |${search_pattern}|" '=' "${COLOR_BLUE_BOLD}"
 
             # If the search pattern contains '#', ':', or '=', use the
             # search pattern "as is".  Otherwise, assume the user is
@@ -372,7 +443,7 @@ if ! $cloWarnUndefinedVariables; then
             echo "VARIABLES"
             print_horizontal_rule '-'
             set +e
-            "${GREP}" --color=never "${variable_search_pattern}" "${STDOUT_TMPFILE}" \
+            "${GREP}" --color=never "${variable_search_pattern}" "${TMPFILE_STDOUT}" \
                 | "${GREP}" --color="${cloColorOutput}" "${search_pattern}" \
                 | "${SORT}" \
                 | "${UNIQ}"
@@ -383,7 +454,7 @@ if ! $cloWarnUndefinedVariables; then
                 print_banner "OTHER MATCHES" '-'
                 # List other occurrences of PATTERN that aren't variable
                 # definitions (e.g., rules and recipes).
-                "${GREP}" -v --color=never "${variable_search_pattern}" "${STDOUT_TMPFILE}" \
+                "${GREP}" -v --color=never "${variable_search_pattern}" "${TMPFILE_STDOUT}" \
                     | "${GREP}" --color="${cloColorOutput}" "${search_pattern}" || true
             fi
 
@@ -397,13 +468,22 @@ fi
 #--------------------------------------------------------------------------
 
 if ! $cloNoWarnUndefinedVariables; then
-    print_banner "UNDEFINED VARIABLES"
+    # Check for 'undefined variable' warnings in TMPFILE_STDERR
     set -o pipefail
-    if ! "${GREP}" ' warning: undefined variable ' "${STDOUT_TMPFILE}" | "${SORT}" | "${UNIQ}"
-    then
-        echo "There are no undefined variables."
-    fi
+    "${GREP}" ' warning: undefined variable ' "${TMPFILE_STDERR}" | "${SORT}" | "${UNIQ}" > "${TMPFILE_UNDEFINED_VARIABLES}"
+    exit_status=$?
     set +o pipefail
+
+    # If exit_status is zero, TMPFILE_STDERR contains "undefined variable"
+    # warnings.
+    if (( exit_status == 0 )); then
+        # Strip the 'undefined variable' warnings from TMPFILE_STDERR
+        sed -i -e '/warning: undefined variable/d' "${TMPFILE_STDERR}"
+
+        # Print the undefined variable warnings
+        print_banner "UNDEFINED VARIABLES" '=' "${COLOR_ORANGE_BOLD}"
+        cat "${TMPFILE_UNDEFINED_VARIABLES}"
+    fi
 fi
 
 
@@ -411,8 +491,9 @@ fi
 # Print the error messages, if any.
 #--------------------------------------------------------------------------
 
-if [ -s "${STDERR_TMPFILE}" ]; then
-    print_banner "ERROR MESSAGES"
-    cat "${STDERR_TMPFILE}"
+# If TMPFILE_STDERR is not empty, print the remaining error messages.
+if [ -s "${TMPFILE_STDERR}" ]; then
+    print_banner "ERROR MESSAGES" '#' "${COLOR_RED_BOLD}"
+    cat "${TMPFILE_STDERR}"
 fi
 
