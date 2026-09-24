@@ -74,7 +74,7 @@ clear
 # shellcheck disable=SC1091
 # eceugl-utils library
 . "${ECEUGL_UTILS_LIBEXECDIR}"/cli.bash
-. "${ECEUGL_UTILS_LIBEXECDIR}"/trace.bash
+#. "${ECEUGL_UTILS_LIBEXECDIR}"/trace.bash
 
 SCRIPT_NAME="$(/usr/bin/basename "${BASH_SOURCE[0]}")"
 declare -r SCRIPT_NAME
@@ -103,7 +103,7 @@ function CleanUp()
 {
     set +e
     local exit_code=$?
-    "${RM}" -f -- "${TMPFILE}"
+    "${RM}" -f -- "${STDOUT_TMPFILE}" "${STDERR_TMPFILE}"
     exit "$exit_code"
 }
 declare -fr CleanUp
@@ -210,6 +210,7 @@ function print_banner()
 {
     local -r banner_title="$1"
     local -r hr_char="${2:-=}"
+    echo ''
     print_horizontal_rule "${hr_char}"
     echo " ${banner_title}"
     print_horizontal_rule "${hr_char}"
@@ -271,16 +272,19 @@ ParseTheCommandLine "$@"
 # that file when this script exits.
 #--------------------------------------------------------------------------
 
-TMPFILE="$(/usr/bin/mktemp)"
-declare -r TMPFILE
+STDOUT_TMPFILE="$(/usr/bin/mktemp)"
+declare -r STDOUT_TMPFILE
 
-# Automatically delete TMPFILE when this script exits.
+STDERR_TMPFILE="$(/usr/bin/mktemp)"
+declare -r STDERR_TMPFILE
+
+# Automatically delete STDOUT_TMPFILE when this script exits.
 trap CleanUp EXIT INT TERM
 
 
 #--------------------------------------------------------------------------
 # Perform a reconnaissance make (a.k.a., a "dry run" make) and redirect
-# make's output into the TMPFILE.
+# make's output into STDOUT_TMPFILE and STDERR_TMPFILE.
 #--------------------------------------------------------------------------
 
 make_flags=(
@@ -303,7 +307,7 @@ if $cloDefaults; then
     #   * Include make's built-in variables and rules
     #   * Exclude the Makefile's variables and rules, and
     #   * Exclude variables defined by the user's environment
-    "${ENV}" -i "${MAKE}" --makefile=/dev/null "${make_flags[@]}" "${cloMakeTargets[@]}" &> "${TMPFILE}"
+    "${ENV}" -i "${MAKE}" --makefile=/dev/null "${make_flags[@]}" "${cloMakeTargets[@]}" > "${STDOUT_TMPFILE}" 2> "${STDERR_TMPFILE}"
 
 elif $cloIgnoreEnvironment; then
 
@@ -311,7 +315,7 @@ elif $cloIgnoreEnvironment; then
     #   * Include make's built-in variables and rules
     #   * Include the Makefile's variables and rules, and
     #   * Exclude variables defined by the user's environment
-    "${ENV}" -i "${MAKE}" "${make_flags[@]}" "${cloMakeTargets[@]}" &> "${TMPFILE}"
+    "${ENV}" -i "${MAKE}" "${make_flags[@]}" "${cloMakeTargets[@]}" > "${STDOUT_TMPFILE}" 2> "${STDERR_TMPFILE}"
 else
 
     # This is the default case.
@@ -319,7 +323,7 @@ else
     #   * Include make's built-in variables and rules
     #   * Include the Makefile's variables and rules, and
     #   * Include variables defined by the user's environment
-    "${MAKE}" "${make_flags[@]}" "${cloMakeTargets[@]}" &> "${TMPFILE}"
+    "${MAKE}" "${make_flags[@]}" "${cloMakeTargets[@]}" > "${STDOUT_TMPFILE}" 2> "${STDERR_TMPFILE}"
 
 fi
 set -e
@@ -327,12 +331,14 @@ set -e
 
 #--------------------------------------------------------------------------
 # Remove any ANSI escape codes (e.g., color codes) from the text in file 
-# TMPFILE.  See also:
+# STDOUT_TMPFILE and STDERR_TMPFILE.  See also:
 # [1] https://unix.stackexchange.com/a/55547/121145
 # [2] https://stackoverflow.com/q/17998978/5051940
 #--------------------------------------------------------------------------
 
-"${SED}" -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "${TMPFILE}"
+for tmpfile in "${STDOUT_TMPFILE}" "${STDERR_TMPFILE}"; do
+    "${SED}" -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "${tmpfile}"
+done
 
 
 #--------------------------------------------------------------------------
@@ -344,10 +350,10 @@ if ! $cloWarnUndefinedVariables; then
     # If make-vars was invoked without a search pattern, print everything.
     if [ ${#cloSearchPatterns[@]} -eq 0 ]; then
         # Print everything
-        "${CAT}" "${TMPFILE}"
+        "${CAT}" "${STDOUT_TMPFILE}"
     else
         # The user specified one or more search patterns when they invoked
-        # make-vars. For each search pattern, print the lines in TMPFILE
+        # make-vars. For each search pattern, print the lines in STDOUT_TMPFILE
         # that match that search pattern.
         for search_pattern in "${cloSearchPatterns[@]}"; do
 
@@ -366,7 +372,7 @@ if ! $cloWarnUndefinedVariables; then
             echo "VARIABLES"
             print_horizontal_rule '-'
             set +e
-            "${GREP}" --color=never "${variable_search_pattern}" "${TMPFILE}" \
+            "${GREP}" --color=never "${variable_search_pattern}" "${STDOUT_TMPFILE}" \
                 | "${GREP}" --color="${cloColorOutput}" "${search_pattern}" \
                 | "${SORT}" \
                 | "${UNIQ}"
@@ -377,7 +383,7 @@ if ! $cloWarnUndefinedVariables; then
                 print_banner "OTHER MATCHES" '-'
                 # List other occurrences of PATTERN that aren't variable
                 # definitions (e.g., rules and recipes).
-                "${GREP}" -v --color=never "${variable_search_pattern}" "${TMPFILE}" \
+                "${GREP}" -v --color=never "${variable_search_pattern}" "${STDOUT_TMPFILE}" \
                     | "${GREP}" --color="${cloColorOutput}" "${search_pattern}" || true
             fi
 
@@ -393,9 +399,20 @@ fi
 if ! $cloNoWarnUndefinedVariables; then
     print_banner "UNDEFINED VARIABLES"
     set -o pipefail
-    if ! "${GREP}" ' warning: undefined variable ' "${TMPFILE}" | "${SORT}" | "${UNIQ}"
+    if ! "${GREP}" ' warning: undefined variable ' "${STDOUT_TMPFILE}" | "${SORT}" | "${UNIQ}"
     then
         echo "There are no undefined variables."
     fi
     set +o pipefail
 fi
+
+
+#--------------------------------------------------------------------------
+# Print the error messages, if any.
+#--------------------------------------------------------------------------
+
+if [ -s "${STDERR_TMPFILE}" ]; then
+    print_banner "ERROR MESSAGES"
+    cat "${STDERR_TMPFILE}"
+fi
+
