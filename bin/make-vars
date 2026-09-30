@@ -292,7 +292,8 @@ declare -fr print_horizontal_rule
 #  Trap Handler
 #--------------------------------------------------------------------------
 
-# Automatically delete TMPFILE_STDOUT when this script exits.
+# This script creates multiple temporary files.  Create a trap handler that
+# automatically deletes those files when this script exits.
 trap CleanUp EXIT INT TERM
 
 
